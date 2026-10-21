@@ -60,6 +60,7 @@ class SettingsController extends ChangeNotifier {
     await _store.saveSettings(_settings);
   }
 
-  String get greetingName =>
-      (_settings.displayName?.isNotEmpty ?? false) ? _settings.displayName! : 'Rahul';
+  String get greetingName => (_settings.displayName?.isNotEmpty ?? false)
+      ? _settings.displayName!
+      : 'Rahul';
 }

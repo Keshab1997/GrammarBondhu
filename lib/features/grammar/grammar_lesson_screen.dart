@@ -23,7 +23,9 @@ class GrammarLessonScreen extends StatelessWidget {
     final settings = context.watch<SettingsController>();
     final chapter = content.byId(chapterId);
     if (chapter == null) {
-      return Scaffold(appBar: AppBar(), body: const Center(child: Text('Chapter not found')));
+      return Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('Chapter not found')));
     }
 
     final lesson = chapter.lesson;
@@ -51,7 +53,8 @@ class GrammarLessonScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const LanguageChip(code: 'en', label: 'English', flag: '🇬🇧'),
+                          const LanguageChip(
+                              code: 'en', label: 'English', flag: '🇬🇧'),
                           const Spacer(),
                           Flexible(
                             child: Text(
@@ -65,7 +68,8 @@ class GrammarLessonScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.md),
                       Text(lesson.title.en, style: text.headlineMedium),
                       const SizedBox(height: AppSpacing.sm),
-                      Text(lesson.explanation.of(lang), style: text.bodyLarge?.copyWith(height: 1.5)),
+                      Text(lesson.explanation.of(lang),
+                          style: text.bodyLarge?.copyWith(height: 1.5)),
                       const SizedBox(height: AppSpacing.lg),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,20 +80,25 @@ class GrammarLessonScreen extends StatelessWidget {
                               children: [
                                 for (final example in lesson.examples)
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                    padding: const EdgeInsets.only(
+                                        bottom: AppSpacing.md),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Icon(Icons.check_circle_rounded,
                                             color: AppColors.success, size: 18),
                                         const SizedBox(width: AppSpacing.sm),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(example.sentence,
                                                   style: text.bodyLarge
-                                                      ?.copyWith(fontWeight: FontWeight.w700)),
+                                                      ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700)),
                                               const SizedBox(height: 2),
                                               Text(example.note.of(lang),
                                                   style: text.bodyMedium),
@@ -103,7 +112,8 @@ class GrammarLessonScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
-                          const CharacterAvatar(characterId: 'teacher', size: 84),
+                          const CharacterAvatar(
+                              characterId: 'teacher', size: 84),
                         ],
                       ),
                     ],

@@ -91,7 +91,8 @@ ThemeData buildAppTheme() {
       fontWeight: FontWeight.w700,
     ),
     bodyLarge: base.textTheme.bodyLarge?.copyWith(color: AppColors.textPrimary),
-    bodyMedium: base.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+    bodyMedium:
+        base.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
     labelLarge: base.textTheme.labelLarge?.copyWith(
       color: AppColors.textOnDark,
       fontWeight: FontWeight.w700,

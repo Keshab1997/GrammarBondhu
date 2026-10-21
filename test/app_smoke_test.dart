@@ -27,7 +27,8 @@ Future<void> _pumpApp(WidgetTester tester) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('splash shows branding and starts onboarding on first run', (tester) async {
+  testWidgets('splash shows branding and starts onboarding on first run',
+      (tester) async {
     await _pumpApp(tester);
 
     expect(find.text('Grammar'), findsOneWidget);
@@ -41,7 +42,8 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
-  testWidgets('home shell shows greeting and continue journey after content loads',
+  testWidgets(
+      'home shell shows greeting and continue journey after content loads',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final store = await LocalStore.open();

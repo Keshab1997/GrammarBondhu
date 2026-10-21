@@ -72,7 +72,9 @@ class _QuizScreenState extends State<QuizScreen> {
     final settings = context.watch<SettingsController>();
     final chapter = content.byId(widget.chapterId);
     if (chapter == null) {
-      return Scaffold(appBar: AppBar(), body: const Center(child: Text('Chapter not found')));
+      return Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('Chapter not found')));
     }
 
     final question = chapter.quiz[_questionIndex];
@@ -97,22 +99,28 @@ class _QuizScreenState extends State<QuizScreen> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.close_rounded, color: Colors.white),
+                      icon:
+                          const Icon(Icons.close_rounded, color: Colors.white),
                     ),
                     Expanded(
                       child: Column(
                         children: [
-                          Text('Quiz Time!', style: text.titleLarge?.copyWith(color: Colors.white)),
+                          Text('Quiz Time!',
+                              style: text.titleLarge
+                                  ?.copyWith(color: Colors.white)),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.white24,
-                              borderRadius: BorderRadius.circular(AppRadii.chip),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadii.chip),
                             ),
                             child: Text(
                               'Question ${_questionIndex + 1}/${chapter.quiz.length}',
-                              style: text.bodyMedium?.copyWith(color: Colors.white),
+                              style: text.bodyMedium
+                                  ?.copyWith(color: Colors.white),
                             ),
                           ),
                         ],
@@ -125,7 +133,8 @@ class _QuizScreenState extends State<QuizScreen> {
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+                  margin: const EdgeInsets.fromLTRB(
+                      AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
@@ -144,7 +153,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         _OptionTile(
                           label: question.options[i],
                           state: !_submitted
-                              ? (i == _selected ? _OptionState.selected : _OptionState.idle)
+                              ? (i == _selected
+                                  ? _OptionState.selected
+                                  : _OptionState.idle)
                               : i == question.correctIndex
                                   ? _OptionState.correct
                                   : i == _selected
@@ -160,7 +171,8 @@ class _QuizScreenState extends State<QuizScreen> {
                         AppButton(
                           label: 'Submit',
                           variant: AppButtonVariant.success,
-                          onPressed: _selected == null ? null : () => _submit(chapter),
+                          onPressed:
+                              _selected == null ? null : () => _submit(chapter),
                         )
                       else ...[
                         _FeedbackCard(
@@ -231,7 +243,8 @@ class _OptionTile extends StatelessWidget {
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(AppRadii.button),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: 14),
           child: Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
@@ -293,7 +306,8 @@ class _FeedbackCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
-          Text(showTranslation ? explanation : englishExplanation, style: text.bodyMedium?.copyWith(height: 1.45)),
+          Text(showTranslation ? explanation : englishExplanation,
+              style: text.bodyMedium?.copyWith(height: 1.45)),
         ],
       ),
     );

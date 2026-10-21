@@ -44,7 +44,8 @@ class HomeScreen extends StatelessWidget {
             _ProgressCard(
               title: 'Your Progress',
               subtitle: current.title.en,
-              trailing: '${progress.chapterProgress(current.id).resumeSceneIndex ?? 0}'
+              trailing:
+                  '${progress.chapterProgress(current.id).resumeSceneIndex ?? 0}'
                   '/${current.scenes.length + 1}',
               value: chapters.isEmpty
                   ? 0
@@ -86,7 +87,8 @@ class _Header extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         IconButton(
           tooltip: 'Settings',
-          onPressed: () => Navigator.of(context).pushNamed(SettingsScreen.routeName),
+          onPressed: () =>
+              Navigator.of(context).pushNamed(SettingsScreen.routeName),
           icon: const Icon(Icons.settings_outlined),
         ),
       ],
@@ -109,7 +111,8 @@ class _CoinBadge extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.monetization_on_rounded, size: 16, color: AppColors.textPrimary),
+          const Icon(Icons.monetization_on_rounded,
+              size: 16, color: AppColors.textPrimary),
           const SizedBox(width: 4),
           Text('$coins', style: const TextStyle(fontWeight: FontWeight.w800)),
         ],
@@ -142,7 +145,9 @@ class _ContinueCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  record.started ? 'Continue Your Journey' : 'Start Your Journey',
+                  record.started
+                      ? 'Continue Your Journey'
+                      : 'Start Your Journey',
                   style: text.bodyMedium?.copyWith(color: Colors.white70),
                 ),
                 const SizedBox(height: 4),
@@ -197,7 +202,8 @@ class _QuickActions extends StatelessWidget {
           icon: Icons.menu_book_rounded,
           label: 'Chapters',
           color: AppColors.primary,
-          onTap: () => Navigator.of(context).pushNamed(ChapterListScreen.routeName),
+          onTap: () =>
+              Navigator.of(context).pushNamed(ChapterListScreen.routeName),
         ),
         _ActionChip(
           icon: Icons.school_rounded,
@@ -225,7 +231,8 @@ class _QuickActions extends StatelessWidget {
           icon: Icons.insights_rounded,
           label: 'Progress',
           color: AppColors.primaryDark,
-          onTap: () => Navigator.of(context).pushNamed(ProgressScreen.routeName),
+          onTap: () =>
+              Navigator.of(context).pushNamed(ProgressScreen.routeName),
         ),
       ],
     );
@@ -264,7 +271,8 @@ class _ActionChip extends StatelessWidget {
               child: Icon(icon, color: color, size: 26),
             ),
             const SizedBox(height: 6),
-            Text(label, style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(label,
+                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
           ],
         ),
       ),
@@ -295,7 +303,9 @@ class _ProgressCard extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(title, style: text.titleMedium)),
-              Text(trailing, style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(trailing,
+                  style:
+                      text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -321,7 +331,8 @@ class _DailyGoalCard extends StatelessWidget {
       color: AppColors.accent.withValues(alpha: 0.16),
       child: Row(
         children: [
-          const Icon(Icons.local_fire_department_rounded, size: 36, color: AppColors.accentDark),
+          const Icon(Icons.local_fire_department_rounded,
+              size: 36, color: AppColors.accentDark),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

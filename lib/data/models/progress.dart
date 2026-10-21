@@ -47,10 +47,11 @@ class UserProgress {
     }
   }
 
-  ChapterProgress chapter(String chapterId) =>
-      chapters.putIfAbsent(chapterId, () => ChapterProgress(chapterId: chapterId));
+  ChapterProgress chapter(String chapterId) => chapters.putIfAbsent(
+      chapterId, () => ChapterProgress(chapterId: chapterId));
 
-  int get completedChapterCount => chapters.values.where((c) => c.completed).length;
+  int get completedChapterCount =>
+      chapters.values.where((c) => c.completed).length;
 
   int get totalQuizAnswered =>
       chapters.values.fold(0, (sum, c) => sum + c.attempts);
@@ -91,7 +92,8 @@ class UserProgress {
     final chapters = <String, ChapterProgress>{};
     final raw = json['chapters'] as Map<String, dynamic>? ?? {};
     for (final entry in raw.entries) {
-      chapters[entry.key] = ChapterProgress.fromJson((entry.value as Map).cast<String, dynamic>());
+      chapters[entry.key] = ChapterProgress.fromJson(
+          (entry.value as Map).cast<String, dynamic>());
     }
     return UserProgress(
       chapters: chapters,
@@ -144,7 +146,8 @@ class ChapterProgress {
 
   bool get started => attempts > 0 || resumeSceneIndex != null || completed;
 
-  factory ChapterProgress.fromJson(Map<String, dynamic> json) => ChapterProgress(
+  factory ChapterProgress.fromJson(Map<String, dynamic> json) =>
+      ChapterProgress(
         chapterId: json['chapter_id'] as String? ?? '',
         completed: json['completed'] as bool? ?? false,
         stars: (json['stars'] as num?)?.toInt() ?? 0,

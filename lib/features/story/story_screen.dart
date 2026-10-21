@@ -42,7 +42,8 @@ class _StoryScreenState extends State<StoryScreen> {
   /// Local display language for translations: 'off', 'bn', 'hi'.
   String _translationLang = 'off';
 
-  Chapter? get _chapter => context.read<ContentController>().byId(widget.args.chapterId);
+  Chapter? get _chapter =>
+      context.read<ContentController>().byId(widget.args.chapterId);
 
   void _advance() {
     final chapter = _chapter;
@@ -80,7 +81,8 @@ class _StoryScreenState extends State<StoryScreen> {
       _translationLang = settings.supportLanguage;
     }
 
-    final scene = chapter.scenes[_sceneIndex.clamp(0, chapter.scenes.length - 1)];
+    final scene =
+        chapter.scenes[_sceneIndex.clamp(0, chapter.scenes.length - 1)];
     final line = scene.dialogue[_lineIndex.clamp(0, scene.dialogue.length - 1)];
     final text = Theme.of(context).textTheme;
 
@@ -99,7 +101,8 @@ class _StoryScreenState extends State<StoryScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                        icon: const Icon(Icons.arrow_back_rounded,
+                            color: Colors.white),
                       ),
                       const Spacer(),
                       LanguageChip(
@@ -130,7 +133,8 @@ class _StoryScreenState extends State<StoryScreen> {
                 ),
                 const Spacer(),
                 if (_chosenChoice != null)
-                  _ChoiceResponseBubble(choice: _chosenChoice!, lang: _translationLang),
+                  _ChoiceResponseBubble(
+                      choice: _chosenChoice!, lang: _translationLang),
                 _DialogueBubble(
                   characterId: line.characterId,
                   line: line,
@@ -140,13 +144,15 @@ class _StoryScreenState extends State<StoryScreen> {
                   _ChoiceList(
                     choices: scene.choices,
                     lang: _translationLang,
-                    onChosen: (choice) => setState(() => _chosenChoice = choice),
+                    onChosen: (choice) =>
+                        setState(() => _chosenChoice = choice),
                   ),
                 Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Text(
                     'Tap to Continue',
-                    style: text.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                    style: text.bodyMedium?.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -186,14 +192,16 @@ class _DialogueBubble extends StatelessWidget {
               CharacterAvatar(characterId: characterId, size: 56),
               const SizedBox(width: AppSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(AppRadii.chip),
                 ),
                 child: Text(
                   name,
-                  style: text.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                  style: text.bodyMedium?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -209,7 +217,8 @@ class _DialogueBubble extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(line.text.en, style: text.bodyLarge?.copyWith(height: 1.45)),
+                Text(line.text.en,
+                    style: text.bodyLarge?.copyWith(height: 1.45)),
                 if (translation != null && translation != line.text.en) ...[
                   const Divider(height: AppSpacing.md),
                   Text(
@@ -240,7 +249,8 @@ class _ChoiceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -270,7 +280,8 @@ class _ChoiceResponseBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Container(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
+      margin: const EdgeInsets.fromLTRB(
+          AppSpacing.md, 0, AppSpacing.md, AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.successSoft,
@@ -278,7 +289,8 @@ class _ChoiceResponseBubble extends StatelessWidget {
       ),
       child: Text(
         choice.response.of(lang == 'off' ? 'en' : lang),
-        style: text.bodyLarge?.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+        style: text.bodyLarge
+            ?.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
       ),
     );
   }

@@ -24,7 +24,8 @@ class AppSettings {
 
   static const supportedLanguages = ['en', 'bn', 'hi'];
 
-  static bool isSupportedLanguage(String code) => supportedLanguages.contains(code);
+  static bool isSupportedLanguage(String code) =>
+      supportedLanguages.contains(code);
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     final language = json['support_language'] as String? ?? 'bn';

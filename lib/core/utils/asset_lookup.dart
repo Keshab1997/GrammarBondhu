@@ -30,9 +30,11 @@ class AssetLookup {
 
   static String? characterPath(String characterId) => characters[characterId];
 
-  static String? backgroundPath(String backgroundId) => backgrounds[backgroundId];
+  static String? backgroundPath(String backgroundId) =>
+      backgrounds[backgroundId];
 
-  static String? illustrationPath(String illustrationId) => illustrations[illustrationId];
+  static String? illustrationPath(String illustrationId) =>
+      illustrations[illustrationId];
 
   /// Friendly display name for a character id (used in dialogue captions
   /// and as the fallback when a portrait asset is missing).

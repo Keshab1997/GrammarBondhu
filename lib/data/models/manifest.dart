@@ -2,7 +2,10 @@
 ///
 /// New chapter = one JSON file under `assets/data/chapters/` + one entry here.
 class ContentManifest {
-  const ContentManifest({required this.version, required this.entries, this.defaultSupportLanguage = 'bn'});
+  const ContentManifest(
+      {required this.version,
+      required this.entries,
+      this.defaultSupportLanguage = 'bn'});
 
   final int version;
   final List<ManifestEntry> entries;
@@ -22,13 +25,15 @@ class ContentManifest {
     return ContentManifest(
       version: (json['version'] as num?)?.toInt() ?? 1,
       entries: entries,
-      defaultSupportLanguage: (json['default_support_language'] as String?) ?? 'bn',
+      defaultSupportLanguage:
+          (json['default_support_language'] as String?) ?? 'bn',
     );
   }
 }
 
 class ManifestEntry {
-  const ManifestEntry({required this.chapterId, required this.file, required this.order});
+  const ManifestEntry(
+      {required this.chapterId, required this.file, required this.order});
 
   final String chapterId;
 

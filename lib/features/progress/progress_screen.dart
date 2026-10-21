@@ -42,11 +42,20 @@ class _ProgressScreenState extends State<ProgressScreen> {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
-                  _TabChip(label: 'Overview', selected: _tab == 0, onTap: () => setState(() => _tab = 0)),
+                  _TabChip(
+                      label: 'Overview',
+                      selected: _tab == 0,
+                      onTap: () => setState(() => _tab = 0)),
                   const SizedBox(width: AppSpacing.sm),
-                  _TabChip(label: 'Chapters', selected: _tab == 1, onTap: () => setState(() => _tab = 1)),
+                  _TabChip(
+                      label: 'Chapters',
+                      selected: _tab == 1,
+                      onTap: () => setState(() => _tab = 1)),
                   const SizedBox(width: AppSpacing.sm),
-                  _TabChip(label: 'Stats', selected: _tab == 2, onTap: () => setState(() => _tab = 2)),
+                  _TabChip(
+                      label: 'Stats',
+                      selected: _tab == 2,
+                      onTap: () => setState(() => _tab = 2)),
                 ],
               ),
             ),
@@ -74,7 +83,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           icon: Icons.menu_book_rounded,
                           color: AppColors.primary,
                           label: 'Chapters',
-                          value: '${p.completedChapterCount}/${content.chapters.length}',
+                          value:
+                              '${p.completedChapterCount}/${content.chapters.length}',
                         ),
                         _StatTile(
                           icon: Icons.quiz_rounded,
@@ -86,7 +96,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           icon: Icons.local_fire_department_rounded,
                           color: AppColors.accentDark,
                           label: 'Streak',
-                          value: '${p.streakDays} ${p.streakDays == 1 ? 'day' : 'days'}',
+                          value:
+                              '${p.streakDays} ${p.streakDays == 1 ? 'day' : 'days'}',
                         ),
                         _StatTile(
                           icon: Icons.military_tech_rounded,
@@ -114,18 +125,25 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(chapter.title.en,
-                                        style: Theme.of(context).textTheme.titleMedium),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium),
                                     Text(
-                                      progress.chapterProgress(chapter.id).completed
+                                      progress
+                                              .chapterProgress(chapter.id)
+                                              .completed
                                           ? 'Best ${progress.chapterProgress(chapter.id).bestScorePercent}%'
                                           : 'Not finished yet',
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
                                     ),
                                   ],
                                 ),
                               ),
                               StarsDisplay(
-                                count: progress.chapterProgress(chapter.id).stars,
+                                count:
+                                    progress.chapterProgress(chapter.id).stars,
                                 size: 18,
                               ),
                             ],
@@ -138,10 +156,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         children: [
                           _StatRow(label: 'Total XP', value: '${p.totalXp}'),
                           _StatRow(label: 'Coins', value: '${p.coins}'),
-                          _StatRow(label: 'Current streak', value: '${p.streakDays} days'),
-                          _StatRow(label: 'Questions today', value: '${p.questionsAnsweredToday}'),
-                          _StatRow(label: 'Daily goal', value: '${p.dailyGoalQuestions} questions'),
-                          _StatRow(label: 'Level', value: '${p.level} — ${p.levelTitle}'),
+                          _StatRow(
+                              label: 'Current streak',
+                              value: '${p.streakDays} days'),
+                          _StatRow(
+                              label: 'Questions today',
+                              value: '${p.questionsAnsweredToday}'),
+                          _StatRow(
+                              label: 'Daily goal',
+                              value: '${p.dailyGoalQuestions} questions'),
+                          _StatRow(
+                              label: 'Level',
+                              value: '${p.level} — ${p.levelTitle}'),
                         ],
                       ),
                     ),
@@ -157,7 +183,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
 }
 
 class _TabChip extends StatelessWidget {
-  const _TabChip({required this.label, required this.selected, required this.onTap});
+  const _TabChip(
+      {required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -256,7 +283,8 @@ class _StatTile extends StatelessWidget {
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 6),
               Flexible(
-                child: Text(label, style: text.bodyMedium, overflow: TextOverflow.ellipsis),
+                child: Text(label,
+                    style: text.bodyMedium, overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -282,7 +310,8 @@ class _StatRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(label, style: text.bodyLarge)),
-          Text(value, style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+          Text(value,
+              style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
         ],
       ),
     );

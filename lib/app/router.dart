@@ -33,15 +33,23 @@ class AppRouter {
       case ChapterListScreen.routeName:
         return _page(const ChapterListScreen(), settings);
       case ChapterDetailScreen.routeName:
-        return _page(ChapterDetailScreen(chapterId: settings.arguments! as String), settings);
+        return _page(
+            ChapterDetailScreen(chapterId: settings.arguments! as String),
+            settings);
       case StoryScreen.routeName:
-        return _page(StoryScreen(args: settings.arguments! as StoryArgs), settings);
+        return _page(
+            StoryScreen(args: settings.arguments! as StoryArgs), settings);
       case GrammarLessonScreen.routeName:
-        return _page(GrammarLessonScreen(chapterId: settings.arguments! as String), settings);
+        return _page(
+            GrammarLessonScreen(chapterId: settings.arguments! as String),
+            settings);
       case QuizScreen.routeName:
-        return _page(QuizScreen(chapterId: settings.arguments! as String), settings);
+        return _page(
+            QuizScreen(chapterId: settings.arguments! as String), settings);
       case ChapterCompletedScreen.routeName:
-        return _page(ChapterCompletedScreen(args: settings.arguments! as CompletedArgs), settings);
+        return _page(
+            ChapterCompletedScreen(args: settings.arguments! as CompletedArgs),
+            settings);
       case ProgressScreen.routeName:
         return _page(const ProgressScreen(), settings);
       case SettingsScreen.routeName:
@@ -55,7 +63,8 @@ class AppRouter {
     }
   }
 
-  static MaterialPageRoute<dynamic> _page(Widget child, RouteSettings settings) {
+  static MaterialPageRoute<dynamic> _page(
+      Widget child, RouteSettings settings) {
     return MaterialPageRoute<dynamic>(
       builder: (_) => child,
       settings: settings,

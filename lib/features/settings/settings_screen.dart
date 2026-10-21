@@ -40,10 +40,12 @@ class SettingsScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(s.supportLanguage.toUpperCase(), style: text.bodyMedium),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                  const Icon(Icons.chevron_right_rounded,
+                      color: AppColors.textSecondary),
                 ],
               ),
-              onTap: () => Navigator.of(context).pushNamed(LanguageSelectionScreen.routeName),
+              onTap: () => Navigator.of(context)
+                  .pushNamed(LanguageSelectionScreen.routeName),
             ),
             _SettingsTile(
               icon: Icons.volume_up_rounded,
@@ -52,7 +54,8 @@ class SettingsScreen extends StatelessWidget {
               trailing: Switch(
                 value: s.audioEnabled,
                 activeThumbColor: AppColors.success,
-                onChanged: (v) => context.read<SettingsController>().setAudioEnabled(v),
+                onChanged: (v) =>
+                    context.read<SettingsController>().setAudioEnabled(v),
               ),
             ),
             _SettingsTile(
@@ -62,24 +65,31 @@ class SettingsScreen extends StatelessWidget {
               trailing: Switch(
                 value: s.notificationsEnabled,
                 activeThumbColor: AppColors.success,
-                onChanged: (v) => context.read<SettingsController>().setNotificationsEnabled(v),
+                onChanged: (v) => context
+                    .read<SettingsController>()
+                    .setNotificationsEnabled(v),
               ),
             ),
             _SettingsTile(
               icon: Icons.download_rounded,
               color: AppColors.primaryDark,
               label: 'Download Chapters',
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-              onTap: () => Navigator.of(context).pushNamed(OfflineDownloadScreen.routeName),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
+              onTap: () => Navigator.of(context)
+                  .pushNamed(OfflineDownloadScreen.routeName),
             ),
             _SettingsTile(
               icon: Icons.cleaning_services_rounded,
               color: AppColors.textSecondary,
               label: 'Clear Cache',
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Cache cleared. Chapters stay bundled with the app.')),
+                  const SnackBar(
+                      content: Text(
+                          'Cache cleared. Chapters stay bundled with the app.')),
                 );
               },
             ),
@@ -87,7 +97,8 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.restart_alt_rounded,
               color: AppColors.error,
               label: 'Reset Progress',
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
               onTap: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
@@ -107,7 +118,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Reset', style: TextStyle(color: AppColors.error)),
+                        child: const Text('Reset',
+                            style: TextStyle(color: AppColors.error)),
                       ),
                     ],
                   ),
@@ -115,8 +127,8 @@ class SettingsScreen extends StatelessWidget {
                 if (confirmed == true && context.mounted) {
                   await context.read<ProgressController>().resetAll();
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('Progress reset.')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Progress reset.')));
                   }
                 }
               },
@@ -125,14 +137,16 @@ class SettingsScreen extends StatelessWidget {
               icon: Icons.info_outline_rounded,
               color: AppColors.primary,
               label: 'About App',
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
               onTap: () => _showAbout(context),
             ),
             _SettingsTile(
               icon: Icons.help_outline_rounded,
               color: AppColors.success,
               label: 'Help & Support',
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              trailing: const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
               onTap: () => _showHelp(context),
             ),
           ],
@@ -145,7 +159,8 @@ class SettingsScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.card)),
         title: const Text('About GrammarBondhu'),
         content: const Text(
           'GrammarBondhu — Learn English Through Stories.\n\n'
@@ -167,7 +182,8 @@ class SettingsScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.card)),
         title: const Text('Help & Support'),
         content: const Text(
           'Stuck on a lesson? Every quiz explains its answers — try again as '
@@ -207,7 +223,8 @@ class _SettingsTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: AppCard(
         onTap: onTap,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         child: Row(
           children: [
             Container(

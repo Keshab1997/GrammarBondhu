@@ -29,5 +29,6 @@ class QuizEval {
       stars >= 3 ? rewards.coins : (rewards.coins / 2).round();
 
   /// Whether this run beats the stored best score.
-  static bool isPersonalBest(int percent, int previousBest) => percent > previousBest;
+  static bool isPersonalBest(int percent, int previousBest) =>
+      percent > previousBest;
 }

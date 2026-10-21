@@ -49,7 +49,8 @@ class ChapterCompletedScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamedAndRemoveUntil(
                       HomeShell.routeName,
                       (_) => false,
                     ),
@@ -68,21 +69,27 @@ class ChapterCompletedScreen extends StatelessWidget {
                 Text(
                   "You did an ${result.percent >= 90 ? 'amazing' : 'great'} job!",
                   textAlign: TextAlign.center,
-                  style: text.headlineMedium?.copyWith(color: Colors.white, fontSize: 28),
+                  style: text.headlineMedium
+                      ?.copyWith(color: Colors.white, fontSize: 28),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _RewardChip(icon: Icons.star_rounded, label: '+${result.xpEarned} XP'),
+                    _RewardChip(
+                        icon: Icons.star_rounded,
+                        label: '+${result.xpEarned} XP'),
                     const SizedBox(width: AppSpacing.md),
-                    _RewardChip(icon: Icons.monetization_on_rounded, label: '+${result.coinsEarned} Coins'),
+                    _RewardChip(
+                        icon: Icons.monetization_on_rounded,
+                        label: '+${result.coinsEarned} Coins'),
                   ],
                 ),
                 if (result.isPersonalBest) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white24,
                       borderRadius: BorderRadius.circular(AppRadii.chip),
@@ -98,7 +105,8 @@ class ChapterCompletedScreen extends StatelessWidget {
                   AppButton(
                     label: 'Next Chapter',
                     icon: Icons.arrow_forward_rounded,
-                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamedAndRemoveUntil(
                       ChapterDetailScreen.routeName,
                       (route) => route.isFirst,
                       arguments: next.id,
@@ -108,14 +116,16 @@ class ChapterCompletedScreen extends StatelessWidget {
                   AppButton(
                     label: 'Back to Home',
                     icon: Icons.home_rounded,
-                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamedAndRemoveUntil(
                       HomeShell.routeName,
                       (_) => false,
                     ),
                   ),
                 const SizedBox(height: AppSpacing.sm),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                  onPressed: () =>
+                      Navigator.of(context).pushNamedAndRemoveUntil(
                     HomeShell.routeName,
                     (_) => false,
                   ),
@@ -139,7 +149,8 @@ class _RewardChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: AppColors.rewardGradient),
         borderRadius: BorderRadius.circular(AppRadii.chip),
@@ -150,7 +161,8 @@ class _RewardChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            style: const TextStyle(
+                fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
         ],
       ),

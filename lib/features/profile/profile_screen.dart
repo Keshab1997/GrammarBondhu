@@ -52,7 +52,8 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 AppProgressBar(value: p.xpIntoLevel / UserProgress.xpPerLevel),
                 const SizedBox(height: 4),
-                Text('${p.xpIntoLevel} / ${UserProgress.xpPerLevel} XP to next level',
+                Text(
+                    '${p.xpIntoLevel} / ${UserProgress.xpPerLevel} XP to next level',
                     style: text.bodyMedium),
               ],
             ),
@@ -61,18 +62,21 @@ class ProfileScreen extends StatelessWidget {
           _MenuTile(
             icon: Icons.insights_rounded,
             label: 'My Progress',
-            onTap: () => Navigator.of(context).pushNamed(ProgressScreen.routeName),
+            onTap: () =>
+                Navigator.of(context).pushNamed(ProgressScreen.routeName),
           ),
           _MenuTile(
             icon: Icons.translate_rounded,
             label: 'Language',
             trailing: settings.supportLanguage.toUpperCase(),
-            onTap: () => Navigator.of(context).pushNamed(LanguageSelectionScreen.routeName),
+            onTap: () => Navigator.of(context)
+                .pushNamed(LanguageSelectionScreen.routeName),
           ),
           _MenuTile(
             icon: Icons.settings_outlined,
             label: 'Settings',
-            onTap: () => Navigator.of(context).pushNamed(SettingsScreen.routeName),
+            onTap: () =>
+                Navigator.of(context).pushNamed(SettingsScreen.routeName),
           ),
         ],
       ),
@@ -109,7 +113,8 @@ class _MenuTile extends StatelessWidget {
               Text(trailing!, style: text.bodyMedium),
               const SizedBox(width: AppSpacing.sm),
             ],
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
           ],
         ),
       ),

@@ -14,7 +14,8 @@ class ProgressController extends ChangeNotifier {
 
   UserProgress get progress => _progress;
 
-  ChapterProgress chapterProgress(String chapterId) => _progress.chapter(chapterId);
+  ChapterProgress chapterProgress(String chapterId) =>
+      _progress.chapter(chapterId);
 
   bool isCompleted(String chapterId) => _progress.chapter(chapterId).completed;
 
@@ -27,7 +28,8 @@ class ProgressController extends ChangeNotifier {
   }
 
   /// Marks the learner as having opened [chapterId] at [sceneIndex].
-  Future<void> openChapter(String chapterId, int sceneIndex, {DateTime? now}) async {
+  Future<void> openChapter(String chapterId, int sceneIndex,
+      {DateTime? now}) async {
     _progress.chapter(chapterId)
       ..resumeSceneIndex = sceneIndex
       ..lastOpenedAt = now ?? DateTime.now();

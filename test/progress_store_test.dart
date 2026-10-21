@@ -17,14 +17,17 @@ Chapter _testChapter() => Chapter(
         StoryScene(
           sceneId: 's1',
           dialogue: [
-            DialogueLine(characterId: 'rahul', text: const LocalizedText(en: 'Hi')),
+            DialogueLine(
+                characterId: 'rahul', text: const LocalizedText(en: 'Hi')),
           ],
         ),
       ],
       lesson: GrammarLesson(
         title: const LocalizedText(en: 't'),
         explanation: const LocalizedText(en: 'e'),
-        examples: [LessonExample(sentence: 'I am.', note: const LocalizedText(en: 'n'))],
+        examples: [
+          LessonExample(sentence: 'I am.', note: const LocalizedText(en: 'n'))
+        ],
       ),
       quiz: [
         QuizQuestion(
@@ -60,7 +63,8 @@ void main() {
       expect(store2.loadSettings().supportLanguage, 'hi');
     });
 
-    test('corrupt records degrade to fresh state instead of crashing', () async {
+    test('corrupt records degrade to fresh state instead of crashing',
+        () async {
       SharedPreferences.setMockInitialValues({
         'user_progress_v1': '{not json',
         'app_settings_v1': '{not json',
@@ -72,7 +76,8 @@ void main() {
   });
 
   group('ProgressController', () {
-    test('first completion grants XP, coins and stars; resume cleared', () async {
+    test('first completion grants XP, coins and stars; resume cleared',
+        () async {
       SharedPreferences.setMockInitialValues({});
       final store = await LocalStore.open();
       final controller = ProgressController(store, store.loadProgress());
@@ -179,7 +184,10 @@ void main() {
             'title': {'en': 't'},
             'explanation': {'en': 'e'},
             'examples': [
-              {'sentence': 's', 'note': {'en': 'n'}}
+              {
+                'sentence': 's',
+                'note': {'en': 'n'}
+              }
             ],
           },
           'quiz': [

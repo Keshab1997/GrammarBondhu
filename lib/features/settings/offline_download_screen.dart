@@ -63,12 +63,14 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(chapter.title.en, style: text.titleMedium),
-                            Text('Images + Audio + JSON Data', style: text.bodyMedium),
+                            Text('Images + Audio + JSON Data',
+                                style: text.bodyMedium),
                           ],
                         ),
                       ),
                       if (_downloaded.contains(chapter.id))
-                        const Icon(Icons.check_circle_rounded, color: AppColors.success)
+                        const Icon(Icons.check_circle_rounded,
+                            color: AppColors.success)
                       else
                         AppButton(
                           label: 'Download',

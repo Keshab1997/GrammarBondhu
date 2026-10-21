@@ -13,7 +13,8 @@ class LocalizedText {
 
   factory LocalizedText.fromJson(Object? json, {String field = 'text'}) {
     if (json is! Map) {
-      throw FormatException('LocalizedText.$field: expected an object, got ${json.runtimeType}');
+      throw FormatException(
+          'LocalizedText.$field: expected an object, got ${json.runtimeType}');
     }
     final map = json.cast<String, dynamic>();
     final en = map['en'] as String?;
@@ -54,11 +55,17 @@ class LocalizedText {
 
   /// Whether a translation exists for [languageCode] (English always does).
   bool has(String languageCode) =>
-      languageCode == 'en' || of(languageCode) != en || (languageCode == 'bn' && bn != null) || (languageCode == 'hi' && hi != null);
+      languageCode == 'en' ||
+      of(languageCode) != en ||
+      (languageCode == 'bn' && bn != null) ||
+      (languageCode == 'hi' && hi != null);
 
   @override
   bool operator ==(Object other) =>
-      other is LocalizedText && other.en == en && other.bn == bn && other.hi == hi;
+      other is LocalizedText &&
+      other.en == en &&
+      other.bn == bn &&
+      other.hi == hi;
 
   @override
   int get hashCode => Object.hash(en, bn, hi);

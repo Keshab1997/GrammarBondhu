@@ -94,7 +94,10 @@ void main() {
           'title': {'en': 'l'},
           'explanation': {'en': 'e'},
           'examples': [
-            {'sentence': 'I am.', 'note': {'en': 'n'}}
+            {
+              'sentence': 'I am.',
+              'note': {'en': 'n'}
+            }
           ],
         },
         'quiz': [

@@ -13,7 +13,8 @@ class LanguageSelectionScreen extends StatefulWidget {
   static const routeName = '/language';
 
   @override
-  State<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
+  State<LanguageSelectionScreen> createState() =>
+      _LanguageSelectionScreenState();
 }
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
@@ -56,7 +57,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         onTap: () => setState(() => _selected = option.code),
                         child: Row(
                           children: [
-                            Text(option.flag, style: const TextStyle(fontSize: 28)),
+                            Text(option.flag,
+                                style: const TextStyle(fontSize: 28)),
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Column(
@@ -88,7 +90,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 label: 'Continue',
                 variant: AppButtonVariant.blue,
                 onPressed: () async {
-                  await context.read<SettingsController>().setSupportLanguage(_selected);
+                  await context
+                      .read<SettingsController>()
+                      .setSupportLanguage(_selected);
                   if (context.mounted) Navigator.of(context).pop();
                 },
               ),

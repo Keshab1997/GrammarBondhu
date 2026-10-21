@@ -25,7 +25,8 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
   _ChapterFilter _filter = _ChapterFilter.story;
 
   /// A chapter unlocks when the previous one is completed.
-  bool _isUnlocked(List<Chapter> chapters, int index, ProgressController progress) {
+  bool _isUnlocked(
+      List<Chapter> chapters, int index, ProgressController progress) {
     if (index == 0) return true;
     return progress.isCompleted(chapters[index - 1].id);
   }
@@ -82,7 +83,8 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
             child: chapters.isEmpty
                 ? const Center(child: Text('Chapters are loading…'))
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     itemCount: chapters.length,
                     itemBuilder: (context, index) {
                       final chapter = chapters[index];
@@ -104,7 +106,8 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                           number: index + 1,
                           locked: isLocked,
                           completed: record.completed,
-                          inProgress: unlocked && record.started && !record.completed,
+                          inProgress:
+                              unlocked && record.started && !record.completed,
                           stars: record.stars,
                           onTap: isLocked
                               ? null
@@ -124,7 +127,8 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
 }
 
 class _FilterChip extends StatelessWidget {
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip(
+      {required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -136,7 +140,8 @@ class _FilterChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadii.chip),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.primarySoft,
           borderRadius: BorderRadius.circular(AppRadii.chip),
@@ -183,7 +188,8 @@ class _ChapterCard extends StatelessWidget {
         children: [
           ChapterThumbnail(
             assetPath: chapter.thumbnailAsset,
-            fallbackIcon: locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
+            fallbackIcon:
+                locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
             size: 64,
           ),
           const SizedBox(width: AppSpacing.md),
@@ -197,9 +203,12 @@ class _ChapterCard extends StatelessWidget {
                 if (completed)
                   Row(
                     children: [
-                      const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.success),
+                      const Icon(Icons.check_circle_rounded,
+                          size: 16, color: AppColors.success),
                       const SizedBox(width: 4),
-                      Text('Completed', style: text.bodyMedium?.copyWith(color: AppColors.success)),
+                      Text('Completed',
+                          style: text.bodyMedium
+                              ?.copyWith(color: AppColors.success)),
                       const SizedBox(width: AppSpacing.sm),
                       StarsDisplay(count: stars, size: 16),
                     ],
@@ -207,15 +216,21 @@ class _ChapterCard extends StatelessWidget {
                 else if (inProgress)
                   Row(
                     children: [
-                      const Icon(Icons.play_circle_fill_rounded, size: 16, color: AppColors.primary),
+                      const Icon(Icons.play_circle_fill_rounded,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
-                      Text('In Progress', style: text.bodyMedium?.copyWith(color: AppColors.primary)),
+                      Text('In Progress',
+                          style: text.bodyMedium
+                              ?.copyWith(color: AppColors.primary)),
                     ],
                   )
                 else if (locked)
                   Row(
                     children: [
-                      Icon(Icons.lock_rounded, size: 16, color: AppColors.textSecondary.withValues(alpha: 0.6)),
+                      Icon(Icons.lock_rounded,
+                          size: 16,
+                          color:
+                              AppColors.textSecondary.withValues(alpha: 0.6)),
                       const SizedBox(width: 4),
                       Text('Locked', style: text.bodyMedium),
                     ],
@@ -224,7 +239,8 @@ class _ChapterCard extends StatelessWidget {
             ),
           ),
           if (!locked)
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
         ],
       ),
     );

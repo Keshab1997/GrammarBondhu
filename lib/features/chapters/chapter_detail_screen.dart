@@ -34,8 +34,10 @@ class ChapterDetailScreen extends StatelessWidget {
 
     return Scaffold(
       body: SceneBackground(
-        backgroundId:
-            chapter.backgroundAsset?.split('/').last.replaceAll(RegExp(r'\.[a-z]+$'), ''),
+        backgroundId: chapter.backgroundAsset
+            ?.split('/')
+            .last
+            .replaceAll(RegExp(r'\.[a-z]+$'), ''),
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,8 +71,11 @@ class ChapterDetailScreen extends StatelessWidget {
                       Text('Grammar Focus', style: text.bodyMedium),
                       Text(chapter.grammarTopic.en, style: text.titleLarge),
                       const SizedBox(height: AppSpacing.lg),
-                      _CheckRow(label: 'Story', detail: '${chapter.scenes.length} scenes'),
-                      _CheckRow(label: 'Grammar Lesson', detail: 'Rules & examples'),
+                      _CheckRow(
+                          label: 'Story',
+                          detail: '${chapter.scenes.length} scenes'),
+                      _CheckRow(
+                          label: 'Grammar Lesson', detail: 'Rules & examples'),
                       _CheckRow(
                         label: 'Quiz (${chapter.quiz.length} Questions)',
                         detail: record.completed
@@ -81,10 +86,13 @@ class ChapterDetailScreen extends StatelessWidget {
                       if (record.completed)
                         Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: Center(child: StarsDisplay(count: record.stars)),
+                          child:
+                              Center(child: StarsDisplay(count: record.stars)),
                         ),
                       AppButton(
-                        label: record.started && !record.completed ? 'Resume' : 'Start',
+                        label: record.started && !record.completed
+                            ? 'Resume'
+                            : 'Start',
                         icon: Icons.play_arrow_rounded,
                         variant: AppButtonVariant.primary,
                         onPressed: () => Navigator.of(context).pushNamed(
@@ -117,7 +125,8 @@ class _CheckRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 22),
+          const Icon(Icons.check_circle_rounded,
+              color: AppColors.success, size: 22),
           const SizedBox(width: AppSpacing.sm),
           Expanded(child: Text(label, style: text.bodyLarge)),
           Text(detail, style: text.bodyMedium),

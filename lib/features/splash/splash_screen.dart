@@ -36,7 +36,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void _begin() {
     final settings = context.read<SettingsController>().settings;
     Navigator.of(context).pushReplacementNamed(
-      settings.onboardingComplete ? HomeShell.routeName : OnboardingScreen.routeName,
+      settings.onboardingComplete
+          ? HomeShell.routeName
+          : OnboardingScreen.routeName,
     );
   }
 
@@ -46,7 +48,11 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primaryDark, AppColors.primary, AppColors.skyTop],
+            colors: [
+              AppColors.primaryDark,
+              AppColors.primary,
+              AppColors.skyTop
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

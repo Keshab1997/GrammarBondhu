@@ -56,9 +56,18 @@ class RewardsScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _BigStat(icon: Icons.monetization_on_rounded, value: '${p.coins}', label: 'Coins'),
-                _BigStat(icon: Icons.local_fire_department_rounded, value: '${p.streakDays}', label: 'Day Streak'),
-                _BigStat(icon: Icons.military_tech_rounded, value: '${p.totalXp}', label: 'Total XP'),
+                _BigStat(
+                    icon: Icons.monetization_on_rounded,
+                    value: '${p.coins}',
+                    label: 'Coins'),
+                _BigStat(
+                    icon: Icons.local_fire_department_rounded,
+                    value: '${p.streakDays}',
+                    label: 'Day Streak'),
+                _BigStat(
+                    icon: Icons.military_tech_rounded,
+                    value: '${p.totalXp}',
+                    label: 'Total XP'),
               ],
             ),
           ),
@@ -81,7 +90,9 @@ class RewardsScreen extends StatelessWidget {
                       ),
                       child: Icon(
                         a.icon,
-                        color: a.earned ? AppColors.accentDark : AppColors.textSecondary,
+                        color: a.earned
+                            ? AppColors.accentDark
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -95,8 +106,12 @@ class RewardsScreen extends StatelessWidget {
                       ),
                     ),
                     Icon(
-                      a.earned ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                      color: a.earned ? AppColors.success : AppColors.textSecondary,
+                      a.earned
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: a.earned
+                          ? AppColors.success
+                          : AppColors.textSecondary,
                     ),
                   ],
                 ),
@@ -109,7 +124,8 @@ class RewardsScreen extends StatelessWidget {
 }
 
 class _BigStat extends StatelessWidget {
-  const _BigStat({required this.icon, required this.value, required this.label});
+  const _BigStat(
+      {required this.icon, required this.value, required this.label});
 
   final IconData icon;
   final String value;
@@ -122,8 +138,10 @@ class _BigStat extends StatelessWidget {
       children: [
         Icon(icon, color: AppColors.textPrimary, size: 28),
         const SizedBox(height: 4),
-        Text(value, style: text.titleLarge?.copyWith(color: AppColors.textPrimary)),
-        Text(label, style: text.bodyMedium?.copyWith(color: AppColors.textPrimary)),
+        Text(value,
+            style: text.titleLarge?.copyWith(color: AppColors.textPrimary)),
+        Text(label,
+            style: text.bodyMedium?.copyWith(color: AppColors.textPrimary)),
       ],
     );
   }

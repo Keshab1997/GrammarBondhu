@@ -56,8 +56,10 @@ class Chapter {
     return Chapter(
       id: id,
       title: LocalizedText.fromJson(json['title'], field: 'title'),
-      description: LocalizedText.fromJson(json['description'], field: 'description'),
-      grammarTopic: LocalizedText.fromJson(json['grammar_topic'], field: 'grammar_topic'),
+      description:
+          LocalizedText.fromJson(json['description'], field: 'description'),
+      grammarTopic:
+          LocalizedText.fromJson(json['grammar_topic'], field: 'grammar_topic'),
       difficulty: _reqString(json, 'difficulty'),
       estimatedDurationMinutes: _reqInt(json, 'estimated_duration_minutes'),
       rewards: ChapterRewards.fromJson(_asMap(json['rewards'], 'rewards')),
@@ -90,7 +92,8 @@ class Chapter {
 }
 
 class ChapterRewards {
-  const ChapterRewards({required this.xp, required this.coins, required this.maxStars});
+  const ChapterRewards(
+      {required this.xp, required this.coins, required this.maxStars});
 
   final int xp;
   final int coins;
@@ -125,12 +128,14 @@ class StoryScene {
         .map((e) => DialogueLine.fromJson(_asMap(e, 'dialogue[]')))
         .toList();
     if (dialogue.isEmpty) {
-      throw FormatException('StoryScene ${json['scene_id']}: "dialogue" must not be empty');
+      throw FormatException(
+          'StoryScene ${json['scene_id']}: "dialogue" must not be empty');
     }
     return StoryScene(
       sceneId: _reqString(json, 'scene_id'),
       backgroundId: json['background_id'] as String?,
-      characterIds: (json['character_ids'] as List?)?.cast<String>() ?? const [],
+      characterIds:
+          (json['character_ids'] as List?)?.cast<String>() ?? const [],
       dialogue: dialogue,
       choices: (json['choices'] as List? ?? const [])
           .map((e) => StoryChoice.fromJson(_asMap(e, 'choices[]')))
@@ -156,7 +161,8 @@ class DialogueLine {
 /// Choices never block progress — they add a friendly response line and
 /// keep the narrative moving.
 class StoryChoice {
-  const StoryChoice({required this.id, required this.text, required this.response});
+  const StoryChoice(
+      {required this.id, required this.text, required this.response});
 
   final String id;
   final LocalizedText text;
@@ -170,7 +176,8 @@ class StoryChoice {
 }
 
 class GrammarLesson {
-  const GrammarLesson({required this.title, required this.explanation, required this.examples});
+  const GrammarLesson(
+      {required this.title, required this.explanation, required this.examples});
 
   final LocalizedText title;
   final LocalizedText explanation;
@@ -185,7 +192,8 @@ class GrammarLesson {
     }
     return GrammarLesson(
       title: LocalizedText.fromJson(json['title'], field: 'title'),
-      explanation: LocalizedText.fromJson(json['explanation'], field: 'explanation'),
+      explanation:
+          LocalizedText.fromJson(json['explanation'], field: 'explanation'),
       examples: examples,
     );
   }
@@ -231,9 +239,11 @@ class QuizQuestion {
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     final id = _reqString(json, 'question_id');
-    final options = (json['options'] as List?)?.map((e) => e.toString()).toList();
+    final options =
+        (json['options'] as List?)?.map((e) => e.toString()).toList();
     if (options == null || options.length < 2) {
-      throw FormatException('QuizQuestion.$id: "options" needs at least 2 entries');
+      throw FormatException(
+          'QuizQuestion.$id: "options" needs at least 2 entries');
     }
     final correct = json['correct_index'];
     if (correct is! int || correct < 0 || correct >= options.length) {
@@ -244,7 +254,8 @@ class QuizQuestion {
       question: _reqString(json, 'question'),
       options: options,
       correctIndex: correct,
-      explanation: LocalizedText.fromJson(json['explanation'], field: 'explanation'),
+      explanation:
+          LocalizedText.fromJson(json['explanation'], field: 'explanation'),
     );
   }
 }
@@ -279,7 +290,8 @@ List<dynamic> _reqList(Map<String, dynamic> json, String key) {
 
 Map<String, dynamic> _asMap(Object? value, String field) {
   if (value is! Map) {
-    throw FormatException('$field: expected an object, got ${value.runtimeType}');
+    throw FormatException(
+        '$field: expected an object, got ${value.runtimeType}');
   }
   return value.cast<String, dynamic>();
 }

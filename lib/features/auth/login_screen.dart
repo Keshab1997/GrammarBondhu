@@ -34,7 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _goHome() {
-    Navigator.of(context).pushNamedAndRemoveUntil(HomeShell.routeName, (_) => false);
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(HomeShell.routeName, (_) => false);
   }
 
   Future<void> _signIn() async {
@@ -67,7 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const BrandLogo(fontSize: 30, showTagline: false),
                   const SizedBox(height: AppSpacing.lg),
-                  Text('Welcome Back!', textAlign: TextAlign.center, style: text.headlineMedium),
+                  Text('Welcome Back!',
+                      textAlign: TextAlign.center, style: text.headlineMedium),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Login to continue your journey',
@@ -78,7 +80,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _accountController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _inputDecoration('Email or Phone', Icons.person_outline_rounded),
+                    decoration: _inputDecoration(
+                        'Email or Phone', Icons.person_outline_rounded),
                     validator: (value) {
                       final v = value?.trim() ?? '';
                       if (v.isEmpty) return 'Please enter your email or phone';
@@ -89,14 +92,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscure,
-                    decoration: _inputDecoration('Password', Icons.lock_outline_rounded).copyWith(
+                    decoration:
+                        _inputDecoration('Password', Icons.lock_outline_rounded)
+                            .copyWith(
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                        icon: Icon(_obscure
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
-                    validator: (value) =>
-                        (value == null || value.length < 4) ? 'Password needs 4+ characters' : null,
+                    validator: (value) => (value == null || value.length < 4)
+                        ? 'Password needs 4+ characters'
+                        : null,
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Align(
@@ -105,7 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Password reset arrives with the online release.'),
+                            content: Text(
+                                'Password reset arrives with the online release.'),
                           ),
                         );
                       },
@@ -122,7 +131,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const Expanded(child: Divider()),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md),
                         child: Text('or', style: text.bodyMedium),
                       ),
                       const Expanded(child: Divider()),

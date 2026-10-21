@@ -17,7 +17,8 @@ class BrandLogo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.school_rounded, size: fontSize * 1.15, color: AppColors.accent),
+        Icon(Icons.school_rounded,
+            size: fontSize * 1.15, color: AppColors.accent),
         SizedBox(height: fontSize * 0.18),
         Text(
           'Grammar',
@@ -27,7 +28,8 @@ class BrandLogo extends StatelessWidget {
             color: AppColors.primaryDark,
             letterSpacing: 0.5,
             shadows: const [
-              Shadow(color: Colors.black26, offset: Offset(0, 3), blurRadius: 6),
+              Shadow(
+                  color: Colors.black26, offset: Offset(0, 3), blurRadius: 6),
             ],
           ),
         ),
@@ -41,8 +43,12 @@ class BrandLogo extends StatelessWidget {
               color: AppColors.accent,
               letterSpacing: 1,
               shadows: const [
-                Shadow(color: AppColors.accentDark, offset: Offset(0, 3), blurRadius: 0),
-                Shadow(color: Colors.black26, offset: Offset(0, 6), blurRadius: 8),
+                Shadow(
+                    color: AppColors.accentDark,
+                    offset: Offset(0, 3),
+                    blurRadius: 0),
+                Shadow(
+                    color: Colors.black26, offset: Offset(0, 6), blurRadius: 8),
               ],
             ),
           ),

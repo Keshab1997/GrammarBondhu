@@ -54,7 +54,10 @@ void main() {
             'title': {'en': 'am / is / are'},
             'explanation': {'en': 'Use am with I.'},
             'examples': [
-              {'sentence': 'I am a student.', 'note': {'en': 'I + am'}}
+              {
+                'sentence': 'I am a student.',
+                'note': {'en': 'I + am'}
+              }
             ],
           },
           'quiz': [

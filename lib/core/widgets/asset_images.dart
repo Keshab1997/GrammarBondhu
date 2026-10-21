@@ -30,7 +30,8 @@ class CharacterAvatar extends StatelessWidget {
             : Image.asset(
                 path,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _FallbackAvatar(name: name, size: size),
+                errorBuilder: (_, __, ___) =>
+                    _FallbackAvatar(name: name, size: size),
               ),
       ),
     );

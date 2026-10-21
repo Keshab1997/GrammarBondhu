@@ -90,7 +90,8 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = Material(
       color: color,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(radius),
@@ -136,7 +137,8 @@ class AppProgressBar extends StatelessWidget {
 
 /// Star row used on completion and chapter cards.
 class StarsDisplay extends StatelessWidget {
-  const StarsDisplay({super.key, required this.count, this.total = 3, this.size = 28});
+  const StarsDisplay(
+      {super.key, required this.count, this.total = 3, this.size = 28});
 
   final int count;
   final int total;
@@ -151,7 +153,9 @@ class StarsDisplay extends StatelessWidget {
           Icon(
             i < count ? Icons.star_rounded : Icons.star_outline_rounded,
             size: size,
-            color: i < count ? AppColors.accent : AppColors.textSecondary.withValues(alpha: 0.4),
+            color: i < count
+                ? AppColors.accent
+                : AppColors.textSecondary.withValues(alpha: 0.4),
           ),
           if (i < total - 1) SizedBox(width: size * 0.15),
         ],
@@ -184,7 +188,8 @@ class LanguageChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadii.chip),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.primarySoft,
           borderRadius: BorderRadius.circular(AppRadii.chip),
@@ -199,7 +204,8 @@ class LanguageChip extends StatelessWidget {
             if (flag != null)
               Text(flag!, style: const TextStyle(fontSize: 16))
             else
-              Icon(Icons.language, size: 16, color: selected ? Colors.white : AppColors.primary),
+              Icon(Icons.language,
+                  size: 16, color: selected ? Colors.white : AppColors.primary),
             const SizedBox(width: 6),
             Text(
               label,

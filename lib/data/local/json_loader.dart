@@ -22,7 +22,8 @@ class JsonLoader {
       }
       return decoded;
     } on FormatException catch (e) {
-      throw ContentLoadException('Asset "$assetPath" is not valid JSON: ${e.message}');
+      throw ContentLoadException(
+          'Asset "$assetPath" is not valid JSON: ${e.message}');
     }
   }
 }
