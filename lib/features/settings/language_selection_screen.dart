@@ -7,6 +7,7 @@ import '../../core/widgets/app_widgets.dart';
 
 /// Screen 18 — choose the supporting language for explanations and
 /// story translations. English stays the primary learning language.
+/// Uses 3D circular flag icons matching the storyboard design.
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
 
@@ -21,9 +22,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   late String _selected = context.read<SettingsController>().supportLanguage;
 
   static const _options = [
-    (code: 'en', flag: '🇬🇧', name: 'English', detail: 'Main Language'),
-    (code: 'bn', flag: '🇧🇩', name: 'বাংলা', detail: 'Translation'),
-    (code: 'hi', flag: '🇮🇳', name: 'हिन्दी', detail: 'Translation'),
+    (code: 'en', flag: '🇬🇧', icon: 'flag_en', name: 'English', detail: 'Main Language'),
+    (code: 'bn', flag: '🇧🇩', icon: 'flag_bn', name: 'বাংলা', detail: 'Translation'),
+    (code: 'hi', flag: '🇮🇳', icon: 'flag_hi', name: 'हिन्दी', detail: 'Translation'),
   ];
 
   @override
@@ -57,8 +58,28 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         onTap: () => setState(() => _selected = option.code),
                         child: Row(
                           children: [
-                            Text(option.flag,
-                                style: const TextStyle(fontSize: 28)),
+                            // 3D circular flag icon (storyboard frame 18).
+                            ClipOval(
+                              child: SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Image.asset(
+                                  'assets/icons/${option.icon}.webp',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [AppColors.primary, AppColors.skyTop],
+                                      ),
+                                      borderRadius: BorderRadius.circular(22),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(option.flag,
+                                        style: const TextStyle(fontSize: 22)),
+                                  ),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Column(

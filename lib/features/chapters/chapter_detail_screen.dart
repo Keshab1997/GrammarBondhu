@@ -9,6 +9,8 @@ import '../../core/widgets/asset_images.dart';
 import '../story/story_screen.dart';
 
 /// Screen 17 — chapter intro, learning objectives, Start button.
+/// Uses the chapter detail hero illustration (Rahul + Priya at school gate)
+/// with a white content card rising from the bottom, matching the storyboard.
 class ChapterDetailScreen extends StatelessWidget {
   const ChapterDetailScreen({super.key, required this.chapterId});
 
@@ -33,80 +35,99 @@ class ChapterDetailScreen extends StatelessWidget {
     final resume = record.resumeSceneIndex ?? 0;
 
     return Scaffold(
-      body: SceneBackground(
-        backgroundId: chapter.backgroundAsset
-            ?.split('/')
-            .last
-            .replaceAll(RegExp(r'\.[a-z]+$'), ''),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_rounded),
-                    ),
-                  ],
-                ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Chapter hero illustration (storyboard frame 17).
+          Image.asset(
+            'assets/illustrations/chapter_detail_hero.webp',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(color: AppColors.skyTop),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black26, Colors.transparent, Colors.white],
+                stops: [0.0, 0.35, 0.75],
               ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(AppSpacing.md),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadii.sheet),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  child: Row(
                     children: [
-                      Text('Chapter ${content.chapters.indexOf(chapter) + 1}',
-                          style: text.bodyMedium),
-                      Text(chapter.title.en, style: text.headlineMedium),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text('Grammar Focus', style: text.bodyMedium),
-                      Text(chapter.grammarTopic.en, style: text.titleLarge),
-                      const SizedBox(height: AppSpacing.lg),
-                      _CheckRow(
-                          label: 'Story',
-                          detail: '${chapter.scenes.length} scenes'),
-                      _CheckRow(
-                          label: 'Grammar Lesson', detail: 'Rules & examples'),
-                      _CheckRow(
-                        label: 'Quiz (${chapter.quiz.length} Questions)',
-                        detail: record.completed
-                            ? 'Best score ${record.bestScorePercent}%'
-                            : 'Test yourself',
-                      ),
-                      const Spacer(),
-                      if (record.completed)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child:
-                              Center(child: StarsDisplay(count: record.stars)),
-                        ),
-                      AppButton(
-                        label: record.started && !record.completed
-                            ? 'Resume'
-                            : 'Start',
-                        icon: Icons.play_arrow_rounded,
-                        variant: AppButtonVariant.primary,
-                        onPressed: () => Navigator.of(context).pushNamed(
-                          StoryScreen.routeName,
-                          arguments: StoryArgs(chapterId, startScene: resume),
-                        ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_rounded,
+                            color: Colors.white),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                const Spacer(flex: 2),
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    margin: const EdgeInsets.all(AppSpacing.md),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadii.sheet),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Chapter ${content.chapters.indexOf(chapter) + 1}',
+                            style: text.bodyMedium),
+                        Text(chapter.title.en, style: text.headlineMedium),
+                        const SizedBox(height: AppSpacing.lg),
+                        Text('Grammar Focus', style: text.bodyMedium),
+                        Text(chapter.grammarTopic.en, style: text.titleLarge),
+                        const SizedBox(height: AppSpacing.lg),
+                        _CheckRow(
+                            label: 'Story',
+                            detail: '${chapter.scenes.length} scenes'),
+                        _CheckRow(
+                            label: 'Grammar Lesson', detail: 'Rules & examples'),
+                        _CheckRow(
+                          label: 'Quiz (${chapter.quiz.length} Questions)',
+                          detail: record.completed
+                              ? 'Best score ${record.bestScorePercent}%'
+                              : 'Test yourself',
+                        ),
+                        const Spacer(),
+                        if (record.completed)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.sm),
+                            child: Center(
+                                child: StarsDisplay(count: record.stars)),
+                          ),
+                        AppButton(
+                          label: record.started && !record.completed
+                              ? 'Resume'
+                              : 'Start',
+                          icon: Icons.play_arrow_rounded,
+                          variant: AppButtonVariant.primary,
+                          onPressed: () => Navigator.of(context).pushNamed(
+                            StoryScreen.routeName,
+                            arguments: StoryArgs(chapterId, startScene: resume),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
