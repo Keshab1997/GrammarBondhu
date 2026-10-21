@@ -27,7 +27,7 @@ Character IDs in content JSON: `rahul`, `priya`, `teacher` (see
 | Priya portrait | `characters/priya.webp` | ✅ finished (3D-style) |
 | Mrs. Sen portrait | `characters/teacher.webp` | ✅ finished (3D-style) |
 | Backgrounds (4 scene keys) | `backgrounds/bg_*.webp` | ✅ finished (3D-style) |
-| Chapter thumbnails (5) | `illustrations/ch01..05_thumb.webp` | ✅ finished — ch04, ch05 pending generation |
+| Chapter thumbnails (5) | `illustrations/ch01..05_thumb.webp` | ✅ finished (3D-style) |
 | Audio | `audio/` | ⬜ not used in v1 (audio toggle reserved) |
 
 ## Guidelines for new art
