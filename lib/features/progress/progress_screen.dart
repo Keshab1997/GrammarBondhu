@@ -236,7 +236,20 @@ class _LevelCard extends StatelessWidget {
     return AppCard(
       child: Row(
         children: [
-          const CharacterAvatar(characterId: 'rahul', size: 64),
+          // Progress hero avatar (storyboard frame 14: Rahul portrait with level info).
+          ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: SizedBox(
+              width: 64,
+              height: 64,
+              child: Image.asset(
+                'assets/illustrations/progress_avatar.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) =>
+                    const CharacterAvatar(characterId: 'rahul', size: 64),
+              ),
+            ),
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

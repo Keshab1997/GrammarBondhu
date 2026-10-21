@@ -26,6 +26,31 @@ class AssetLookup {
     'ch03_thumb': 'assets/illustrations/ch03_thumb.webp',
     'ch04_thumb': 'assets/illustrations/ch04_thumb.webp',
     'ch05_thumb': 'assets/illustrations/ch05_thumb.webp',
+    // Storyboard-matched screen hero illustrations (3D Pixar style).
+    'splash_hero': 'assets/illustrations/splash_hero.webp',
+    'onboarding_welcome': 'assets/illustrations/onboarding_welcome.webp',
+    'onboarding_languages': 'assets/illustrations/onboarding_languages.webp',
+    'onboarding_story_world': 'assets/illustrations/onboarding_story_world.webp',
+    'login_hero': 'assets/illustrations/login_hero.webp',
+    'chapter_completed': 'assets/illustrations/chapter_completed.webp',
+    'quiz_time': 'assets/illustrations/quiz_time.webp',
+    'grammar_lesson': 'assets/illustrations/grammar_lesson.webp',
+    'story_dialogue_bg': 'assets/illustrations/story_dialogue_bg.webp',
+    'progress_avatar': 'assets/illustrations/progress_avatar.webp',
+    'offline_download': 'assets/illustrations/offline_download.webp',
+    'chapter_detail_hero': 'assets/illustrations/chapter_detail_hero.webp',
+    'rewards_trophy': 'assets/illustrations/rewards_trophy.webp',
+    'locked_chapter': 'assets/illustrations/locked_chapter.webp',
+  };
+
+  static const Map<String, String> branding = {
+    'logo_with_char': 'assets/branding/logo_with_char.webp',
+  };
+
+  static const Map<String, String> icons = {
+    'flag_en': 'assets/icons/flag_en.webp',
+    'flag_bn': 'assets/icons/flag_bn.webp',
+    'flag_hi': 'assets/icons/flag_hi.webp',
   };
 
   static String? characterPath(String characterId) => characters[characterId];
@@ -35,6 +60,10 @@ class AssetLookup {
 
   static String? illustrationPath(String illustrationId) =>
       illustrations[illustrationId];
+
+  static String? brandingPath(String brandingId) => branding[brandingId];
+
+  static String? iconPath(String iconId) => icons[iconId];
 
   /// Friendly display name for a character id (used in dialogue captions
   /// and as the fallback when a portrait asset is missing).

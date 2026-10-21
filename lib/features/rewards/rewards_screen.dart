@@ -47,6 +47,25 @@ class RewardsScreen extends StatelessWidget {
         children: [
           Text('Rewards', style: text.titleLarge),
           const SizedBox(height: AppSpacing.md),
+          // Rewards trophy hero (matches storyboard reward vibe).
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.asset(
+                'assets/illustrations/rewards_trophy.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(colors: AppColors.rewardGradient),
+                  ),
+                  child: const Icon(Icons.emoji_events_rounded,
+                      size: 72, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(

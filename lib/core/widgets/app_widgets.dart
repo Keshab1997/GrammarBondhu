@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 
-/// Primary CTA — the warm yellow pill used for "Let's Begin", "Start",
-/// "Next Chapter". Falls back to blue style when [style] is [ButtonStyle.primary].
-class AppButton extends StatelessWidget {
+/// Primary CTA — supports gradient variants for a premium feel.
+class AppButton extends StatefulWidget {
   const AppButton({
     super.key,
     required this.label,
@@ -21,55 +20,124 @@ class AppButton extends StatelessWidget {
   final bool expand;
 
   @override
+  State<AppButton> createState() => _AppButtonState();
+}
+
+class _AppButtonState extends State<AppButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
+    final disabled = widget.onPressed == null;
+
     final child = Row(
-      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (icon != null) ...[
-          Icon(icon, size: 20),
+        if (widget.icon != null) ...[
+          Icon(widget.icon, size: 20),
           const SizedBox(width: AppSpacing.sm),
         ],
-        Text(label),
+        Text(widget.label),
       ],
     );
 
-    switch (variant) {
-      case AppButtonVariant.primary:
-        final button = ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.accent,
-            foregroundColor: AppColors.textPrimary,
-          ),
-          child: child,
-        );
-        return expand ? button : _wrap(button);
-      case AppButtonVariant.blue:
-        final button = ElevatedButton(onPressed: onPressed, child: child);
-        return expand ? button : _wrap(button);
-      case AppButtonVariant.outline:
-        final button = OutlinedButton(onPressed: onPressed, child: child);
-        return expand ? button : _wrap(button);
-      case AppButtonVariant.success:
-        final button = ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            foregroundColor: AppColors.textOnDark,
-          ),
-          child: child,
-        );
-        return expand ? button : _wrap(button);
-    }
-  }
+    // Colors, gradient and shadow per variant.
+    late Gradient gradient;
+    late Color solidColor;
+    late List<BoxShadow> shadow;
+    late Color foreground;
 
-  Widget _wrap(Widget button) => button;
+    switch (widget.variant) {
+      case AppButtonVariant.primary: // warm yellow
+        gradient = const LinearGradient(
+          colors: [AppColors.goldTop, AppColors.accentDark],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        );
+        solidColor = AppColors.accent;
+        shadow = AppShadows.buttonYellow;
+        foreground = AppColors.textPrimary;
+        break;
+      case AppButtonVariant.blue:
+        gradient = const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        );
+        solidColor = AppColors.primary;
+        shadow = AppShadows.button;
+        foreground = AppColors.textOnDark;
+        break;
+      case AppButtonVariant.outline:
+        gradient = const LinearGradient(colors: [Colors.white, Colors.white]);
+        solidColor = Colors.white;
+        shadow = AppShadows.cardSoft;
+        foreground = AppColors.primary;
+        break;
+      case AppButtonVariant.success:
+        gradient = const LinearGradient(
+          colors: [Color(0xFF34D399), AppColors.successDark],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        );
+        solidColor = AppColors.success;
+        shadow = AppShadows.buttonSuccess;
+        foreground = AppColors.textOnDark;
+        break;
+    }
+
+    Widget button = AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOutCubic,
+      height: 56,
+      padding: EdgeInsets.symmetric(horizontal: widget.expand ? 0 : AppSpacing.xl),
+      transform: Matrix4.translationValues(0, _pressed ? 2 : 0, 0),
+      decoration: BoxDecoration(
+        gradient: disabled ? null : gradient,
+        color: disabled ? AppColors.textMuted.withValues(alpha: 0.5) : (widget.variant == AppButtonVariant.outline ? Colors.white : null),
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        border: widget.variant == AppButtonVariant.outline
+            ? Border.all(color: AppColors.primary.withValues(alpha: disabled ? 0.3 : 1), width: 1.8)
+            : null,
+        boxShadow: disabled ? [] : shadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onPressed,
+          onHighlightChanged: (v) => setState(() => _pressed = v),
+          borderRadius: BorderRadius.circular(AppRadii.button),
+          child: Center(
+            child: DefaultTextStyle.merge(
+              style: TextStyle(
+                color: foreground.withValues(alpha: disabled ? 0.7 : 1),
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: 0.2,
+              ),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: foreground.withValues(alpha: disabled ? 0.7 : 1),
+                ),
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (!widget.expand) {
+      return button;
+    }
+    return SizedBox(width: double.infinity, child: button);
+  }
 }
 
 enum AppButtonVariant { primary, blue, outline, success }
 
-/// Soft rounded card used across screens.
+/// Soft rounded card with subtle drop shadow.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -78,58 +146,93 @@ class AppCard extends StatelessWidget {
     this.color = AppColors.surface,
     this.radius = AppRadii.card,
     this.onTap,
+    this.gradient,
+    this.elevation = true,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Color color;
+  final Gradient? gradient;
   final double radius;
   final VoidCallback? onTap;
+  final bool elevation;
 
   @override
   Widget build(BuildContext context) {
-    final card = Material(
-      color: color,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
-      child: InkWell(
-        onTap: onTap,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        color: gradient == null ? color : null,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(radius),
-        child: Padding(padding: padding, child: child),
+        boxShadow: elevation ? AppShadows.card : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
-    return card;
   }
 }
 
-/// Horizontal progress bar with rounded ends.
+/// Horizontal progress bar with rounded ends and optional gradient.
 class AppProgressBar extends StatelessWidget {
   const AppProgressBar({
     super.key,
     required this.value,
     this.height = 12,
     this.color = AppColors.primary,
-    this.trackColor = AppColors.primarySoft,
+    this.trackColor,
+    this.gradient,
   });
 
   /// 0.0–1.0
   final double value;
   final double height;
   final Color color;
-  final Color trackColor;
+  final Color? trackColor;
+  final Gradient? gradient;
 
   @override
   Widget build(BuildContext context) {
+    final clamped = value.clamp(0.0, 1.0);
     return ClipRRect(
       borderRadius: BorderRadius.circular(height / 2),
-      child: SizedBox(
-        height: height,
-        child: LinearProgressIndicator(
-          value: value.clamp(0.0, 1.0),
-          backgroundColor: trackColor,
-          color: color,
-          minHeight: height,
-        ),
+      child: Stack(
+        children: [
+          Container(
+            height: height,
+            color: trackColor ?? AppColors.primarySoft,
+          ),
+          FractionallySizedBox(
+            widthFactor: clamped,
+            child: Container(
+              height: height,
+              decoration: BoxDecoration(
+                gradient: gradient ??
+                    LinearGradient(
+                      colors: [color, color.withValues(alpha: 0.7)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                borderRadius: BorderRadius.circular(height / 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,14 +253,31 @@ class StarsDisplay extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (var i = 0; i < total; i++) ...[
-          Icon(
-            i < count ? Icons.star_rounded : Icons.star_outline_rounded,
-            size: size,
-            color: i < count
-                ? AppColors.accent
-                : AppColors.textSecondary.withValues(alpha: 0.4),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.5, end: i < count ? 1.0 : 0.6),
+            duration: Duration(milliseconds: 400 + i * 120),
+            curve: Curves.elasticOut,
+            builder: (_, v, child) => Transform.scale(
+              scale: v,
+              child: Icon(
+                i < count ? Icons.star_rounded : Icons.star_outline_rounded,
+                size: size,
+                color: i < count
+                    ? AppColors.accent
+                    : AppColors.textSecondary.withValues(alpha: 0.3),
+                shadows: i < count
+                    ? [
+                        BoxShadow(
+                          color: AppColors.accentDark.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ]
+                    : null,
+              ),
+            ),
           ),
-          if (i < total - 1) SizedBox(width: size * 0.15),
+          if (i < total - 1) SizedBox(width: size * 0.1),
         ],
       ],
     );
@@ -183,39 +303,45 @@ class LanguageChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.chip),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.primarySoft,
-          borderRadius: BorderRadius.circular(AppRadii.chip),
-          border: Border.all(
-            color: selected ? AppColors.primary : Colors.transparent,
-            width: 1.4,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (flag != null)
-              Text(flag!, style: const TextStyle(fontSize: 16))
-            else
-              Icon(Icons.language,
-                  size: 16, color: selected ? Colors.white : AppColors.primary),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : AppColors.primary,
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.chip),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary : AppColors.primarySoft,
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+            border: Border.all(
+              color: selected ? AppColors.primary : Colors.transparent,
+              width: 1.6,
             ),
-          ],
+            boxShadow: selected ? AppShadows.cardSoft : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (flag != null)
+                Text(flag!, style: const TextStyle(fontSize: 16))
+              else
+                Icon(Icons.language,
+                    size: 16, color: selected ? Colors.white : AppColors.primary),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected ? Colors.white : AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

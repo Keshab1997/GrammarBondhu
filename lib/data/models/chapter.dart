@@ -34,7 +34,7 @@ class Chapter {
   final GrammarLesson lesson;
   final List<QuizQuestion> quiz;
 
-  /// Asset reference, e.g. `assets/illustrations/ch01_thumb.png`.
+  /// Asset reference, e.g. `assets/illustrations/ch01_thumb.webp`.
   /// Renderers must show a friendly fallback when the file is missing.
   final String? thumbnailAsset;
   final String? backgroundAsset;

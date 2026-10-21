@@ -16,6 +16,8 @@ import '../settings/settings_screen.dart';
 import '../story/story_screen.dart';
 
 /// Screen 6 — continue journey, quick actions, progress, daily goal.
+/// Polished with soft shadows, gradient hero card, pill quick actions
+/// and vibrant daily-streak fire card.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -31,15 +33,16 @@ class HomeScreen extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
         children: [
           _Header(name: settings.greetingName),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           if (current != null)
             _ContinueCard(chapter: current, chapters: chapters),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           _QuickActions(current: current),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           if (current != null)
             _ProgressCard(
               title: 'Your Progress',
@@ -56,7 +59,6 @@ class HomeScreen extends StatelessWidget {
             done: progress.progress.questionsAnsweredToday,
             target: progress.progress.dailyGoalQuestions,
           ),
-          const SizedBox(height: AppSpacing.md),
         ],
       ),
     );
@@ -74,24 +76,89 @@ class _Header extends StatelessWidget {
     final coins = context.watch<ProgressController>().progress.coins;
     return Row(
       children: [
+        // Rahul avatar with a subtle glow ring.
+        Container(
+          padding: const EdgeInsets.all(2.5),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.accent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: AppShadows.cardSoft,
+          ),
+          child: ClipOval(
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Image.asset(
+                'assets/illustrations/progress_avatar.webp',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: AppColors.primary,
+                  child:
+                      const Icon(Icons.person, color: Colors.white, size: 24),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Hello, $name!', style: text.titleLarge),
-              Text("Keep going, you're doing great!", style: text.bodyMedium),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Icon(Icons.favorite_rounded,
+                      size: 14, color: AppColors.error.withValues(alpha: 0.8)),
+                  const SizedBox(width: 4),
+                  Text("Keep going, you're doing great!",
+                      style: text.bodyMedium),
+                ],
+              ),
             ],
           ),
         ),
         _CoinBadge(coins: coins),
-        const SizedBox(width: AppSpacing.sm),
-        IconButton(
-          tooltip: 'Settings',
-          onPressed: () =>
+        const SizedBox(width: AppSpacing.xs),
+        _IconPill(
+          icon: Icons.settings_outlined,
+          onTap: () =>
               Navigator.of(context).pushNamed(SettingsScreen.routeName),
-          icon: const Icon(Icons.settings_outlined),
         ),
       ],
+    );
+  }
+}
+
+class _IconPill extends StatelessWidget {
+  const _IconPill({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppRadii.chip),
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.chip),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+            boxShadow: AppShadows.cardSoft,
+          ),
+          child: Icon(icon, size: 20, color: AppColors.textSecondary),
+        ),
+      ),
     );
   }
 }
@@ -104,17 +171,26 @@ class _CoinBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.accent,
+        gradient: const LinearGradient(
+          colors: [AppColors.goldTop, AppColors.accentDark],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
         borderRadius: BorderRadius.circular(AppRadii.chip),
+        boxShadow: AppShadows.buttonYellow,
       ),
       child: Row(
         children: [
           const Icon(Icons.monetization_on_rounded,
-              size: 16, color: AppColors.textPrimary),
-          const SizedBox(width: 4),
-          Text('$coins', style: const TextStyle(fontWeight: FontWeight.w800)),
+              size: 18, color: AppColors.textPrimary),
+          const SizedBox(width: 6),
+          Text('$coins',
+              style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  fontSize: 14)),
         ],
       ),
     );
@@ -133,10 +209,15 @@ class _ContinueCard extends StatelessWidget {
     final progress = context.watch<ProgressController>();
     final record = progress.chapterProgress(chapter.id);
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: AppColors.chapterGradient),
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primary, AppColors.skyTop],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(AppRadii.card),
+        boxShadow: AppShadows.button,
       ),
       child: Row(
         children: [
@@ -144,26 +225,38 @@ class _ContinueCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  record.started
-                      ? 'Continue Your Journey'
-                      : 'Start Your Journey',
-                  style: text.bodyMedium?.copyWith(color: Colors.white70),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Chapter ${chapters.indexOf(chapter) + 1}',
-                  style: text.bodyMedium?.copyWith(color: Colors.white70),
-                ),
-                Text(
-                  chapter.title.en,
-                  style: text.titleLarge?.copyWith(color: Colors.white),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                  child: Text(
+                    record.started ? 'Continue Your Journey' : 'Start Your Journey',
+                    style: text.bodySmall?.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Chapter ${chapters.indexOf(chapter) + 1}',
+                  style: text.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  chapter.title.en,
+                  style: text.headlineSmall?.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: AppSpacing.md),
                 AppButton(
                   label: record.started ? 'Play' : 'Start',
                   icon: Icons.play_arrow_rounded,
                   expand: false,
+                  variant: AppButtonVariant.primary,
                   onPressed: () {
                     final resume = record.resumeSceneIndex ?? 0;
                     Navigator.of(context).pushNamed(
@@ -175,12 +268,24 @@ class _ContinueCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          ChapterThumbnail(
-            assetPath: chapter.thumbnailAsset,
-            fallbackIcon: Icons.auto_stories_rounded,
-            size: 96,
-            radius: AppRadii.card,
+          const SizedBox(width: AppSpacing.md),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadii.card - 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                )
+              ],
+            ),
+            child: ChapterThumbnail(
+              assetPath: chapter.thumbnailAsset,
+              fallbackIcon: Icons.auto_stories_rounded,
+              size: 110,
+              radius: AppRadii.card - 4,
+            ),
           ),
         ],
       ),
@@ -230,7 +335,7 @@ class _QuickActions extends StatelessWidget {
         _ActionChip(
           icon: Icons.insights_rounded,
           label: 'Progress',
-          color: AppColors.primaryDark,
+          color: AppColors.purpleTop,
           onTap: () =>
               Navigator.of(context).pushNamed(ProgressScreen.routeName),
         ),
@@ -265,14 +370,31 @@ class _ActionChip extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                gradient: LinearGradient(
+                  colors: [
+                    color.withValues(alpha: 0.18),
+                    color.withValues(alpha: 0.08),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  )
+                ],
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(label,
-                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                style: text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    fontSize: 12)),
           ],
         ),
       ),
@@ -302,14 +424,38 @@ class _ProgressCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                ),
+                child: const Icon(Icons.trending_up_rounded,
+                    color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(child: Text(title, style: text.titleMedium)),
-              Text(trailing,
-                  style:
-                      text.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                ),
+                child: Text(trailing,
+                    style: text.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary)),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          AppProgressBar(value: value),
+          const SizedBox(height: AppSpacing.md),
+          AppProgressBar(
+            value: value,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.skyTop],
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(subtitle, style: text.bodyMedium),
         ],
@@ -327,30 +473,67 @@ class _DailyGoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final pct = target == 0 ? 0.0 : (done / target).clamp(0.0, 1.0);
     return AppCard(
-      color: AppColors.accent.withValues(alpha: 0.16),
+      gradient: const LinearGradient(
+        colors: [Color(0xFFFFF4D6), Color(0xFFFFE0B2)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      elevation: false,
       child: Row(
         children: [
-          const Icon(Icons.local_fire_department_rounded,
-              size: 36, color: AppColors.accentDark),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.accentDark, AppColors.warning],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentDark.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.local_fire_department_rounded,
+                size: 28, color: Colors.white),
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Daily Goal', style: text.titleMedium),
-                Text('Complete $target quiz today', style: text.bodyMedium),
+                const SizedBox(height: 2),
+                Text('Complete $target quiz questions today',
+                    style: text.bodyMedium),
                 const SizedBox(height: AppSpacing.sm),
                 AppProgressBar(
-                  value: target == 0 ? 0 : done / target,
+                  value: pct,
                   color: AppColors.accentDark,
                   trackColor: Colors.white,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accent, AppColors.accentDark],
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text('$done/$target', style: text.titleLarge),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('$done/$target',
+                  style: text.titleLarge
+                      ?.copyWith(color: AppColors.accentDeep)),
+              Text('questions',
+                  style: text.bodySmall
+                      ?.copyWith(color: AppColors.accentDeep)),
+            ],
+          ),
         ],
       ),
     );

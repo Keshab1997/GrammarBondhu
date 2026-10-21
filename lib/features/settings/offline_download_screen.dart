@@ -40,6 +40,23 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            // Download hero illustration (storyboard frame 16).
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.asset(
+                  'assets/illustrations/offline_download.webp',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: AppColors.primarySoft,
+                    child: const Icon(Icons.download_rounded,
+                        size: 64, color: AppColors.primary),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               'All chapters include story images, grammar lessons and quiz data. '
               'They work fully offline.',

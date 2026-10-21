@@ -43,6 +43,24 @@ class GrammarLessonScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Grammar lesson hero banner (teacher pointing at board) — storyboard frame 10.
+            SizedBox(
+              height: 160,
+              width: double.infinity,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.circular(28),
+                ),
+                child: Image.asset(
+                  'assets/illustrations/grammar_lesson.webp',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppSpacing.md),

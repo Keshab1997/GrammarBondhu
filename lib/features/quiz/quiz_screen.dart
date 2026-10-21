@@ -82,54 +82,72 @@ class _QuizScreenState extends State<QuizScreen> {
     final isCorrect = _submitted && _selected == question.correctIndex;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryDark, AppColors.primary],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon:
-                          const Icon(Icons.close_rounded, color: Colors.white),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text('Quiz Time!',
-                              style: text.titleLarge
-                                  ?.copyWith(color: Colors.white)),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius:
-                                  BorderRadius.circular(AppRadii.chip),
-                            ),
-                            child: Text(
-                              'Question ${_questionIndex + 1}/${chapter.quiz.length}',
-                              style: text.bodyMedium
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Quiz-time illustrated background (storyboard frame 11).
+          Image.asset(
+            'assets/illustrations/quiz_time.webp',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primaryDark, AppColors.primary],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
+            ),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xAA1B5FC1), Color(0xCC2F80ED)],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        icon:
+                            const Icon(Icons.close_rounded, color: Colors.white),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text('Quiz Time!',
+                                style: text.titleLarge
+                                    ?.copyWith(color: Colors.white)),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadii.chip),
+                              ),
+                              child: Text(
+                                'Question ${_questionIndex + 1}/${chapter.quiz.length}',
+                                style: text.bodyMedium
+                                    ?.copyWith(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                ),
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -205,6 +223,7 @@ class _QuizScreenState extends State<QuizScreen> {
             ],
           ),
         ),
+        ],
       ),
     );
   }

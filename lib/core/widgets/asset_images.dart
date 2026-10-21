@@ -126,19 +126,53 @@ class ChapterThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: AppColors.chapterGradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Icon(fallbackIcon, color: Colors.white, size: size * 0.45),
-    );
+    final isLocked = fallbackIcon == Icons.lock_rounded;
+    final fallback = isLocked
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFB8B8D1), Color(0xFF7E7EA0)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                  Opacity(
+                    opacity: 0.9,
+                    child: Image.asset(
+                      'assets/illustrations/locked_chapter.webp',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Icon(fallbackIcon,
+                            color: Colors.white, size: size * 0.45),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: AppColors.chapterGradient,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: Icon(fallbackIcon, color: Colors.white, size: size * 0.45),
+          );
     if (assetPath == null) return fallback;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
