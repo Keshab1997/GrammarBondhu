@@ -1,0 +1,217 @@
+{
+  "chapter_id": "ch02",
+  "title": {
+    "en": "A New Friend",
+    "bn": "একটি নতুন বন্ধু",
+    "hi": "एक नया दोस्त"
+  },
+  "description": {
+    "en": "Rahul and Priya become friends and talk about daily habits. Learn the simple present tense.",
+    "bn": "রাহুল আর প্রিয়া বন্ধু হয়ে যায় আর দৈনন্দিন অভ্যাস নিয়ে কথা বলে। শেখো simple present tense।",
+    "hi": "राहुल और प्रिया दोस्त बनते हैं और रोज़ की आदतों पर बात करते हैं। सीखो simple present tense।"
+  },
+  "grammar_topic": {
+    "en": "Simple Present Tense",
+    "bn": "Simple Present Tense",
+    "hi": "Simple Present Tense"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch02_thumb.png",
+  "background_asset": "assets/backgrounds/bg_school_garden.png",
+  "rewards": { "xp": 60, "coins": 12, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch02_s1",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Rahul, do you like this school?",
+            "bn": "রাহুল, তুমি কি এই স্কুলটা পছন্দ করো?",
+            "hi": "राहुल, क्या तुम्हें यह स्कूल पसंद है?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Yes! I like the library. I read storybooks every evening.",
+            "bn": "হ্যাঁ! আমি লাইব্রেরি পছন্দ করি। আমি প্রতিদিন সন্ধ্যায় গল্পের বই পড়ি।",
+            "hi": "हाँ! मुझे लाइब्रेरी पसंद है। मैं हर शाम कहानी की किताबें पढ़ता हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch02_s2",
+      "background_id": "bg_school_garden",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I play badminton after school. My brother plays with me.",
+            "bn": "স্কুলের পর আমি ব্যাডমিন্টন খেলি। আমার ভাই আমার সাথে খেলে।",
+            "hi": "स्कूल के बाद मैं बैडमिंटन खेलती हूँ। मेरा भाई मेरे साथ खेलता है।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "My sister likes music. She sings very well!",
+            "bn": "আমার বোনকে সংগীত পছন্দ। সে খুব সুন্দর গান গায়!",
+            "hi": "मेरी बहन को संगीत पसंद है। वह बहुत अच्छा गाती है!"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch02_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "We walk home together every day. Friends help each other!",
+            "bn": "আমরা প্রতিদিন একসাথে বাড়ি হেঁটে যাই। বন্ধুরা একে অপরের সাহায্য করে!",
+            "hi": "हम हर दिन साथ में घर चलते हैं। दोस्त एक-दूसरे की मदद करते हैं!"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch02_c1",
+          "text": {
+            "en": "Yes, we are good friends!",
+            "bn": "হ্যাঁ, আমরা ভালো বন্ধু!",
+            "hi": "हाँ, हम अच्छे दोस्त हैं!"
+          },
+          "response": {
+            "en": "The best! Tomorrow we meet at the library gate.",
+            "bn": "সবচেয়ে ভালো! কাল আমরা লাইব্রেরির গেটে মিলব।",
+            "hi": "सबसे अच्छे! कल हम लाइब्रेरी के गेट पर मिलेंगे।"
+          }
+        },
+        {
+          "id": "ch02_c2",
+          "text": {
+            "en": "I will teach you cricket too!",
+            "bn": "আমি তোমাকে ক্রিকেটও শেখাব!",
+            "hi": "मैं तुम्हें क्रिकेट भी सिखाऊँगा!"
+          },
+          "response": {
+            "en": "Really? That sounds fun. Let us play on Friday!",
+            "bn": "সত্যি? মজা হবে। শুক্রবার খেলি!",
+            "hi": "सच्ची? मज़ा आएगा। शुक्रवार को खेलते हैं!"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Simple Present Tense",
+      "bn": "Simple Present Tense",
+      "hi": "Simple Present Tense"
+    },
+    "explanation": {
+      "en": "We use the simple present tense for habits and everyday facts. With I, you, we and they, use the base verb. With he, she and it, add -s or -es to the verb.",
+      "bn": "অভ্যাস আর প্রতিদনের সত্য কথা বলতে simple present tense ব্যবহার করি। I, you, we, they-এর সাথে ক্রিয়ার মূল রূপ বসে। he, she, it-এর সাথে ক্রিয়ায় -s বা -es যোগ হয়।",
+      "hi": "आदतों और रोज़ के सामान्य सत्य के लिए simple present tense उपयोग करते हैं। I, you, we, they के साथ क्रिया का मूल रूप आता है। he, she, it के साथ क्रिया में -s या -es लगता है।"
+    },
+    "examples": [
+      {
+        "sentence": "I read storybooks every evening.",
+        "note": {
+          "en": "With I, use the base verb: read.",
+          "bn": "I-এর সাথে মূল ক্রিয়া: read।",
+          "hi": "I के साथ मूल क्रिया: read।"
+        }
+      },
+      {
+        "sentence": "She sings very well.",
+        "note": {
+          "en": "With she, add -s: sing becomes sings.",
+          "bn": "she-এর সাথে -s যোগ হয়: sing হয়ে যায় sings।",
+          "hi": "she के साथ -s लगता है: sing बन जाता है sings।"
+        }
+      },
+      {
+        "sentence": "My brother plays badminton.",
+        "note": {
+          "en": "He/She/It + verb + s: play becomes plays.",
+          "bn": "He/She/It + ক্রিয়া + s: play হয়ে যায় plays।",
+          "hi": "He/She/It + क्रिया + s: play बन जाता है plays।"
+        }
+      },
+      {
+        "sentence": "We walk home together.",
+        "note": {
+          "en": "With we, use the base verb: walk.",
+          "bn": "we-এর সাথে মূল ক্রিয়া: walk।",
+          "hi": "we के साथ मूल क्रिया: walk।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch02_q1",
+      "question": "She ___ English every day.",
+      "options": ["studies", "study", "studying", "studied"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "With she, the verb takes -s (or -es). Study becomes studies.",
+        "bn": "she-এর সাথে ক্রিয়ায় -s (বা -es) বসে। Study হয়ে যায় studies।",
+        "hi": "she के साथ क्रिया में -s (या -es) लगता है। Study बन जाता है studies।"
+      }
+    },
+    {
+      "question_id": "ch02_q2",
+      "question": "They ___ to school by bus.",
+      "options": ["go", "goes", "going", "gone"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "With they, use the base verb: go. Only he/she/it takes -s.",
+        "bn": "they-এর সাথে মূল ক্রিয়া: go। শুধু he/she/it-এর সাথে -s বসে।",
+        "hi": "they के साथ मूल क्रिया: go। सिर्फ़ he/she/it के साथ -s लगता है।"
+      }
+    },
+    {
+      "question_id": "ch02_q3",
+      "question": "Rahul ___ stories at night.",
+      "options": ["reads", "read", "reading", "is read"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Rahul is one boy, like 'he'. So the verb takes -s: reads.",
+        "bn": "রাহুল একজন ছেলে, মানে 'he'-এর মতো। তাই ক্রিয়ায় -s বসে: reads।",
+        "hi": "राहुल एक लड़का है, यानी 'he' जैसा। इसलिए क्रिया में -s लगता है: reads।"
+      }
+    },
+    {
+      "question_id": "ch02_q4",
+      "question": "I ___ breakfast at 7 o'clock.",
+      "options": ["eat", "eats", "eating", "eaten"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "With I, use the base verb — eat, never eats.",
+        "bn": "I-এর সাথে মূল ক্রিয়া বসে — eat, কখনোই eats নয়।",
+        "hi": "I के साथ मूल क्रिया आती है — eat, कभी eats नहीं।"
+      }
+    },
+    {
+      "question_id": "ch02_q5",
+      "question": "We ___ games after school.",
+      "options": ["play", "plays", "playing", "played"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "With we, use the base verb: play.",
+        "bn": "we-এর সাথে মূল ক্রিয়া: play।",
+        "hi": "we के साथ मूल क्रिया: play।"
+      }
+    }
+  ]
+}

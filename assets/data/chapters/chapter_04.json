@@ -1,0 +1,204 @@
+{
+  "chapter_id": "ch04",
+  "title": {
+    "en": "The Lost Map",
+    "bn": "হারানো ম্যাপ",
+    "hi": "खोया हुआ नक्शा"
+  },
+  "description": {
+    "en": "Yesterday's adventure! Rahul tells the story of the lost map. Learn the past tense — was, were and regular verbs.",
+    "bn": "গতকালের অ্যাডভেঞ্চার! রাহুল হারানো ম্যাপের গল্প বলে। শেখো past tense — was, were আর সাধারণ ক্রিয়া।",
+    "hi": "कल का साहसिक किस्सा! राहुल खोए हुए नक्शे की कहानी सुनाता है। सीखो past tense — was, were और सामान्य क्रियाएँ।"
+  },
+  "grammar_topic": {
+    "en": "Past Tense (was / were / -ed)",
+    "bn": "Past Tense (was / were / -ed)",
+    "hi": "Past Tense (was / were / -ed)"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch04_thumb.png",
+  "background_asset": "assets/backgrounds/bg_school_gate.png",
+  "rewards": { "xp": 70, "coins": 14, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch04_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Children, what happened yesterday? Tell me in the past tense.",
+            "bn": "বাচ্চারা, গতকাল কী হয়েছিল? আমাকে past tense-এ বলো।",
+            "hi": "बच्चों, कल क्या हुआ था? मुझे past tense में बताओ।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Yesterday we were in the library. The old map was inside a red book.",
+            "bn": "গতকাল আমরা লাইব্রেরিতে ছিলাম। পুরোনো ম্যাপটা একটি লাল বইয়ের ভেতরে ছিল।",
+            "hi": "कल हम लाइब्रेरी में थे। पुराना नक्शा एक लाल किताब के अंदर था।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch04_s2",
+      "background_id": "bg_school_garden",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I opened the book and the map fell out. We laughed and picked it up.",
+            "bn": "আমি বইটা খুললাম আর ম্যাপটা পড়ে গেল। আমরা হেসে ওঠালাম।",
+            "hi": "मैंने किताब खोली और नक्शा गिर गया। हम हँसे और उसे उठाया।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Then we walked to the old banyan tree. The treasure was a box of storybooks!",
+            "bn": "তারপর আমরা পুরোনো বটগাছের কাছে হেঁটে গেলাম। ধন ছিল গল্পের বইয়ের একটি বাক্স!",
+            "hi": "फिर हम पुराने बरगद तक चलकर गए। ख़ज़ाना कहानी की किताबों का एक बक्सा था!"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch04_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Excellent! You used the past tense beautifully. The class clapped for you.",
+            "bn": "দারুণ! তুমি সুন্দর করে past tense ব্যবহার করেছ। ক্লাস তোমাদের জন্য হাততালি দিল।",
+            "hi": "बहुत बढ़िया! तुमने past tense बहुत सुंदर ढंग से बोला। क्लास ने तुम्हारे लिए तालियाँ बजाईं।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch04_c1",
+          "text": {
+            "en": "Thank you, ma'am!",
+            "bn": "ধন্যবাদ, ম্যাডাম!",
+            "hi": "धन्यवाद, मैम!"
+          },
+          "response": {
+            "en": "You earned it. Your English is growing every day!",
+            "bn": "তুমি এটার যোগ্য। তোমার ইংরেজি প্রতিদিন বাড়ছে!",
+            "hi": "तुमने इसे कमाया है। तुम्हारी अंग्रेज़ी हर दिन बढ़ रही है!"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Past Tense — was / were / regular verbs",
+      "bn": "Past Tense — was / were / সাধারণ ক্রিয়া",
+      "hi": "Past Tense — was / were / सामान्य क्रियाएँ"
+    },
+    "explanation": {
+      "en": "Use the past tense for things that already happened. Use was with I, he, she and it. Use were with you, we and they. For regular verbs, add -ed: walk becomes walked.",
+      "bn": "যে কাজ আগেই শেষ হয়েছে তার জন্য past tense ব্যবহার করো। I, he, she, it-এর সাথে was। you, we, they-এর সাথে were। সাধারণ ক্রিয়ায় -ed যোগ হয়: walk হয়ে যায় walked।",
+      "hi": "जो काम पहले हो चुका है उसके लिए past tense उपयोग करो। I, he, she, it के साथ was। you, we, they के साथ were। सामान्य क्रियाओं में -ed लगता है: walk बन जाता है walked।"
+    },
+    "examples": [
+      {
+        "sentence": "Yesterday we were in the library.",
+        "note": {
+          "en": "Use were with we.",
+          "bn": "we-এর সাথে were বসে।",
+          "hi": "we के साथ were लगता है।"
+        }
+      },
+      {
+        "sentence": "The map was inside the book.",
+        "note": {
+          "en": "Use was with a singular thing (the map).",
+          "bn": "একবচন বস্তুর (the map) সাথে was বসে।",
+          "hi": "एकवचन वस्तु (the map) के साथ was लगता है।"
+        }
+      },
+      {
+        "sentence": "We laughed and picked up the map.",
+        "note": {
+          "en": "Regular verbs take -ed: laugh → laughed, pick → picked.",
+          "bn": "সাধারণ ক্রিয়ায় -ed বসে: laugh → laughed, pick → picked।",
+          "hi": "सामान्य क्रियाओं में -ed लगता है: laugh → laughed, pick → picked।"
+        }
+      },
+      {
+        "sentence": "The class clapped for us.",
+        "note": {
+          "en": "Clap becomes clapped (double p + ed).",
+          "bn": "Clap হয়ে যায় clapped (দুটি p + ed)।",
+          "hi": "Clap बन जाता है clapped (दो p + ed)।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch04_q1",
+      "question": "Yesterday I ___ at home.",
+      "options": ["was", "were", "is", "are"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use 'was' with I. 'Were' is for you, we and they.",
+        "bn": "I-এর সাথে 'was' বসে। 'were' you, we আর they-এর জন্য।",
+        "hi": "I के साथ 'was' लगता है। 'were' you, we और they के लिए है।"
+      }
+    },
+    {
+      "question_id": "ch04_q2",
+      "question": "They ___ very happy yesterday.",
+      "options": ["were", "was", "are", "is"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "With they, use 'were' — They were happy.",
+        "bn": "they-এর সাথে 'were' বসে — They were happy.",
+        "hi": "they के साथ 'were' लगता है — They were happy."
+      }
+    },
+    {
+      "question_id": "ch04_q3",
+      "question": "Rahul ___ the story to the class.",
+      "options": ["told", "tell", "tells", "telling"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "The action happened yesterday, so use the past form: tell becomes told.",
+        "bn": "কাজটা গতকাল হয়েছিল, তাই past রূপ: tell হয়ে যায় told।",
+        "hi": "काम कल हुआ था, इसलिए past रूप: tell बन जाता है told।"
+      }
+    },
+    {
+      "question_id": "ch04_q4",
+      "question": "We ___ to the banyan tree and found the box.",
+      "options": ["walked", "walk", "walks", "walking"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Regular verbs take -ed in the past: walk becomes walked.",
+        "bn": "সাধারণ ক্রিয়ার past-এ -ed বসে: walk হয়ে যায় walked।",
+        "hi": "सामान्य क्रियाओं के past में -ed लगता है: walk बन जाता है walked।"
+      }
+    },
+    {
+      "question_id": "ch04_q5",
+      "question": "The treasure ___ a box of storybooks.",
+      "options": ["was", "were", "are", "be"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "'The treasure' is one thing, so it takes 'was'.",
+        "bn": "'The treasure' একটি বস্তু, তাই এর সাথে 'was' বসে।",
+        "hi": "'The treasure' एक चीज़ है, इसलिए इसके साथ 'was' लगता है।"
+      }
+    }
+  ]
+}

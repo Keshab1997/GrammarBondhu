@@ -1,0 +1,209 @@
+{
+  "chapter_id": "ch01",
+  "title": {
+    "en": "The New Student",
+    "bn": "নতুন ছাত্র",
+    "hi": "नया छात्र"
+  },
+  "description": {
+    "en": "Rahul's first day at a new school. Learn how to introduce yourself with am, is and are.",
+    "bn": "নতুন স্কুলে রাহুলের প্রথম দিন। am, is আর are দিয়ে নিজেকে পরিচয় করিয়ে দিতে শেখো।",
+    "hi": "नए स्कूल में राहुल का पहला दिन। am, is और are से अपना परिचय देना सीखो।"
+  },
+  "grammar_topic": {
+    "en": "am / is / are",
+    "bn": "am / is / are",
+    "hi": "am / is / are"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 10,
+  "thumbnail_asset": "assets/illustrations/ch01_thumb.png",
+  "background_asset": "assets/backgrounds/bg_school_gate.png",
+  "rewards": { "xp": 50, "coins": 10, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch01_s1",
+      "background_id": "bg_school_gate",
+      "character_ids": ["rahul"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Hi! I am Rahul. I am a new student. This is my first day at this school.",
+            "bn": "হাই! আমি রাহুল। আমি একজন নতুন ছাত্র। আজ এই স্কুলে আমার প্রথম দিন।",
+            "hi": "नमस्ते! मैं राहुल हूँ। मैं एक नया छात्र हूँ। आज इस स्कूल में मेरा पहला दिन है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch01_s2",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Welcome, Rahul! I am Mrs. Sen. I am your English teacher.",
+            "bn": "স্বাগতম, রাহুল! আমি মিসেস সেন। আমি তোমার ইংরেজি শিক্ষিকা।",
+            "hi": "स्वागत है, राहुल! मैं मिसेस सेन हूँ। मैं तुम्हारी अंग्रेज़ी शिक्षिका हूँ।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Thank you, ma'am. I am happy to be here.",
+            "bn": "ধন্যবাদ, ম্যাডাম। এখানে আসতে পেরে আমি খুশি।",
+            "hi": "धन्यवाद, मैम। यहाँ आकर मुझे खुशी हो रही है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch01_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Hi Rahul! I am Priya. We are classmates now!",
+            "bn": "হাই রাহুল! আমি প্রিয়া। এখন আমরা সহপাঠী!",
+            "hi": "हाय राहुल! मैं प्रिया हूँ। अब हम सहपाठी हैं!"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch01_c1",
+          "text": {
+            "en": "Nice to meet you, Priya!",
+            "bn": "তোমার সাথে পরিচিত হয়ে ভালো লাগল, প্রিয়া!",
+            "hi": "तुमसे मिलकर अच्छा लगा, प्रिया!"
+          },
+          "response": {
+            "en": "Nice to meet you too! Come, our class is this way.",
+            "bn": "তোমার সাথেও পরিচিত হয়ে ভালো লাগল! আসো, আমাদের ক্লাস এদিকে।",
+            "hi": "तुमसे मिलकर मुझे भी अच्छा लगा! आओ, हमारी क्लास इस तरफ़ है।"
+          }
+        },
+        {
+          "id": "ch01_c2",
+          "text": {
+            "en": "Hello, friend!",
+            "bn": "হ্যালো, বন্ধু!",
+            "hi": "हैलो, दोस्त!"
+          },
+          "response": {
+            "en": "Hello! You are going to like this school.",
+            "bn": "হ্যালো! তুমি এই স্কুলটা পছন্দ করবে।",
+            "hi": "हैलो! तुम्हें यह स्कूल पसंद आएगा।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "am / is / are",
+      "bn": "am / is / are",
+      "hi": "am / is / are"
+    },
+    "explanation": {
+      "en": "We use am with I, is with he / she / it, and are with you / we / they. These little verbs help us say who people are and what they are like.",
+      "bn": "I-এর সাথে am, he / she / it-এর সাথে is, আর you / we / they-এর সাথে are ব্যবহার করি। এই ছোট ক্রিয়াগুলো বলতে সাহায্য করে কে কে আর কেমন।",
+      "hi": "हम I के साथ am, he / she / it के साथ is, और you / we / they के साथ are लगाते हैं। ये छोटी क्रियाएँ बताती हैं कि कौन कौन है और कैसा है।"
+    },
+    "examples": [
+      {
+        "sentence": "I am a student.",
+        "note": {
+          "en": "Use am with I.",
+          "bn": "I-এর সাথে am ব্যবহার করো।",
+          "hi": "I के साथ am लगाओ।"
+        }
+      },
+      {
+        "sentence": "He is my friend.",
+        "note": {
+          "en": "Use is with he.",
+          "bn": "he-এর সাথে is ব্যবহার করো।",
+          "hi": "he के साथ is लगाओ।"
+        }
+      },
+      {
+        "sentence": "She is my teacher.",
+        "note": {
+          "en": "Use is with she.",
+          "bn": "she-এর সাথে is ব্যবহার করো।",
+          "hi": "she के साथ is लगाओ।"
+        }
+      },
+      {
+        "sentence": "We are classmates.",
+        "note": {
+          "en": "Use are with we.",
+          "bn": "we-এর সাথে are ব্যবহার করো।",
+          "hi": "we के साथ are लगाओ।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch01_q1",
+      "question": "I ___ a student.",
+      "options": ["am", "is", "are", "was"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "We use 'am' with 'I'. In this sentence, the subject is 'I', so we should use 'am'.",
+        "bn": "I (আমি) এর সাথে 'am' ব্যবহার হয়। এই বাক্যের subject 'I', তাই 'am' ব্যবহার করতে হবে।",
+        "hi": "I (मैं) के साथ 'am' आता है। इस वाक्य में subject 'I' है, इसलिए हमें 'am' लगाना चाहिए।"
+      }
+    },
+    {
+      "question_id": "ch01_q2",
+      "question": "She ___ my teacher.",
+      "options": ["is", "am", "are", "be"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use 'is' with he, she and it. Here the subject is 'She', so 'is' is correct.",
+        "bn": "he, she আর it-এর সাথে 'is' ব্যবহার হয়। এখানে subject 'She', তাই 'is' সঠিক।",
+        "hi": "he, she और it के साथ 'is' लगता है। यहाँ subject 'She' है, इसलिए 'is' सही है।"
+      }
+    },
+    {
+      "question_id": "ch01_q3",
+      "question": "We ___ classmates.",
+      "options": ["are", "is", "am", "was"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use 'are' with you, we and they. The subject here is 'We'.",
+        "bn": "you, we আর they-এর সাথে 'are' ব্যবহার হয়। এখানে subject 'We'।",
+        "hi": "you, we और they के साथ 'are' लगता है। यहाँ subject 'We' है।"
+      }
+    },
+    {
+      "question_id": "ch01_q4",
+      "question": "They ___ my friends.",
+      "options": ["are", "is", "am", "be"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "'They' is plural, so it takes 'are' — They are my friends.",
+        "bn": "'They' বহুবচন, তাই এর সাথে 'are' বসে — They are my friends.",
+        "hi": "'They' बहुवचन है, इसलिए 'are' आता है — They are my friends."
+      }
+    },
+    {
+      "question_id": "ch01_q5",
+      "question": "Rahul and Priya ___ in the same class.",
+      "options": ["are", "is", "am", "was"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Two people together act like 'they', so we use 'are'.",
+        "bn": "দুজন মিলে 'they'-এর মতো হয়, তাই আমরা 'are' ব্যবহার করি।",
+        "hi": "दो लोग मिलकर 'they' जैसे होते हैं, इसलिए हम 'are' लगाते हैं।"
+      }
+    }
+  ]
+}
