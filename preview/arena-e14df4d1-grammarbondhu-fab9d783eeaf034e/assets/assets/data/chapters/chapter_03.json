@@ -1,0 +1,217 @@
+{
+  "chapter_id": "ch03",
+  "title": {
+    "en": "The Mystery of the Library",
+    "bn": "লাইব্রেরির রহস্য",
+    "hi": "लाइब्रेरी का रहस्य"
+  },
+  "description": {
+    "en": "Rahul and Priya discover an old book in the library. Learn articles (a, an, the) and prepositions (in, on, under, at).",
+    "bn": "রাহুল আর প্রিয়া লাইব্রেরিতে একটি পুরোনো বই খুঁজে পায়। শেখো articles (a, an, the) আর prepositions (in, on, under, at)।",
+    "hi": "राहुल और प्रिया लाइब्रेरी में एक पुरानी किताब ढूँढते हैं। सीखो articles (a, an, the) और prepositions (in, on, under, at)।"
+  },
+  "grammar_topic": {
+    "en": "Articles & Prepositions",
+    "bn": "Articles ও Prepositions",
+    "hi": "Articles और Prepositions"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_library.webp",
+  "rewards": { "xp": 60, "coins": 12, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch03_s1",
+      "background_id": "bg_library",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Look, Rahul! There is an old book on that table.",
+            "bn": "দেখো, রাহুল! ওই টেবিলের উপর একটি পুরোনো বই আছে।",
+            "hi": "देखो, राहुल! उस मेज़ पर एक पुरानी किताब है।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "It is under a layer of dust! Let us open the book.",
+            "bn": "এটা ধুলোর স্তরের নিচে আছে! চলো বইটা খুলি।",
+            "hi": "यह धूल की परत के नीचे है! चलो किताब खोलते हैं।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch03_s2",
+      "background_id": "bg_library",
+      "character_ids": ["rahul", "priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The book has a map inside! But where does it go?",
+            "bn": "বইটার ভেতরে একটা ম্যাপ আছে! কিন্তু এটা কোথায় যায়?",
+            "hi": "किताब के अंदर एक नक्शा है! पर यह कहाँ जाता है?"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Ah, the map of the old school garden! It is a little treasure of our school.",
+            "bn": "আহ, পুরোনো স্কুল বাগানের ম্যাপ! এটা আমাদের স্কুলের ছোট্ট ধন।",
+            "hi": "आह, पुराने स्कूल बगीचे का नक्शा! यह हमारे स्कूल की छोटी-सी धरोहर है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch03_s3",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "An adventure in our own school! I love this place.",
+            "bn": "আমাদের নিজের স্কুলেই একটা অ্যাডভেঞ্চার! আমি এই জায়গাটা ভালোবাসি।",
+            "hi": "अपने ही स्कूल में एक साहसिक यात्रा! मुझे यह जगह बहुत पसंद है।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch03_c1",
+          "text": {
+            "en": "Let us follow the map!",
+            "bn": "চলো ম্যাপটা অনুসরণ করি!",
+            "hi": "चलो नक्शे का पीछा करते हैं!"
+          },
+          "response": {
+            "en": "Yes! The first mark is near the old banyan tree.",
+            "bn": "হ্যাঁ! প্রথম চিহ্নটা পুরোনো বটগাছের কাছে।",
+            "hi": "हाँ! पहला निशान पुराने बरगद के पास है।"
+          }
+        },
+        {
+          "id": "ch03_c2",
+          "text": {
+            "en": "First, we should tell our teacher.",
+            "bn": "আগে আমাদের শিক্ষিকাকে জানানো উচিত।",
+            "hi": "पहले हमें अपनी शिक्षिका को बताना चाहिए।"
+          },
+          "response": {
+            "en": "Good idea. A good explorer always stays careful!",
+            "bn": "ভালো আইডিয়া। ভালো অভিযাত্রী সবসময় সতর্ক থাকে!",
+            "hi": "अच्छा विचार। अच्छा खोजी हमेशा सावधान रहता है!"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Articles (a, an, the) & Prepositions (in, on, under, at)",
+      "bn": "Articles (a, an, the) ও Prepositions (in, on, under, at)",
+      "hi": "Articles (a, an, the) और Prepositions (in, on, under, at)"
+    },
+    "explanation": {
+      "en": "Use a before consonant sounds (a book), an before vowel sounds (an old book), and the for a specific thing (the map). Prepositions show place: in (inside), on (above and touching), under (below), at (a point).",
+      "bn": "ব্যঞ্জনধ্বনির আগে a (a book), স্বরধ্বনির আগে an (an old book), আর নির্দিষ্ট কিছুর জন্য the (the map) ব্যবহার করো। Prepositions স্থান দেখায়: in (ভেতরে), on (উপরে ছোঁয়া), under (নিচে), at (নির্দিষ্ট জায়গা)।",
+      "hi": "व्यंजन ध्वनि से पहले a (a book), स्वर ध्वनि से पहले an (an old book), और किसी ख़ास चीज़ के लिए the (the map) लगाओ। Prepositions जगह दिखाते हैं: in (अंदर), on (ऊपर छूता हुआ), under (नीचे), at (किसी बिंदु पर)।"
+    },
+    "examples": [
+      {
+        "sentence": "There is a book on the table.",
+        "note": {
+          "en": "'a book' — one book, not specific. 'on the table' — above and touching.",
+          "bn": "'a book' — একটি বই, নির্দিষ্ট নয়। 'on the table' — উপরে ছোঁয়া।",
+          "hi": "'a book' — एक किताब, ख़ास नहीं। 'on the table' — मेज़ पर टिकी हुई।"
+        }
+      },
+      {
+        "sentence": "It is under a layer of dust.",
+        "note": {
+          "en": "'under' means below something.",
+          "bn": "'under' মানে কিছুর নিচে।",
+          "hi": "'under' का मतलब किसी चीज़ के नीचे।"
+        }
+      },
+      {
+        "sentence": "The map is inside the book.",
+        "note": {
+          "en": "'the map' — a specific map we already know about.",
+          "bn": "'the map' — নির্দিষ্ট ম্যাপ, যেটা আমরা আগেই চিনি।",
+          "hi": "'the map' — वही ख़ास नक्शा जिसे हम पहले से जानते हैं।"
+        }
+      },
+      {
+        "sentence": "We meet at the library gate.",
+        "note": {
+          "en": "'at' points to an exact place.",
+          "bn": "'at' নির্দিষ্ট একটি জায়গা নির্দেশ করে।",
+          "hi": "'at' किसी तय जगह की ओर इशारा करता है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch03_q1",
+      "question": "I have ___ orange in my bag.",
+      "options": ["an", "a", "the", "no article"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "'Orange' starts with a vowel sound, so we use 'an'.",
+        "bn": "'Orange' স্বরধ্বনি দিয়ে শুরু হয়, তাই আমরা 'an' ব্যবহার করি।",
+        "hi": "'Orange' स्वर ध्वनि से शुरू होता है, इसलिए हम 'an' लगाते हैं।"
+      }
+    },
+    {
+      "question_id": "ch03_q2",
+      "question": "The cat is ___ the table.",
+      "options": ["under", "in", "at", "on to"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "'Under' means below the table.",
+        "bn": "'under' মানে টেবিলের নিচে।",
+        "hi": "'under' का मतलब मेज़ के नीचे।"
+      }
+    },
+    {
+      "question_id": "ch03_q3",
+      "question": "Please put the book ___ the shelf.",
+      "options": ["on", "in", "under", "at"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "A book rests on the shelf — above and touching it.",
+        "bn": "বইটা তাকের উপর থাকে — উপরে ছোঁয়া।",
+        "hi": "किताब ताक पर टिकी रहती है — ऊपर छूती हुई।"
+      }
+    },
+    {
+      "question_id": "ch03_q4",
+      "question": "Rahul is ___ honest boy.",
+      "options": ["an", "a", "the", "am"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "'Honest' starts with a vowel sound (the h is silent), so we use 'an'.",
+        "bn": "'Honest' স্বরধ্বনি দিয়ে শুরু হয় (h নিঃশব্দ), তাই 'an' ব্যবহার করি।",
+        "hi": "'Honest' स्वर ध्वनि से शुरू होता है (h नहीं बोला जाता), इसलिए 'an' लगाते हैं।"
+      }
+    },
+    {
+      "question_id": "ch03_q5",
+      "question": "We meet ___ the school gate every morning.",
+      "options": ["at", "on", "under", "in"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use 'at' for an exact point or place, like the school gate.",
+        "bn": "স্কুল গেটের মতো নির্দিষ্ট জায়গার জন্য 'at' ব্যবহার করো।",
+        "hi": "स्कूल गेट जैसी तय जगह के लिए 'at' लगाओ।"
+      }
+    }
+  ]
+}
