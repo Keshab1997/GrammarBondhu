@@ -65,7 +65,10 @@ class ProgressController extends ChangeNotifier {
 
     // XP and coins are granted once per improvement path: full amount on
     // first completion, the difference when a better run beats the old best.
-    var grantedXp = firstCompletion ? xp : 0;
+    // Finishing is never worth 0 XP — a completion floor keeps the
+    // experience encouraging even after a rough first run.
+    final completionXp = xp < 10 ? 10 : xp;
+    var grantedXp = firstCompletion ? completionXp : 0;
     var grantedCoins = firstCompletion ? coins : 0;
     if (!firstCompletion && isBest) {
       final previousXp = record.xpEarned;

@@ -12,6 +12,7 @@ class UserProgress {
     this.questionsAnsweredToday = 0,
     this.dailyGoalQuestions = 5,
     this.lastStudyDate,
+    this.lastQuestionDate,
     DateTime? now,
   }) : chapters = chapters ?? {};
 
@@ -22,6 +23,7 @@ class UserProgress {
   int questionsAnsweredToday;
   int dailyGoalQuestions;
   DateTime? lastStudyDate;
+  DateTime? lastQuestionDate;
 
   // ---- Level system: 100 XP per level, matching the design's Level 3 @ 300 XP.
   static const int xpPerLevel = 100;
@@ -79,11 +81,12 @@ class UserProgress {
   /// Counts one answered quiz question toward the daily goal.
   void registerQuestionAnswered(DateTime now) {
     final today = DateTime(now.year, now.month, now.day);
-    final last = lastStudyDate;
+    final last = lastQuestionDate;
     if (last == null || DateTime(last.year, last.month, last.day) != today) {
       questionsAnsweredToday = 0;
     }
     questionsAnsweredToday += 1;
+    lastQuestionDate = today;
   }
 
   bool get dailyGoalReached => questionsAnsweredToday >= dailyGoalQuestions;
@@ -105,6 +108,9 @@ class UserProgress {
       lastStudyDate: json['last_study_date'] == null
           ? null
           : DateTime.tryParse(json['last_study_date'] as String),
+      lastQuestionDate: json['last_question_date'] == null
+          ? null
+          : DateTime.tryParse(json['last_question_date'] as String),
     );
   }
 
@@ -115,6 +121,7 @@ class UserProgress {
         'questions_today': questionsAnsweredToday,
         'daily_goal_questions': dailyGoalQuestions,
         'last_study_date': lastStudyDate?.toIso8601String(),
+        'last_question_date': lastQuestionDate?.toIso8601String(),
         'chapters': chapters.map((k, v) => MapEntry(k, v.toJson())),
       };
 }
