@@ -8,24 +8,24 @@ class AssetLookup {
   const AssetLookup._();
 
   static const Map<String, String> characters = {
-    'rahul': 'assets/characters/rahul.png',
-    'priya': 'assets/characters/priya.png',
-    'teacher': 'assets/characters/teacher.png',
+    'rahul': 'assets/characters/rahul.webp',
+    'priya': 'assets/characters/priya.webp',
+    'teacher': 'assets/characters/teacher.webp',
   };
 
   static const Map<String, String> backgrounds = {
-    'bg_school_gate': 'assets/backgrounds/bg_school_gate.png',
-    'bg_classroom': 'assets/backgrounds/bg_classroom.png',
-    'bg_school_garden': 'assets/backgrounds/bg_school_garden.png',
-    'bg_library': 'assets/backgrounds/bg_library.png',
+    'bg_school_gate': 'assets/backgrounds/bg_school_gate.webp',
+    'bg_classroom': 'assets/backgrounds/bg_classroom.webp',
+    'bg_school_garden': 'assets/backgrounds/bg_school_garden.webp',
+    'bg_library': 'assets/backgrounds/bg_library.webp',
   };
 
   static const Map<String, String> illustrations = {
-    'ch01_thumb': 'assets/illustrations/ch01_thumb.png',
-    'ch02_thumb': 'assets/illustrations/ch02_thumb.png',
-    'ch03_thumb': 'assets/illustrations/ch03_thumb.png',
-    'ch04_thumb': 'assets/illustrations/ch04_thumb.png',
-    'ch05_thumb': 'assets/illustrations/ch05_thumb.png',
+    'ch01_thumb': 'assets/illustrations/ch01_thumb.webp',
+    'ch02_thumb': 'assets/illustrations/ch02_thumb.webp',
+    'ch03_thumb': 'assets/illustrations/ch03_thumb.webp',
+    'ch04_thumb': 'assets/illustrations/ch04_thumb.webp',
+    'ch05_thumb': 'assets/illustrations/ch05_thumb.webp',
   };
 
   static String? characterPath(String characterId) => characters[characterId];

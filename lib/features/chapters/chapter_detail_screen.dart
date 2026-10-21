@@ -34,7 +34,8 @@ class ChapterDetailScreen extends StatelessWidget {
 
     return Scaffold(
       body: SceneBackground(
-        backgroundId: chapter.backgroundAsset?.split('/').last.replaceAll('.png', ''),
+        backgroundId:
+            chapter.backgroundAsset?.split('/').last.replaceAll(RegExp(r'\.[a-z]+$'), ''),
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -17,8 +17,8 @@
   },
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
-  "thumbnail_asset": "assets/illustrations/ch03_thumb.png",
-  "background_asset": "assets/backgrounds/bg_library.png",
+  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_library.webp",
   "rewards": { "xp": 60, "coins": 12, "max_stars": 3 },
   "scenes": [
     {

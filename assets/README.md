@@ -8,9 +8,9 @@ so the learning flow works even while illustrations are still being produced.
 
 | Kind | Location | Pattern | Example |
 |---|---|---|---|
-| Character portrait | `assets/characters/` | `<character_id>.png` | `rahul.png` |
-| Scene background | `assets/backgrounds/` | `<background_id>.png` | `bg_classroom.png` |
-| Illustration / thumbnail | `assets/illustrations/` | `<key>.png` | `ch01_thumb.png` |
+| Character portrait | `assets/characters/` | `<character_id>.webp` | `rahul.webp` |
+| Scene background | `assets/backgrounds/` | `<background_id>.webp` | `bg_classroom.webp` |
+| Illustration / thumbnail | `assets/illustrations/` | `<key>.webp` | `ch01_thumb.webp` |
 | Content data | `assets/data/` | `manifest.json`, `chapters/chapter_NN.json` | `chapter_01.json` |
 | Audio (future) | `assets/audio/` | `<chapter_id>_<key>.mp3` | `ch01_intro.mp3` |
 
@@ -23,11 +23,11 @@ Character IDs in content JSON: `rahul`, `priya`, `teacher` (see
 |---|---|---|
 | Chapters 1–5 content | `assets/data/chapters/*.json` | ✅ finished (EN/BN/HI) |
 | Manifest | `assets/data/manifest.json` | ✅ finished |
-| Rahul portrait | `characters/rahul.png` | ⬜ placeholder — fallback avatar shown |
-| Priya portrait | `characters/priya.png` | ⬜ placeholder — fallback avatar shown |
-| Mrs. Sen portrait | `characters/teacher.png` | ⬜ placeholder — fallback avatar shown |
-| Backgrounds (4 scene keys) | `backgrounds/bg_*.png` | ⬜ placeholder — gradient scene shown |
-| Chapter thumbnails (5) | `illustrations/ch01..05_thumb.png` | ⬜ placeholder — icon card shown |
+| Rahul portrait | `characters/rahul.webp` | ✅ finished (3D-style) |
+| Priya portrait | `characters/priya.webp` | ✅ finished (3D-style) |
+| Mrs. Sen portrait | `characters/teacher.webp` | ✅ finished (3D-style) |
+| Backgrounds (4 scene keys) | `backgrounds/bg_*.webp` | ✅ finished (3D-style) |
+| Chapter thumbnails (5) | `illustrations/ch01..05_thumb.webp` | ✅ finished — ch04, ch05 pending generation |
 | Audio | `audio/` | ⬜ not used in v1 (audio toggle reserved) |
 
 ## Guidelines for new art

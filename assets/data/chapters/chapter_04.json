@@ -17,8 +17,8 @@
   },
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
-  "thumbnail_asset": "assets/illustrations/ch04_thumb.png",
-  "background_asset": "assets/backgrounds/bg_school_gate.png",
+  "thumbnail_asset": "assets/illustrations/ch04_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_school_gate.webp",
   "rewards": { "xp": 70, "coins": 14, "max_stars": 3 },
   "scenes": [
     {
