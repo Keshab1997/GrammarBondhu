@@ -45,14 +45,30 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _tab,
-        children: const [
-          HomeScreen(),
-          ChapterListScreen(),
-          RewardsScreen(),
-          ProfileScreen(),
-        ],
+      // A soft sky wash behind the dashboard: the flat #F1F5FB canvas read as
+      // "unfinished" next to the gradient hero card and the splash screen.
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFE4EEFE),
+              Color(0xFFF1F5FB),
+              Color(0xFFF1F5FB),
+            ],
+            stops: [0.0, 0.35, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: IndexedStack(
+          index: _tab,
+          children: const [
+            HomeScreen(),
+            ChapterListScreen(),
+            RewardsScreen(),
+            ProfileScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -140,25 +156,32 @@ class _NavItem extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              selected ? activeIcon : icon,
-              color: selected ? Colors.white : AppColors.textMuted,
-              size: 24,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w800,
+        // The bar has a fixed height, so a label that wraps — narrow phones,
+        // long labels, a raised system text scale — used to overflow the item
+        // by a dozen pixels. scaleDown keeps the lockup intact inside it.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                selected ? activeIcon : icon,
                 color: selected ? Colors.white : AppColors.textMuted,
-                letterSpacing: 0.2,
+                size: 24,
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  color: selected ? Colors.white : AppColors.textMuted,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
