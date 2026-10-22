@@ -37,6 +37,11 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
 
   int _page = 0;
 
+  /// Board language: English by default, with one tap to read the rule in the
+  /// learner's own script. The English example sentences never change — they are
+  /// the thing being taught — only the writing around them.
+  bool _boardInSupportLanguage = false;
+
   /// Rule → examples → remember. Three beats, one board.
   static const _pageCount = 3;
 
@@ -84,6 +89,7 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     }
     final lesson = chapter.lesson;
     final lang = settings.supportLanguage;
+    final boardLang = _boardInSupportLanguage ? lang : 'en';
 
     return Scaffold(
       backgroundColor: const Color(0xFF16241E),
@@ -111,7 +117,7 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                   // Text keeps clear of the body standing in front of it.
                   contentBottomInset: teacherHeight * 0.85,
                   lesson: lesson,
-                  lang: lang,
+                  lang: boardLang,
                   progress: _chalk,
                 ),
               ),
@@ -123,20 +129,35 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                 top: MediaQuery.paddingOf(context).top,
                 child: _TopBar(
                   chapter: chapter,
-                  status: 'PAGE ${_page + 1} OF $_pageCount',
+                  boardLang: boardLang,
+                  onToggleLanguage: () => setState(
+                      () => _boardInSupportLanguage = !_boardInSupportLanguage),
                   onBack: () => Navigator.of(context).maybePop(),
                 ),
               ),
 
               // Mrs. Sen, in front of the board, pointer across it.
+              // A pose per page — pointing, explaining from the book, then
+              // inviting the learner to try — cross-faded so she moves rather
+              // than teleports.
               Positioned(
                 right: -14,
                 bottom: ctaTop - 6,
                 height: teacherHeight,
-                child: const IdleBob(
-                  period: 5000,
-                  amplitude: 0.005,
-                  child: _Teacher(),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 320),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [...previous, if (current != null) current],
+                  ),
+                  child: IdleBob(
+                    key: ValueKey(_page),
+                    period: 5000,
+                    amplitude: 0.005,
+                    child: _Teacher(pose: _poses[_page % _poses.length]),
+                  ),
                 ),
               ),
 
@@ -145,7 +166,7 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                 left: AppSpacing.md,
                 right: teacherWidth * 0.52,
                 bottom: ctaTop + 10,
-                child: _TeacherSays(text: _teacherLine(lang, _page)),
+                child: _TeacherSays(text: _teacherLine(boardLang, _page)),
               ),
 
               Positioned(
@@ -179,7 +200,15 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
   static double _ctaHeight(BuildContext context) =>
       88 + MediaQuery.paddingOf(context).bottom;
 
-  /// Standee aspect from the exported art (479 × 703).
+  /// One standee per page: pointer on the rule, book while reading the
+  /// examples, open palms for "your turn".
+  static const List<TeacherPose> _poses = [
+    TeacherPose('assets/characters/teacher_pointer.webp', 479 / 703),
+    TeacherPose('assets/characters/teacher_book.webp', 428 / 714),
+    TeacherPose('assets/characters/teacher_invite.webp', 328 / 708),
+  ];
+
+  /// Standee aspect of the pose on the current page.
   static const double _teacherAspect = 479 / 703;
 
   /// One sentence per page, in the language the learner reads in. The long
@@ -245,12 +274,14 @@ class _ClassroomWall extends StatelessWidget {
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.chapter,
-    required this.status,
+    required this.boardLang,
+    required this.onToggleLanguage,
     required this.onBack,
   });
 
   final Chapter chapter;
-  final String status;
+  final String boardLang;
+  final VoidCallback onToggleLanguage;
   final VoidCallback onBack;
 
   @override
@@ -282,23 +313,62 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              status,
-              style: const TextStyle(
-                color: Color(0xFF4A3410),
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
-              ),
-            ),
+          // The board's language. Small, one tap, and it never hides the rule:
+          // English stays the default, the support script is opt-in.
+          _LanguagePill(
+            boardLang: boardLang,
+            onTap: onToggleLanguage,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "EN / বাংলা / हिन्दी" — the board's language, as one small pill.
+class _LanguagePill extends StatelessWidget {
+  const _LanguagePill({required this.boardLang, required this.onTap});
+
+  final String boardLang;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Hindi vs Bangla comes from the app's support language, so the pill always
+    // names the script the tap will produce.
+    final support = context.watch<SettingsController>().supportLanguage;
+    final label =
+        boardLang == 'en' ? (support == 'hi' ? 'हिन्दी' : 'বাংলা') : 'EN';
+    return Material(
+      color: Colors.white.withValues(alpha: 0.16),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.24), width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.translate_rounded,
+                  size: 13, color: Colors.white.withValues(alpha: 0.8)),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -347,6 +417,14 @@ class _Board extends StatelessWidget {
   final GrammarLesson lesson;
   final String lang;
   final Animation<double> progress;
+
+  /// Where the page is, written on the slate so the top bar can hold the
+  /// language toggle instead.
+  String get _pageLabel => switch (lang) {
+        'bn' => 'পৃষ্ঠা ${page + 1} / ৩',
+        'hi' => 'पेज ${page + 1} / 3',
+        _ => 'PAGE ${page + 1} OF 3',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -427,6 +505,26 @@ class _Board extends StatelessWidget {
             Positioned(
               right: 14,
               top: 12,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      _pageLabel,
+                      style: const TextStyle(
+                        color: Color(0x99FFFFFF),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 14,
+              top: 30,
               child: Row(
                 children: [
                   for (var i = 0; i < pageCount; i++)
@@ -516,7 +614,8 @@ class _BoardPage extends StatelessWidget {
           to: 0.72,
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Text(lesson.explanation.en, style: chalk(14.5, alpha: 0.88)),
+            child: Text(lesson.explanation.of(lang),
+                style: chalk(14.5, alpha: 0.88)),
           ),
         ),
         // The same rule as a table — how a teacher actually leaves it on the
@@ -528,18 +627,30 @@ class _BoardPage extends StatelessWidget {
             to: 0.84 + i * 0.09,
             child: Padding(
               padding: const EdgeInsets.only(top: 10),
+              // Flexible subject, fixed verb column: Bangla subjects are wider
+              // than "I", and a fixed 118 px column pushed them into the dash.
               child: Row(
                 children: [
-                  SizedBox(
-                    width: 118,
-                    child: Text(_table[i].$1, style: chalk(14, alpha: 0.75)),
+                  Expanded(
+                    child: Text(
+                      switch (lang) {
+                        'bn' => _table[i].$3,
+                        'hi' => _table[i].$4,
+                        _ => _table[i].$1,
+                      },
+                      style: chalk(14, alpha: 0.75),
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text('—', style: chalk(14, alpha: 0.4)),
                   const SizedBox(width: 10),
-                  Text(
-                    _table[i].$2,
-                    style: chalk(17, w: FontWeight.w700).copyWith(
-                        color: AppColors.accent.withValues(alpha: 0.95)),
+                  SizedBox(
+                    width: 62,
+                    child: Text(
+                      _table[i].$2,
+                      style: chalk(17, w: FontWeight.w700).copyWith(
+                          color: AppColors.accent.withValues(alpha: 0.95)),
+                    ),
                   ),
                 ],
               ),
@@ -552,7 +663,8 @@ class _BoardPage extends StatelessWidget {
           progress: progress,
           from: 0.1,
           to: 0.3,
-          child: Text('Examples', style: chalk(20, w: FontWeight.w700)),
+          child: Text(_t('Examples', 'উদাহরণ', 'उदाहरण'),
+              style: chalk(20, w: FontWeight.w700)),
         ),
         for (var i = 0; i < lesson.examples.length; i++)
           _ChalkLine(
@@ -596,7 +708,8 @@ class _BoardPage extends StatelessWidget {
           progress: progress,
           from: 0.1,
           to: 0.3,
-          child: Text('Say it yourself', style: chalk(20, w: FontWeight.w700)),
+          child: Text(_t('Say it yourself', 'নিজে বলে দেখো', 'खुद बोलकर देखो'),
+              style: chalk(20, w: FontWeight.w700)),
         ),
         _ChalkLine(
           progress: progress,
@@ -605,7 +718,11 @@ class _BoardPage extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Fill the gap out loud, then check below.',
+              _t(
+                'Fill the gap out loud, then check below.',
+                'ফাঁকা জায়গাটা জোরে বলে ভরো, তারপর নিচে মিলিয়ে নাও।',
+                'खाली जगह ज़ोर से बोलकर भरो, फिर नीचे मिलाओ।',
+              ),
               style: chalk(13, alpha: 0.7),
             ),
           ),
@@ -644,10 +761,15 @@ class _BoardPage extends StatelessWidget {
     );
   }
 
+  /// Board chrome in the language the toggle is set to. The English example
+  /// sentences are deliberately never translated.
+  String _t(String en, String bn, String hi) =>
+      switch (lang) { 'bn' => bn, 'hi' => hi, _ => en };
+
   String get _kicker => switch (page) {
-        0 => 'TODAY’S RULE',
-        1 => 'ON THE BOARD',
-        _ => 'YOUR TURN',
+        0 => _t('TODAY’S RULE', 'আজকের নিয়ম', 'आज का नियम'),
+        1 => _t('ON THE BOARD', 'বোর্ডে লেখা', 'बोर्ड पर'),
+        _ => _t('YOUR TURN', 'তোমার পালা', 'तुम्हारी बारी'),
       };
 
   /// Three gaps that only need the rule that was just taught.
@@ -657,13 +779,15 @@ class _BoardPage extends StatelessWidget {
     ('They ___ classmates.',),
   ];
 
-  static const _answers = 'Answers: am · is · are';
+  String get _answers => _t(
+      'Answers: am · is · are', 'উত্তর: am · is · are', 'जवाब: am · is · are');
 
-  /// Subject → verb, the three rows a teacher writes under the rule.
-  static const List<(String, String)> _table = [
-    ('I', 'am'),
-    ('he / she / it', 'is'),
-    ('you / we / they', 'are'),
+  /// Subject → verb, the three rows a teacher writes under the rule, with the
+  /// subject in all three languages.
+  static const List<(String, String, String, String)> _table = [
+    ('I', 'am', 'আমি', 'मैं'),
+    ('he / she / it', 'is', 'সে', 'वह'),
+    ('you / we / they', 'are', 'তুমি / আমরা / তারা', 'तुम / हम / वे'),
   ];
 }
 
@@ -737,13 +861,23 @@ class _ChalkUnderline extends StatelessWidget {
 
 // ------------------------------------------------------------- the teacher ---
 
+/// One standee and its art aspect.
+class TeacherPose {
+  const TeacherPose(this.asset, this.aspect);
+
+  final String asset;
+  final double aspect;
+}
+
 class _Teacher extends StatelessWidget {
-  const _Teacher();
+  const _Teacher({required this.pose});
+
+  final TeacherPose pose;
 
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'assets/characters/teacher_pointer.webp',
+      pose.asset,
       fit: BoxFit.contain,
       alignment: Alignment.bottomRight,
       filterQuality: FilterQuality.medium,
