@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../app/state/content_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
-import '../../core/widgets/asset_images.dart';
 import '../../core/widgets/brand_logo.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../onboarding/onboarding_screen.dart';

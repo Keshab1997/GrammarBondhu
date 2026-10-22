@@ -5,7 +5,6 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
-import '../../core/widgets/asset_images.dart';
 import '../story/story_screen.dart';
 
 /// Screen 17 — chapter intro, learning objectives, Start button.

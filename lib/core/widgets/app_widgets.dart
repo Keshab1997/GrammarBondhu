@@ -44,7 +44,6 @@ class _AppButtonState extends State<AppButton> {
 
     // Colors, gradient and shadow per variant.
     late Gradient gradient;
-    late Color solidColor;
     late List<BoxShadow> shadow;
     late Color foreground;
 
@@ -55,7 +54,6 @@ class _AppButtonState extends State<AppButton> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         );
-        solidColor = AppColors.accent;
         shadow = AppShadows.buttonYellow;
         foreground = AppColors.textPrimary;
         break;
@@ -65,13 +63,11 @@ class _AppButtonState extends State<AppButton> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         );
-        solidColor = AppColors.primary;
         shadow = AppShadows.button;
         foreground = AppColors.textOnDark;
         break;
       case AppButtonVariant.outline:
         gradient = const LinearGradient(colors: [Colors.white, Colors.white]);
-        solidColor = Colors.white;
         shadow = AppShadows.cardSoft;
         foreground = AppColors.primary;
         break;
@@ -81,7 +77,6 @@ class _AppButtonState extends State<AppButton> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         );
-        solidColor = AppColors.success;
         shadow = AppShadows.buttonSuccess;
         foreground = AppColors.textOnDark;
         break;
