@@ -25,6 +25,7 @@ flutter:
     - assets/data/manifest.json
     - assets/data/chapters/
     - assets/characters/
+    - assets/foregrounds/
     - assets/backgrounds/
     - assets/illustrations/
     - assets/frames/

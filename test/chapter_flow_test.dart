@@ -128,6 +128,12 @@ void main() {
     expect(AssetLookup.fullBodyPath('rahul'), isNotNull);
     expect(AssetLookup.fullBodyPath('teacher'), isNotNull);
     expect(AssetLookup.fullBodyPath('priya'), isNotNull);
+
+    // The blurred foreground plate is what gives the scene depth; every
+    // background ch01 uses must have one.
+    expect(AssetLookup.foregroundPath('bg_school_gate'), isNotNull);
+    expect(AssetLookup.foregroundPath('bg_classroom'), isNotNull);
+    expect(AssetLookup.foregroundPath('bg_does_not_exist'), isNull);
   });
 
   testWidgets('chapter list filters by real chapter state', (tester) async {

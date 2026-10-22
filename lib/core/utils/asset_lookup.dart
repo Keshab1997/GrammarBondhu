@@ -71,6 +71,18 @@ class AssetLookup {
   static String? backgroundPath(String backgroundId) =>
       backgrounds[backgroundId];
 
+  /// Blurred props that belong *in front of* the cast, keyed by background.
+  /// A doorway/pillar edge in the foreground is what stops two flat cut-outs
+  /// from looking pasted onto a picture: the props cue depth, so the eye reads
+  /// the characters as standing inside the room.
+  static const Map<String, String> foregrounds = {
+    'bg_school_gate': 'assets/foregrounds/fg_gate.webp',
+    'bg_classroom': 'assets/foregrounds/fg_class.webp',
+  };
+
+  static String? foregroundPath(String backgroundId) =>
+      foregrounds[backgroundId];
+
   static String? illustrationPath(String illustrationId) =>
       illustrations[illustrationId];
 

@@ -121,6 +121,7 @@ class _StoryScreenState extends State<StoryScreen> {
             _Stage(
               cast: cast,
               speakerId: line.characterId,
+              backgroundId: scene.backgroundId,
               bubble: _DialogueBubble(
                 characterId: line.characterId,
                 line: line,
@@ -237,15 +238,22 @@ class _Stage extends StatelessWidget {
   const _Stage({
     required this.cast,
     required this.speakerId,
+    required this.backgroundId,
     required this.bubble,
   });
 
   final List<String> cast;
   final String speakerId;
+  final String? backgroundId;
   final Widget bubble;
 
   /// Character height as a fraction of the stage, and where they stand.
   static const _baseHeightFactor = 0.52;
+
+  /// How much of the frame the blurred props occupy. Full-bleed props read as a
+  /// sticker over the art; keeping them to the bottom band makes them a
+  /// foreground the camera is shooting past.
+  static const _foregroundHeightFactor = 0.44;
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +304,18 @@ class _Stage extends StatelessWidget {
                   isSpeaker: p.isSpeaker,
                 ),
               ),
+            // Blurred props in front of the cast. This is the whole trick: an
+            // out-of-focus foreground edge turns a flat plate plus two cut-outs
+            // into a room the characters are actually standing in.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: h * _foregroundHeightFactor,
+              child: IgnorePointer(
+                child: _Foreground(backgroundId: backgroundId),
+              ),
+            ),
             // Anchored by its *bottom*, not its top: the bubble grows upward
             // from the speaker's head. Anchoring the top let a long line grow
             // down over the speaker's face.
@@ -835,6 +855,41 @@ String _translationLabel(String lang) => lang == 'hi'
     : lang == 'bn'
         ? 'BENGALI'
         : '';
+
+/// Out-of-focus props standing between the lens and the cast.
+class _Foreground extends StatelessWidget {
+  const _Foreground({required this.backgroundId});
+
+  final String? backgroundId;
+
+  @override
+  Widget build(BuildContext context) {
+    final path =
+        backgroundId == null ? null : AssetLookup.foregroundPath(backgroundId!);
+    if (path == null) return const SizedBox.shrink();
+    // The band the props sit in ends in a straight line; without a fade the
+    // tree trunk stops dead mid-air. A short top fade turns that cut into depth
+    // of field.
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (rect) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x00FFFFFF), Color(0xFFFFFFFF)],
+        stops: [0.0, 0.72],
+      ).createShader(Offset.zero & rect.size),
+      child: Image.asset(
+        path,
+        fit: BoxFit.cover,
+        alignment: Alignment.bottomCenter,
+        // Just shy of opaque: the props should read as soft glass, never as a
+        // solid sticker over the art.
+        opacity: const AlwaysStoppedAnimation<double>(0.94),
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
 
 /// The scene background.
 ///
