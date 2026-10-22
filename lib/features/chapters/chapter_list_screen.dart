@@ -89,13 +89,13 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                     onTap: () => setState(() => _filter = _ChapterFilter.all),
                   ),
                   _FilterChip(
-                    label: 'In progress',
+                    label: 'Started',
                     selected: _filter == _ChapterFilter.inProgress,
                     onTap: () =>
                         setState(() => _filter = _ChapterFilter.inProgress),
                   ),
                   _FilterChip(
-                    label: 'Completed',
+                    label: 'Done',
                     selected: _filter == _ChapterFilter.completed,
                     onTap: () =>
                         setState(() => _filter = _ChapterFilter.completed),
@@ -184,8 +184,7 @@ class _FilterChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadii.chip),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadii.chip),
           ),
@@ -242,14 +241,45 @@ class _ChapterCard extends StatelessWidget {
             children: [
               // Locked art is dimmed: a locked chapter shouldn't look as
               // inviting as the one you can actually open.
-              Opacity(
-                opacity: locked ? 0.55 : 1,
-                child: ChapterThumbnail(
-                  assetPath: chapter.thumbnailAsset,
-                  fallbackIcon:
-                      locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
-                  size: 64,
-                ),
+              // The chapter number lives on the artwork, where a reader scans
+              // for it, instead of inside the title string.
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Opacity(
+                    opacity: locked ? 0.62 : 1,
+                    child: ChapterThumbnail(
+                      assetPath: chapter.thumbnailAsset,
+                      fallbackIcon: locked
+                          ? Icons.lock_rounded
+                          : Icons.auto_stories_rounded,
+                      size: 64,
+                    ),
+                  ),
+                  Positioned(
+                    left: -4,
+                    top: -4,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: locked ? AppColors.textMuted : AppColors.primary,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: Text(
+                        '$number',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -260,7 +290,7 @@ class _ChapterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            '$number. ${chapter.title.en}',
+                            chapter.title.en,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: text.titleMedium,
@@ -315,16 +345,16 @@ class _ChapterCard extends StatelessWidget {
                     else if (locked)
                       Row(
                         children: [
-                          Icon(Icons.lock_rounded,
-                              size: 14, color: AppColors.textMuted),
+                          const Icon(Icons.lock_rounded,
+                              size: 14, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               unlocksAfter ?? 'Locked',
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: text.bodySmall
-                                  ?.copyWith(color: AppColors.textMuted),
+                                  ?.copyWith(color: AppColors.textSecondary),
                             ),
                           ),
                         ],

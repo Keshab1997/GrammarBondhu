@@ -75,6 +75,7 @@ class ChapterDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(
                             AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
                         child: _SheetBody(
+                          number: number,
                           chapterTitle: chapter.title.en,
                           grammarTopic: chapter.grammarTopic.en,
                           sceneCount: chapter.scenes.length,
@@ -127,7 +128,6 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     return AspectRatio(
       aspectRatio: _aspect,
       child: Stack(
@@ -158,61 +158,24 @@ class _Hero extends StatelessWidget {
               ),
             ),
           ),
+          // Chapter identity lives in the top row, with the back button. It used
+          // to sit at the bottom of the artwork, on top of a face.
           SafeArea(
             bottom: false,
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: _CircleButton(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  _CircleButton(
                     icon: Icons.arrow_back_rounded,
                     tooltip: 'Back',
                     onTap: () => Navigator.of(context).maybePop(),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.lg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _Pill(label: 'CHAPTER $number'),
-                    if (completed) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      _Pill(
-                        label: 'COMPLETED',
-                        color: AppColors.success,
-                        icon: Icons.check_rounded,
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: text.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
-                    shadows: const [
-                      Shadow(color: Color(0x66000000), blurRadius: 10),
-                    ],
-                  ),
-                ),
-                if (completed && stars > 0) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  StarsDisplay(count: stars, size: 20),
+                  const Spacer(),
+                  if (completed && stars > 0)
+                    StarsDisplay(count: stars, size: 18),
                 ],
-              ],
+              ),
             ),
           ),
         ],
@@ -225,33 +188,42 @@ class _Pill extends StatelessWidget {
   const _Pill({
     required this.label,
     this.color = Colors.white,
+    this.onLight = false,
     this.icon,
   });
 
   final String label;
   final Color color;
+
+  /// True when the pill sits on the sheet rather than on artwork: dark type on
+  /// a tinted fill instead of white on a translucent one.
+  final bool onLight;
   final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
+    final fg = onLight ? color : Colors.white;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.22),
+        color: onLight
+            ? color.withValues(alpha: 0.12)
+            : color.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.45)),
+        border:
+            Border.all(color: color.withValues(alpha: onLight ? 0.3 : 0.45)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: Colors.white),
+            Icon(icon, size: 13, color: fg),
             const SizedBox(width: 4),
           ],
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: fg,
               fontSize: 11,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.8,
@@ -298,6 +270,7 @@ class _CircleButton extends StatelessWidget {
 
 class _SheetBody extends StatelessWidget {
   const _SheetBody({
+    required this.number,
     required this.chapterTitle,
     required this.grammarTopic,
     required this.sceneCount,
@@ -308,6 +281,7 @@ class _SheetBody extends StatelessWidget {
     required this.resumeStep,
   });
 
+  final int number;
   final String chapterTitle;
   final String grammarTopic;
   final int sceneCount;
@@ -323,6 +297,42 @@ class _SheetBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // The sheet opens with the chapter it belongs to. It used to open with
+        // the grammar chip over the hero's title, so the first thing read was
+        // the least important thing on the screen.
+        Row(
+          children: [
+            _Pill(
+              label: 'CHAPTER $number',
+              color: AppColors.primary,
+              onLight: true,
+            ),
+            if (completed) ...[
+              const SizedBox(width: AppSpacing.sm),
+              _Pill(
+                label: 'COMPLETED',
+                color: AppColors.success,
+                onLight: true,
+                icon: Icons.check_rounded,
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          chapterTitle,
+          style: text.displaySmall?.copyWith(fontSize: 30, height: 1.15),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          completed
+              ? 'Finished — replay the story or beat your best score.'
+              : inProgress
+                  ? 'You are on step $resumeStep. Pick up where you left off.'
+                  : 'A short story, one grammar point, and five questions.',
+          style: text.bodyMedium,
+        ),
+        const SizedBox(height: AppSpacing.lg),
         // What the learner is about to practise, in their own language of
         // progress: one grammar point, not a description of the app.
         Container(
@@ -505,23 +515,52 @@ class _CtaBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.md + MediaQuery.paddingOf(context).bottom,
-      ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: Color(0xFFEFF3F9))),
-      ),
-      child: AppButton(
-        label: label,
-        icon: Icons.play_arrow_rounded,
-        variant: AppButtonVariant.primary,
-        onPressed: onPressed,
-      ),
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg + 6,
+            AppSpacing.lg,
+            AppSpacing.md + MediaQuery.paddingOf(context).bottom,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x140F172A),
+                blurRadius: 18,
+                offset: Offset(0, -8),
+              ),
+            ],
+          ),
+          child: AppButton(
+            label: label,
+            icon: Icons.play_arrow_rounded,
+            variant: AppButtonVariant.primary,
+            onPressed: onPressed,
+          ),
+        ),
+        // A short fade above the bar: without it the last paragraph is sliced
+        // mid-sentence by a hard edge and reads as a layout bug.
+        Positioned(
+          left: 0,
+          right: 0,
+          top: -26,
+          height: 26,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00FFFFFF), AppColors.surface],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

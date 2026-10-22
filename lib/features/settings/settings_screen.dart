@@ -32,6 +32,10 @@ class SettingsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
+            // Ten identical pills in one column is a wall. Three named groups
+            // make the screen scannable, and the destructive action ends up in
+            // its own section instead of sitting between two settings.
+            const _GroupHeader('Learning'),
             _SettingsTile(
               icon: Icons.translate_rounded,
               color: AppColors.primary,
@@ -70,6 +74,7 @@ class SettingsScreen extends StatelessWidget {
                     .setNotificationsEnabled(v),
               ),
             ),
+            const _GroupHeader('Storage'),
             _SettingsTile(
               icon: Icons.download_rounded,
               color: AppColors.primaryDark,
@@ -93,6 +98,7 @@ class SettingsScreen extends StatelessWidget {
                 );
               },
             ),
+            const _GroupHeader('Your data'),
             _SettingsTile(
               icon: Icons.restart_alt_rounded,
               color: AppColors.error,
@@ -133,6 +139,7 @@ class SettingsScreen extends StatelessWidget {
                 }
               },
             ),
+            const _GroupHeader('About'),
             _SettingsTile(
               icon: Icons.info_outline_rounded,
               color: AppColors.primary,
@@ -196,6 +203,30 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(
+          left: AppSpacing.xs, top: AppSpacing.sm, bottom: AppSpacing.sm),
+      child: Text(
+        label.toUpperCase(),
+        style: text.bodySmall?.copyWith(
+          color: AppColors.textMuted,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.0,
+          fontSize: 11,
+        ),
       ),
     );
   }

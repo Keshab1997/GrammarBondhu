@@ -69,18 +69,15 @@ class GrammarLessonScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Only the language chip lives up here: the grammar
+                      // point used to be printed here *and* as the title
+                      // directly below it, which read as a stuck page.
                       Row(
-                        children: [
-                          const LanguageChip(
+                        children: const [
+                          LanguageChip(
                               code: 'en', label: 'English', flag: '🇬🇧'),
-                          const Spacer(),
-                          Flexible(
-                            child: Text(
-                              chapter.grammarTopic.en,
-                              style: text.bodyMedium,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+                          Spacer(),
+                          _LessonBadge(),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -151,6 +148,31 @@ class GrammarLessonScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small marker that tells the learner the order: rules first, quiz after.
+class _LessonBadge extends StatelessWidget {
+  const _LessonBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.successSoft,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: const Text(
+        'READ FIRST',
+        style: TextStyle(
+          color: AppColors.successDark,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.7,
         ),
       ),
     );

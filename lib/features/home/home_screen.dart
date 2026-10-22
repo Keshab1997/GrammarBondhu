@@ -48,12 +48,8 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           if (current != null)
             _ProgressCard(
-              chapterTitle: current.title.en,
               step: progress.chapterProgress(current.id).resumeSceneIndex ?? 0,
               steps: current.scenes.length + 1,
-              value: chapters.isEmpty
-                  ? 0
-                  : progress.progress.completedChapterCount / chapters.length,
               completedChapters: progress.progress.completedChapterCount,
               totalChapters: chapters.length,
             ),
@@ -577,26 +573,26 @@ class _ActionChip extends StatelessWidget {
 /// Chapter progress: what is in flight, how far along it is.
 class _ProgressCard extends StatelessWidget {
   const _ProgressCard({
-    required this.chapterTitle,
     required this.step,
     required this.steps,
-    required this.value,
     required this.completedChapters,
     required this.totalChapters,
   });
 
-  final String chapterTitle;
   final int step;
   final int steps;
-  final double value;
   final int completedChapters;
   final int totalChapters;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    // One scope per row: the card is about the course, so both the bar and the
+    // label count chapters. It used to mix "4 steps" with "0 of 5 chapters".
+    final value = totalChapters == 0 ? 0.0 : completedChapters / totalChapters;
     final percent = (value * 100).round();
     return AppCard(
+      onTap: () => Navigator.of(context).pushNamed(ProgressScreen.routeName),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -616,13 +612,13 @@ class _ProgressCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your Progress',
+                    Text('Your Course',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: text.titleSmall),
                     const SizedBox(height: 1),
                     Text(
-                      chapterTitle,
+                      '5 chapters, one story at a time',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:
@@ -639,20 +635,28 @@ class _ProgressCard extends StatelessWidget {
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(AppRadii.chip),
                 ),
-                child: Text(
-                  '$step/$steps',
-                  maxLines: 1,
-                  style: text.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$completedChapters/$totalChapters',
+                      maxLines: 1,
+                      style: text.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.chevron_right_rounded,
+                        size: 15, color: AppColors.primary),
+                  ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md - 2),
           AppProgressBar(
-            value: step / steps,
+            value: value,
             height: 10,
             gradient: const LinearGradient(
               colors: [AppColors.primary, AppColors.skyTop],
@@ -675,7 +679,9 @@ class _ProgressCard extends StatelessWidget {
               const Spacer(),
               Flexible(
                 child: Text(
-                  '$completedChapters of $totalChapters chapters',
+                  completedChapters == 0
+                      ? 'Chapter 1 next'
+                      : '$completedChapters of $totalChapters done',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.end,
