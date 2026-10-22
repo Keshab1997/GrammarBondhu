@@ -1028,7 +1028,17 @@ class _BoardListenChip extends StatelessWidget {
     final playing = audio.isPlaying(clipId);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => audio.toggle(clipId),
+      onTap: () async {
+        final started = await audio.toggle(clipId);
+        if (!started && context.mounted) {
+          ScaffoldMessenger.maybeOf(context)
+            ?..hideCurrentSnackBar()
+            ..showSnackBar(const SnackBar(
+              content: Text('Could not play this audio'),
+              duration: Duration(seconds: 2),
+            ));
+        }
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

@@ -17,6 +17,10 @@ dependencies:
   # Pre-generated on purpose: device TTS voices differ per phone, so a bundled
   # clip is the only way every learner hears the same teacher.
   just_audio: ^0.9.42
+  # Audio focus + the iOS silent-switch rule. Without this, narration on an
+  # iPhone with the ringer off plays to nobody, and on Android it fights the
+  # learner's music instead of ducking it.
+  audio_session: ^0.1.25
 
 dev_dependencies:
   flutter_test:

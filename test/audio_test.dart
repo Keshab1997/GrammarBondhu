@@ -25,6 +25,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FakeAudioPort implements AudioPort {
   final List<String> played = <String>[];
   int stops = 0;
+
+  /// Set to make playback fail, the way a broken/undecodable clip would.
+  bool failOnPlay = false;
   final StreamController<void> _completions =
       StreamController<void>.broadcast();
 
@@ -32,7 +35,10 @@ class FakeAudioPort implements AudioPort {
   Stream<void> get completions => _completions.stream;
 
   @override
-  Future<void> playAsset(String assetPath) async => played.add(assetPath);
+  Future<void> playAsset(String assetPath) async {
+    if (failOnPlay) throw Exception('decoder said no');
+    played.add(assetPath);
+  }
 
   @override
   Future<void> stop() async => stops++;
@@ -154,6 +160,15 @@ void main() {
       expect(port.stops, 1);
     });
 
+    test('a clip that will not play reports failure and clears the button',
+        () async {
+      port.failOnPlay = true;
+      final started = await audio.toggle('teach_1_bn');
+      expect(started, isFalse);
+      expect(audio.playingId, isNull);
+      expect(audio.lastError, isNotNull);
+    });
+
     test('a clip that is not in the bundle is never requested', () async {
       await audio.toggle('no_such_clip');
       expect(port.played, isEmpty);
@@ -198,6 +213,36 @@ void main() {
 
       expect(port.played, ['assets/audio/clips/teach_1_bn.mp3']);
       expect(find.byIcon(Icons.graphic_eq_rounded), findsOneWidget);
+    });
+  });
+
+  group('narration failure', () {
+    testWidgets('a dead clip says so instead of staying silent',
+        (tester) async {
+      final port = FakeAudioPort()..failOnPlay = true;
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final settings = SettingsController(store, store.loadSettings());
+      final audio = AudioController(port: port, settings: settings);
+      addTearDown(audio.dispose);
+
+      await tester.pumpWidget(
+        AudioScope(
+          controller: audio,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(child: ListenButton(clipId: 'teach_1_bn')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.volume_up_rounded));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Could not play this audio'), findsOneWidget);
+      expect(find.byIcon(Icons.graphic_eq_rounded), findsNothing);
     });
   });
 

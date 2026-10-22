@@ -45,7 +45,19 @@ class ListenButton extends StatelessWidget {
       label: playing ? 'Stop narration' : 'Play narration',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => audio.toggle(clipId),
+        onTap: () async {
+          final started = await audio.toggle(clipId);
+          if (!started && context.mounted) {
+            // Silence with no explanation is the worst failure mode in an
+            // audio feature; say it out loud.
+            ScaffoldMessenger.maybeOf(context)
+              ?..hideCurrentSnackBar()
+              ..showSnackBar(const SnackBar(
+                content: Text('Could not play this audio'),
+                duration: Duration(seconds: 2),
+              ));
+          }
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           width: size,

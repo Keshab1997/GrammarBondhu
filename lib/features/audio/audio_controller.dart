@@ -32,6 +32,12 @@ class AudioController extends ChangeNotifier {
 
   String? _playing;
 
+  /// Why the last attempt failed, if it did. Surfaced by the button so a
+  /// silent phone can be debugged without a cable attached.
+  Object? _lastError;
+
+  Object? get lastError => _lastError;
+
   /// The clip that is currently sounding, if any.
   String? get playingId => _playing;
 
@@ -45,23 +51,32 @@ class AudioController extends ChangeNotifier {
   bool canPlay(String clipId) => enabled && AudioCatalog.has(clipId);
 
   /// Tap behaviour: start this clip, or stop it if it is already sounding.
-  Future<void> toggle(String clipId) async {
+  ///
+  /// Returns false when playback could not start, so the caller can say so
+  /// instead of leaving the learner tapping a dead button.
+  Future<bool> toggle(String clipId) async {
     if (_playing == clipId) {
       await stop();
-      return;
+      return true;
     }
-    if (!canPlay(clipId)) return;
+    if (!canPlay(clipId)) return false;
     _playing = clipId;
+    _lastError = null;
     notifyListeners();
     try {
       await _port.playAsset(AudioCatalog.assetFor(clipId));
-    } catch (_) {
+      return true;
+    } catch (error, stack) {
       // A clip that will not decode must not leave a button stuck in
-      // "playing" forever.
+      // "playing" forever — and the reason must be visible in the log.
+      debugPrint(
+          'GrammarBondhu audio: could not play $clipId — $error\n$stack');
+      _lastError = error;
       if (_playing == clipId) {
         _playing = null;
         notifyListeners();
       }
+      return false;
     }
   }
 
