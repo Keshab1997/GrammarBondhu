@@ -139,9 +139,13 @@ void main() {
     expect(find.text('Chapters'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('Grammar'));
+    // Tap a filter chip: the InkWell needs its own Material ancestor, which
+    // is what broke when this screen was pushed as a standalone route.
+    await tester.tap(find.text('Locked'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    // Filtering actually filters now: only locked chapters remain.
+    expect(find.textContaining('to unlock'), findsWidgets);
   });
 
   testWidgets('onboarding flow reaches login screen', (tester) async {

@@ -19,10 +19,21 @@ class ChapterListScreen extends StatefulWidget {
   State<ChapterListScreen> createState() => _ChapterListScreenState();
 }
 
-enum _ChapterFilter { story, grammar, locked }
+/// Filters that describe an actual chapter state.
+///
+/// The old set was `story / grammar / locked`, but no `Chapter` carries a
+/// grammar dimension — the "Grammar" tab only hid locked chapters, so it
+/// showed exactly the same list as "Story". These four are all real.
+enum _ChapterFilter { all, inProgress, completed, locked }
 
 class _ChapterListScreenState extends State<ChapterListScreen> {
-  _ChapterFilter _filter = _ChapterFilter.story;
+  _ChapterFilter _filter = _ChapterFilter.all;
+
+  /// What the learner has to finish to open this chapter.
+  String? _unlockHint(List<Chapter> chapters, int index) {
+    if (index == 0) return null;
+    return 'Finish “${chapters[index - 1].title.en}” to unlock';
+  }
 
   /// A chapter unlocks when the previous one is completed.
   bool _isUnlocked(
@@ -63,23 +74,32 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                 ],
               ),
             ),
+            // Wrap, not Row: four chips do not fit on a 353 dp phone, and a
+            // horizontally scrolling row would hide the last filter off the
+            // edge. Wrapping keeps every filter visible and tappable.
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Row(
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
                 children: [
                   _FilterChip(
-                    label: 'Story',
-                    selected: _filter == _ChapterFilter.story,
-                    onTap: () => setState(() => _filter = _ChapterFilter.story),
+                    label: 'All',
+                    selected: _filter == _ChapterFilter.all,
+                    onTap: () => setState(() => _filter = _ChapterFilter.all),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
                   _FilterChip(
-                    label: 'Grammar',
-                    selected: _filter == _ChapterFilter.grammar,
+                    label: 'In progress',
+                    selected: _filter == _ChapterFilter.inProgress,
                     onTap: () =>
-                        setState(() => _filter = _ChapterFilter.grammar),
+                        setState(() => _filter = _ChapterFilter.inProgress),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  _FilterChip(
+                    label: 'Completed',
+                    selected: _filter == _ChapterFilter.completed,
+                    onTap: () =>
+                        setState(() => _filter = _ChapterFilter.completed),
+                  ),
                   _FilterChip(
                     label: 'Locked',
                     selected: _filter == _ChapterFilter.locked,
@@ -103,12 +123,15 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                         final record = progress.chapterProgress(chapter.id);
                         final isLocked = !unlocked;
 
-                        if (_filter == _ChapterFilter.locked && !isLocked) {
-                          return const SizedBox.shrink();
-                        }
-                        if (_filter == _ChapterFilter.grammar && isLocked) {
-                          return const SizedBox.shrink();
-                        }
+                        final inProgress =
+                            unlocked && record.started && !record.completed;
+                        final matches = switch (_filter) {
+                          _ChapterFilter.all => true,
+                          _ChapterFilter.inProgress => inProgress,
+                          _ChapterFilter.completed => record.completed,
+                          _ChapterFilter.locked => isLocked,
+                        };
+                        if (!matches) return const SizedBox.shrink();
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -117,9 +140,12 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                             number: index + 1,
                             locked: isLocked,
                             completed: record.completed,
-                            inProgress:
-                                unlocked && record.started && !record.completed,
+                            inProgress: inProgress,
                             stars: record.stars,
+                            resumeStep: record.resumeSceneIndex,
+                            sceneCount: chapter.scenes.length,
+                            unlocksAfter:
+                                isLocked ? _unlockHint(chapters, index) : null,
                             onTap: isLocked
                                 ? null
                                 : () => Navigator.of(context).pushNamed(
@@ -185,6 +211,9 @@ class _ChapterCard extends StatelessWidget {
     required this.completed,
     required this.inProgress,
     required this.stars,
+    required this.resumeStep,
+    required this.sceneCount,
+    this.unlocksAfter,
     this.onTap,
   });
 
@@ -194,6 +223,9 @@ class _ChapterCard extends StatelessWidget {
   final bool completed;
   final bool inProgress;
   final int stars;
+  final int? resumeStep;
+  final int sceneCount;
+  final String? unlocksAfter;
   final VoidCallback? onTap;
 
   @override
@@ -202,64 +234,144 @@ class _ChapterCard extends StatelessWidget {
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ChapterThumbnail(
-            assetPath: chapter.thumbnailAsset,
-            fallbackIcon:
-                locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
-            size: 64,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Locked art is dimmed: a locked chapter shouldn't look as
+              // inviting as the one you can actually open.
+              Opacity(
+                opacity: locked ? 0.55 : 1,
+                child: ChapterThumbnail(
+                  assetPath: chapter.thumbnailAsset,
+                  fallbackIcon:
+                      locked ? Icons.lock_rounded : Icons.auto_stories_rounded,
+                  size: 64,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '$number. ${chapter.title.en}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.titleMedium,
+                          ),
+                        ),
+                        if (!locked && !completed && !inProgress)
+                          _Badge(
+                            label: 'NEW',
+                            color: AppColors.accentDark,
+                          ),
+                        if (completed)
+                          const Icon(Icons.check_circle_rounded,
+                              size: 18, color: AppColors.success),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      chapter.grammarTopic.en,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodyMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    if (completed)
+                      Row(
+                        children: [
+                          Text('Completed',
+                              style: text.bodySmall?.copyWith(
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w700)),
+                          const SizedBox(width: AppSpacing.sm),
+                          StarsDisplay(count: stars, size: 15),
+                        ],
+                      )
+                    else if (inProgress)
+                      Row(
+                        children: [
+                          _Badge(
+                              label: 'IN PROGRESS', color: AppColors.primary),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              'Step ${(resumeStep ?? 0) + 1} of ${sceneCount + 1}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: AppColors.primary),
+                            ),
+                          ),
+                        ],
+                      )
+                    else if (locked)
+                      Row(
+                        children: [
+                          Icon(Icons.lock_rounded,
+                              size: 14, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              unlocksAfter ?? 'Locked',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.bodySmall
+                                  ?.copyWith(color: AppColors.textMuted),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text('Ready to start',
+                          style: text.bodySmall
+                              ?.copyWith(color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+              if (!locked)
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(Icons.chevron_right_rounded,
+                      color: AppColors.textSecondary),
+                ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('$number. ${chapter.title.en}', style: text.titleMedium),
-                Text(chapter.grammarTopic.en, style: text.bodyMedium),
-                const SizedBox(height: 4),
-                if (completed)
-                  Row(
-                    children: [
-                      const Icon(Icons.check_circle_rounded,
-                          size: 16, color: AppColors.success),
-                      const SizedBox(width: 4),
-                      Text('Completed',
-                          style: text.bodyMedium
-                              ?.copyWith(color: AppColors.success)),
-                      const SizedBox(width: AppSpacing.sm),
-                      StarsDisplay(count: stars, size: 16),
-                    ],
-                  )
-                else if (inProgress)
-                  Row(
-                    children: [
-                      const Icon(Icons.play_circle_fill_rounded,
-                          size: 16, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text('In Progress',
-                          style: text.bodyMedium
-                              ?.copyWith(color: AppColors.primary)),
-                    ],
-                  )
-                else if (locked)
-                  Row(
-                    children: [
-                      Icon(Icons.lock_rounded,
-                          size: 16,
-                          color:
-                              AppColors.textSecondary.withValues(alpha: 0.6)),
-                      const SizedBox(width: 4),
-                      Text('Locked', style: text.bodyMedium),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          if (!locked)
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textSecondary),
         ],
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }
