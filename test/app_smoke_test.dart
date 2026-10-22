@@ -31,9 +31,10 @@ void main() {
       (tester) async {
     await _pumpApp(tester);
 
-    expect(find.text('Grammar'), findsOneWidget);
-    // 'Bondhu' is drawn twice on purpose: a gold fill over a dark stroke
-    // layer for the 3D outline in BrandLogo.
+    // Both words are drawn twice on purpose in the splash wordmark:
+    // 'Grammar' is a blue fill over a white outline, 'Bondhu' a gold fill
+    // over a dark outline (BrandLogo compact lockup).
+    expect(find.text('Grammar'), findsNWidgets(2));
     expect(find.text('Bondhu'), findsNWidgets(2));
     expect(find.text("Let's Begin"), findsOneWidget);
 

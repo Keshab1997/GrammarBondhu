@@ -215,29 +215,48 @@ class BrandLogo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            ShaderMask(
-              shaderCallback: (b) => const LinearGradient(
-                colors: [AppColors.primaryDeeper, AppColors.primary],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ).createShader(b),
-              child: Text(
-                'Grammar',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.3,
-                  height: 1.0,
-                  shadows: const [
-                    Shadow(color: Color(0xE6FFFFFF), blurRadius: 6),
-                    Shadow(
-                        color: Color(0x55000000),
-                        offset: Offset(0, 3),
-                        blurRadius: 8),
-                  ],
+            // White outline first: deep-blue 'Grammar' on a blue sky is
+            // unreadable without it. Mirrors the Bondhu sticker below.
+            Stack(
+              children: [
+                Text(
+                  'Grammar',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = fontSize * 0.16
+                      ..strokeJoin = StrokeJoin.round
+                      ..color = Colors.white,
+                    letterSpacing: 0.3,
+                    height: 1.0,
+                  ),
                 ),
-              ),
+                ShaderMask(
+                  shaderCallback: (b) => const LinearGradient(
+                    colors: [AppColors.primaryDeeper, AppColors.primary],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ).createShader(b),
+                  child: Text(
+                    'Grammar',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                      height: 1.0,
+                      shadows: const [
+                        Shadow(
+                            color: Color(0x55000000),
+                            offset: Offset(0, 3),
+                            blurRadius: 8),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             SizedBox(width: fontSize * 0.22),
             // Bondhu (gold fill over a dark stroke, as in the stacked logo).
@@ -251,6 +270,7 @@ class BrandLogo extends StatelessWidget {
                     foreground: Paint()
                       ..style = PaintingStyle.stroke
                       ..strokeWidth = fontSize * 0.045
+                      ..strokeJoin = StrokeJoin.round
                       ..color = AppColors.accentDeep,
                     letterSpacing: 0.6,
                     height: 1.0,
