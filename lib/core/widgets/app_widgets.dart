@@ -67,7 +67,16 @@ class _AppButtonState extends State<AppButton> with TickerProviderStateMixin {
           Icon(widget.icon, size: 20),
           const SizedBox(width: AppSpacing.sm),
         ],
-        Text(widget.label),
+        // Flexible, not bare: a long label ("I understand — quiz me") overflowed
+        // the row by ~96 px on a 320 dp phone instead of wrapping.
+        Flexible(
+          child: Text(
+            widget.label,
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
 

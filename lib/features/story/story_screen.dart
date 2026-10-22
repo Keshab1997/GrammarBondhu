@@ -8,6 +8,7 @@ import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/asset_lookup.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../core/widgets/idle_motion.dart';
 import '../../data/models/chapter.dart';
 import '../grammar/grammar_lesson_screen.dart';
 
@@ -478,7 +479,7 @@ class _Character extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         // A slow breathing bob keeps a still standee from looking frozen. It is
         // smaller than the speaker scale change so the two never fight.
-        child: _IdleBob(
+        child: IdleBob(
           period: isSpeaker ? 3800 : 4600,
           phase: id.hashCode % 1000 / 1000,
           child: Stack(
@@ -505,78 +506,6 @@ class _Character extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Breathing bob for a still standee.
-///
-/// Two characters on a static plate is a screenshot; a 0.6 % scale drift over
-/// four seconds is enough for the eye to read them as alive, and cheap enough
-/// to run on a low-RAM phone.
-class _IdleBob extends StatefulWidget {
-  const _IdleBob({
-    required this.child,
-    required this.period,
-    required this.phase,
-  });
-
-  final Widget child;
-  final int period;
-  final double phase;
-
-  @override
-  State<_IdleBob> createState() => _IdleBobState();
-}
-
-class _IdleBobState extends State<_IdleBob>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: Duration(milliseconds: widget.period),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    // Staggered so two cast members never breathe in unison.
-    _controller.value = widget.phase;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Respect the OS "remove animations" preference — and, as a side effect,
-    // leave the tree perfectly still in widget tests, which need it to settle.
-    // The ticker itself has to stop, not just the builder.
-    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
-      _controller.stop();
-    } else if (!_controller.isAnimating) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = Curves.easeInOut.transform(
-          (math.sin(_controller.value * 2 * math.pi) + 1) / 2,
-        );
-        return Transform.scale(
-          scale: 1 + t * 0.006,
-          alignment: Alignment.bottomCenter,
-          child: child,
-        );
-      },
-      child: widget.child,
     );
   }
 }

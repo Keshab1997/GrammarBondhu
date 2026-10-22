@@ -7,6 +7,7 @@ import 'package:grammar_bondhu/data/local/local_store.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 import 'package:grammar_bondhu/core/utils/asset_lookup.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_detail_screen.dart';
+import 'package:grammar_bondhu/features/grammar/grammar_lesson_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
 import 'package:grammar_bondhu/features/story/story_screen.dart';
 import 'package:provider/provider.dart';
@@ -140,6 +141,26 @@ void main() {
     expect(AssetLookup.foregroundPath('bg_classroom'), isNotNull);
     expect(AssetLookup.foregroundPath('bg_does_not_exist'), isNull);
   });
+
+  testWidgets('grammar lesson stages the rule on the board', (tester) async {
+    await _pump(tester, const GrammarLessonScreen(chapterId: 'ch01'),
+        const Size(353, 784));
+    await tester.pump(const Duration(seconds: 2));
+
+    // The scripted reveal must end with the rule and every example readable.
+    expect(find.text('am / is / are'), findsWidgets);
+    expect(find.textContaining('We use am with I'), findsOneWidget);
+    expect(find.text('I am a student.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in const [Size(320, 640), Size(412, 915)]) {
+    testWidgets('grammar lesson fits ${size.width.toInt()} dp', (tester) async {
+      await _pump(tester, const GrammarLessonScreen(chapterId: 'ch01'), size);
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('chapter list filters by real chapter state', (tester) async {
     await _pump(tester, const ChapterListScreen(), const Size(353, 784));
