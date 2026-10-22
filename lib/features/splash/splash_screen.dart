@@ -26,12 +26,19 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _ac = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 1100));
+
+  /// Slow settle on the artwork: a still illustration that breathes keeps the
+  /// first screen from looking like a static poster.
+  late final AnimationController _breath = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 6000))
+    ..forward();
   late final Animation<double> _fade;
   late final Animation<Offset> _logoSlide;
   late final Animation<Offset> _btnSlide;
+  late final Animation<double> _trustFade;
 
   /// `assets/illustrations/splash_hero.webp` is 768 × 1376.
   static const _artAspect = 1376 / 768;
@@ -53,7 +60,14 @@ class _SplashScreenState extends State<SplashScreen>
     _btnSlide = Tween<Offset>(
       begin: const Offset(0, 0.25),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ac, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
+    ));
+    _trustFade = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+    );
     _ac.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -67,6 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _ac.dispose();
+    _breath.dispose();
     super.dispose();
   }
 
@@ -137,11 +152,22 @@ class _SplashScreenState extends State<SplashScreen>
                     (artBottom / constraints.maxHeight).clamp(0.0, 1.0),
                   ],
                 ).createShader(rect),
-                child: Image.asset(
-                  'assets/illustrations/splash_hero.webp',
-                  fit: BoxFit.fitWidth,
-                  alignment: Alignment.topCenter,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                child: AnimatedBuilder(
+                  animation: _breath,
+                  builder: (context, child) => Transform.scale(
+                    // 1.03 → 1.0 with a long ease; invisible frame to frame,
+                    // alive over six seconds.
+                    scale:
+                        1.03 - 0.03 * Curves.easeInOut.transform(_breath.value),
+                    alignment: Alignment.topCenter,
+                    child: child,
+                  ),
+                  child: Image.asset(
+                    'assets/illustrations/splash_hero.webp',
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment.topCenter,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
 
@@ -196,14 +222,30 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              // Top feather: keeps the wordmark crisp against the bright sky.
-              const IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment(0, 0.02),
-                      colors: [Color(0xE85F9EDE), Color(0x005F9EDE)],
+              // Soft halo *behind the wordmark* instead of a full-width
+              // feather: the old band washed the treetops in the corners and
+              // made the whole top of the scene look hazy.
+              Positioned(
+                top: -60,
+                left: 0,
+                right: 0,
+                height: 250,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0, 0.35),
+                        radius: 0.75,
+                        // Very light: the wordmark already carries a white
+                        // stroke, so this only needs to lift it off the sky —
+                        // a stronger halo turns into a visible white cloud.
+                        colors: [
+                          Colors.white.withValues(alpha: 0.16),
+                          Colors.white.withValues(alpha: 0.05),
+                          Colors.white.withValues(alpha: 0.0),
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
                     ),
                   ),
                 ),
@@ -234,10 +276,14 @@ class _SplashScreenState extends State<SplashScreen>
                                 label: "Let's Begin",
                                 icon: Icons.arrow_forward_rounded,
                                 variant: AppButtonVariant.primary,
+                                shine: true,
                                 onPressed: _begin,
                               ),
                               const SizedBox(height: AppSpacing.sm + 2),
-                              const _TrustLine(),
+                              FadeTransition(
+                                opacity: _trustFade,
+                                child: const _TrustLine(),
+                              ),
                             ],
                           ),
                         ),
@@ -260,7 +306,7 @@ class _TrustLine extends StatelessWidget {
   const _TrustLine();
 
   static const _style = TextStyle(
-    color: Color(0xCCFFFFFF),
+    color: Color(0xE6FFFFFF),
     fontSize: 12,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.3,
@@ -268,22 +314,32 @@ class _TrustLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Narrow phones get the line scaled down rather than clipped.
-    return const FittedBox(
+    // A glass chip anchors the line: bare text on a gradient looks like it
+    // drifted up from the CTA instead of being part of the design.
+    return FittedBox(
       fit: BoxFit.scaleDown,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.wifi_off_rounded, size: 13, color: Color(0xCCFFFFFF)),
-          SizedBox(width: 5),
-          Text('Works offline', style: _style),
-          SizedBox(width: 10),
-          Text('·', style: _style),
-          SizedBox(width: 10),
-          Icon(Icons.lock_outline_rounded, size: 13, color: Color(0xCCFFFFFF)),
-          SizedBox(width: 5),
-          Text('No sign-up', style: _style),
-        ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.wifi_off_rounded, size: 13, color: Color(0xE6FFFFFF)),
+            SizedBox(width: 5),
+            Text('Works offline', style: _style),
+            SizedBox(width: 9),
+            Text('·', style: _style),
+            SizedBox(width: 9),
+            Icon(Icons.lock_outline_rounded,
+                size: 13, color: Color(0xE6FFFFFF)),
+            SizedBox(width: 5),
+            Text('No sign-up', style: _style),
+          ],
+        ),
       ),
     );
   }

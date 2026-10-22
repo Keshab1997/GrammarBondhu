@@ -11,6 +11,7 @@ class AppButton extends StatefulWidget {
     this.icon,
     this.variant = AppButtonVariant.primary,
     this.expand = true,
+    this.shine = false,
   });
 
   final String label;
@@ -19,12 +20,40 @@ class AppButton extends StatefulWidget {
   final AppButtonVariant variant;
   final bool expand;
 
+  /// A slow highlight that sweeps across the gradient. Off by default — it
+  /// belongs on the one hero CTA per screen, not on every button in the app.
+  final bool shine;
+
   @override
   State<AppButton> createState() => _AppButtonState();
 }
 
-class _AppButtonState extends State<AppButton> {
+class _AppButtonState extends State<AppButton> with TickerProviderStateMixin {
   bool _pressed = false;
+  AnimationController? _sweep;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.shine) {
+      // One sweep, then rest. A looping sweep is the kind of motion that stops
+      // feeling premium by the third pass — and an endlessly repeating
+      // animation never lets a widget test settle.
+      _sweep = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 900),
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _sweep?.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _sweep?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +114,7 @@ class _AppButtonState extends State<AppButton> {
     Widget button = AnimatedContainer(
       duration: const Duration(milliseconds: 120),
       curve: Curves.easeOutCubic,
-      height: 56,
+      height: 58,
       padding:
           EdgeInsets.symmetric(horizontal: widget.expand ? 0 : AppSpacing.xl),
       transform: Matrix4.translationValues(0, _pressed ? 2 : 0, 0),
@@ -104,28 +133,65 @@ class _AppButtonState extends State<AppButton> {
             : null,
         boxShadow: disabled ? [] : shadow,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onPressed,
-          onHighlightChanged: (v) => setState(() => _pressed = v),
-          borderRadius: BorderRadius.circular(AppRadii.button),
-          child: Center(
-            child: DefaultTextStyle.merge(
-              style: TextStyle(
-                color: foreground.withValues(alpha: disabled ? 0.7 : 1),
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                letterSpacing: 0.2,
-              ),
-              child: IconTheme.merge(
-                data: IconThemeData(
-                  color: foreground.withValues(alpha: disabled ? 0.7 : 1),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadii.button),
+        child: Stack(
+          children: [
+            if (_sweep != null)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: AnimatedBuilder(
+                    animation: _sweep!,
+                    builder: (context, _) {
+                      // Ease the sweep so it enters and leaves instead of
+                      // snapping on at the button's edge.
+                      final t = Curves.easeInOut.transform(_sweep!.value);
+                      return FractionalTranslation(
+                        translation: Offset(-1.6 + 3.2 * t, 0),
+                        child: const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                Color(0x00FFFFFF),
+                                Color(0x47FFFFFF),
+                                Color(0x00FFFFFF),
+                              ],
+                              stops: [0.30, 0.5, 0.70],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                child: child,
+              ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onPressed,
+                onHighlightChanged: (v) => setState(() => _pressed = v),
+                borderRadius: BorderRadius.circular(AppRadii.button),
+                child: Center(
+                  child: DefaultTextStyle.merge(
+                    style: TextStyle(
+                      color: foreground.withValues(alpha: disabled ? 0.7 : 1),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      letterSpacing: 0.2,
+                    ),
+                    child: IconTheme.merge(
+                      data: IconThemeData(
+                        color: foreground.withValues(alpha: disabled ? 0.7 : 1),
+                      ),
+                      child: child,
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

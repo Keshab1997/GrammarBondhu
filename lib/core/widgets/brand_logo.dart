@@ -208,105 +208,129 @@ class BrandLogo extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        SizedBox(height: fontSize * 0.28),
+        SizedBox(height: fontSize * 0.26),
         // The lockup is wider than a 320 dp phone at fontSize 36, so it is
         // allowed to shrink rather than overflow the screen edge.
         FittedBox(
           fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
             children: [
-              // White outline first: deep-blue 'Grammar' on a blue sky is
-              // unreadable without it. Mirrors the Bondhu sticker below.
-              Stack(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(
-                    'Grammar',
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w900,
-                      foreground: Paint()
-                        ..style = PaintingStyle.stroke
-                        ..strokeWidth = fontSize * 0.16
-                        ..strokeJoin = StrokeJoin.round
-                        ..color = Colors.white,
-                      letterSpacing: 0.3,
-                      height: 1.0,
-                    ),
-                  ),
-                  ShaderMask(
-                    shaderCallback: (b) => const LinearGradient(
-                      colors: [AppColors.primaryDeeper, AppColors.primary],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ).createShader(b),
-                    child: Text(
-                      'Grammar',
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.3,
-                        height: 1.0,
-                        shadows: const [
-                          Shadow(
-                              color: Color(0x55000000),
-                              offset: Offset(0, 3),
-                              blurRadius: 8),
-                        ],
+                  // White outline first: deep-blue 'Grammar' on a blue sky is
+                  // unreadable without it. Mirrors the Bondhu sticker below.
+                  Stack(
+                    children: [
+                      Text(
+                        'Grammar',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w900,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = fontSize * 0.16
+                            ..strokeJoin = StrokeJoin.round
+                            ..color = Colors.white,
+                          letterSpacing: 0.3,
+                          height: 1.0,
+                        ),
                       ),
-                    ),
+                      ShaderMask(
+                        shaderCallback: (b) => const LinearGradient(
+                          colors: [AppColors.primaryDeeper, AppColors.primary],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ).createShader(b),
+                        child: Text(
+                          'Grammar',
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                            height: 1.0,
+                            // Two shadows: a tight one to lift the letters off
+                            // the sky, a wide soft one for the sticker glow.
+                            shadows: const [
+                              Shadow(
+                                  color: Color(0x66000000),
+                                  offset: Offset(0, 1),
+                                  blurRadius: 3),
+                              Shadow(
+                                  color: Color(0x4D000000),
+                                  offset: Offset(0, 5),
+                                  blurRadius: 12),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: fontSize * 0.22),
+                  // Bondhu (gold fill over a dark stroke, as in the stacked logo).
+                  Stack(
+                    children: [
+                      Text(
+                        'Bondhu',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w900,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = fontSize * 0.045
+                            ..strokeJoin = StrokeJoin.round
+                            ..color = AppColors.accentDeep,
+                          letterSpacing: 0.6,
+                          height: 1.0,
+                        ),
+                      ),
+                      ShaderMask(
+                        shaderCallback: (b) => const LinearGradient(
+                          colors: [
+                            AppColors.goldTop,
+                            AppColors.accent,
+                            AppColors.accentDark
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ).createShader(b),
+                        child: Text(
+                          'Bondhu',
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.6,
+                            height: 1.0,
+                            shadows: const [
+                              Shadow(
+                                  color: Color(0x66000000),
+                                  offset: Offset(0, 3),
+                                  blurRadius: 8),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(width: fontSize * 0.22),
-              // Bondhu (gold fill over a dark stroke, as in the stacked logo).
-              Stack(
-                children: [
-                  Text(
-                    'Bondhu',
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w900,
-                      foreground: Paint()
-                        ..style = PaintingStyle.stroke
-                        ..strokeWidth = fontSize * 0.045
-                        ..strokeJoin = StrokeJoin.round
-                        ..color = AppColors.accentDeep,
-                      letterSpacing: 0.6,
-                      height: 1.0,
-                    ),
-                  ),
-                  ShaderMask(
-                    shaderCallback: (b) => const LinearGradient(
-                      colors: [
-                        AppColors.goldTop,
-                        AppColors.accent,
-                        AppColors.accentDark
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ).createShader(b),
-                    child: Text(
-                      'Bondhu',
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.6,
-                        height: 1.0,
-                        shadows: const [
-                          Shadow(
-                              color: Color(0x66000000),
-                              offset: Offset(0, 3),
-                              blurRadius: 8),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              // Two tiny sparkles: the lockup reads as a sticker with a bit
+              // of magic rather than flat type.
+              Positioned(
+                top: -fontSize * 0.18,
+                left: -fontSize * 0.10,
+                child: _Sparkle(size: fontSize * 0.30),
+              ),
+              Positioned(
+                bottom: -fontSize * 0.16,
+                right: -fontSize * 0.04,
+                child: _Sparkle(size: fontSize * 0.22),
               ),
             ],
           ),
@@ -349,6 +373,31 @@ class BrandLogo extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// A four-point sparkle beside the wordmark: gold, softly glowing, and scaled
+/// off the wordmark so it never looks pasted on.
+class _Sparkle extends StatelessWidget {
+  const _Sparkle({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Icon(
+        Icons.auto_awesome_rounded,
+        size: size,
+        color: AppColors.accent,
+        shadows: [
+          Shadow(color: AppColors.accentDark, blurRadius: size * 0.4),
+          Shadow(
+              color: Colors.white.withValues(alpha: 0.9),
+              blurRadius: size * 0.15),
+        ],
+      ),
     );
   }
 }
