@@ -209,8 +209,8 @@ class BrandLogo extends StatelessWidget {
           ),
         ),
         SizedBox(height: fontSize * 0.28),
-        // One-line wordmark: Grammar (blue, white halo) + Bondhu (gold).
-        // Scale-down fit so the line can never overflow a narrow phone.
+        // The lockup is wider than a 320 dp phone at fontSize 36, so it is
+        // allowed to shrink rather than overflow the screen edge.
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Row(
@@ -313,26 +313,35 @@ class BrandLogo extends StatelessWidget {
         ),
         if (showTagline) ...[
           SizedBox(height: fontSize * 0.3),
+          // A crisp white pill instead of the old translucent black one: on a
+          // blue sky the dark pill muddied the wordmark's gold half.
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Container(
               padding: EdgeInsets.symmetric(
                 horizontal: fontSize * 0.34,
-                vertical: fontSize * 0.13,
+                vertical: fontSize * 0.14,
               ),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.28),
+                color: const Color(0xF7FFFFFF),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                border: Border.all(color: const Color(0x99FFFFFF)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
               child: Text(
                 'LEARN ENGLISH THROUGH STORIES',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: fontSize * 0.27,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primaryDeeper,
+                  letterSpacing: 1.2,
                   height: 1.0,
                 ),
               ),
