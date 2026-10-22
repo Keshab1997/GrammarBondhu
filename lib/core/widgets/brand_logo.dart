@@ -12,10 +12,15 @@ class BrandLogo extends StatelessWidget {
     this.fontSize = 40,
     this.showTagline = true,
     this.compact = false,
+    this.taglineReveal,
   });
 
   final double fontSize;
   final bool showTagline;
+
+  /// Optional 0→1 driver for the tagline pill in the compact lockup, so a
+  /// screen can play the wordmark and its tagline on separate beats.
+  final Animation<double>? taglineReveal;
 
   /// One-line lockup for the splash screen: badge, then "Grammar Bondhu"
   /// side by side and the tagline in a pill. The stacked lockup is ~190 dp
@@ -337,42 +342,72 @@ class BrandLogo extends StatelessWidget {
         ),
         if (showTagline) ...[
           SizedBox(height: fontSize * 0.3),
-          // A crisp white pill instead of the old translucent black one: on a
-          // blue sky the dark pill muddied the wordmark's gold half.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: fontSize * 0.34,
-                vertical: fontSize * 0.14,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xF7FFFFFF),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: const Color(0x99FFFFFF)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Text(
-                'LEARN ENGLISH THROUGH STORIES',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: fontSize * 0.27,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primaryDeeper,
-                  letterSpacing: 1.2,
-                  height: 1.0,
-                ),
-              ),
-            ),
-          ),
+          if (taglineReveal != null)
+            _TaglineReveal(animation: taglineReveal!, child: _pill(fontSize))
+          else
+            _pill(fontSize),
         ],
       ],
+    );
+  }
+
+  Widget _pill(double fontSize) {
+    // A crisp white pill instead of the old translucent black one: on a blue
+    // sky the dark pill muddied the wordmark's gold half.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: fontSize * 0.34,
+          vertical: fontSize * 0.14,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xF7FFFFFF),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: const Color(0x99FFFFFF)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Text(
+          'LEARN ENGLISH THROUGH STORIES',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: fontSize * 0.27,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primaryDeeper,
+            letterSpacing: 1.2,
+            height: 1.0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Applies an external 0→1 driver to the tagline pill with a small spring.
+class _TaglineReveal extends StatelessWidget {
+  const _TaglineReveal({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) => Transform.scale(
+        scale: 0.72 + 0.28 * animation.value,
+        child: Opacity(
+          opacity: animation.value.clamp(0.0, 1.0),
+          child: child,
+        ),
+      ),
+      child: child,
     );
   }
 }

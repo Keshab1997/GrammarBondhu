@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,13 +11,24 @@ import '../../core/widgets/app_widgets.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../home/home_shell.dart';
 
-/// Screen 1 — branding, hero character, "Let's Begin".
+/// Screen 1 — a short, scripted title sequence rather than a static poster.
 ///
-/// Composition: the artwork is laid out at its own aspect ratio from the top
-/// of the screen, so the whole scene — head to shoes — is always visible. The
-/// band under it is not a flat slab: a scrim starting 150 dp *inside* the
-/// artwork fades the stone path into brand navy, so the artwork and the CTA
-/// dock read as one continuous image rather than an image with a cut edge.
+/// It is built as a beat sheet: one timeline controller drives every element
+/// on its own [Interval], so the screen plays like a video instead of
+/// everything fading in together.
+///
+///   0.00–0.90  sky wakes: sun bloom, clouds slide in
+///   0.15–1.45  the storybook card rises and settles with a soft overshoot
+///   0.90–1.50  cap badge pops
+///   1.15–1.85  wordmark scales up, tagline pill springs in behind it
+///   1.85–2.50  CTA rises, one shine sweep crosses it
+///   2.30–2.80  trust chip fades in
+///   2.60–      ambient motion only: character breathes, clouds drift,
+///              sparkles twinkle
+///
+/// Every animation here is finite on purpose. A looping controller never lets
+/// `pumpAndSettle` settle, which turns every widget test that pumps this app
+/// into a timeout.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -27,48 +40,54 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late final AnimationController _ac = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1100));
+  /// The script. One clock, many beats.
+  late final AnimationController _timeline = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3000),
+  );
 
-  /// Slow settle on the artwork: a still illustration that breathes keeps the
-  /// first screen from looking like a static poster.
-  late final AnimationController _breath = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 6000))
-    ..forward();
-  late final Animation<double> _fade;
-  late final Animation<Offset> _logoSlide;
-  late final Animation<Offset> _btnSlide;
-  late final Animation<double> _trustFade;
+  /// Idle life after the script ends. Runs once — see the class comment.
+  late final AnimationController _ambient = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 5200),
+  );
 
-  /// `assets/illustrations/splash_hero.webp` is 768 × 1376.
-  static const _artAspect = 1376 / 768;
+  static const _artAspect = 768 / 1376;
 
-  /// Sky the artwork opens on, and the navy the dock settles into. The scrim
-  /// also passes through `0xFF5A4E46` — the average colour of the artwork's
-  /// last row (the stone path) — which is what makes the seam invisible.
-  static const _skyMid = Color(0xFF5F9EDE);
-  static const _navyDeep = Color(0xFF13276B);
+  late final Animation<double> _skyIn;
+  late final Animation<double> _cloudsIn;
+  late final Animation<double> _cardIn;
+  late final Animation<double> _badgeIn;
+  late final Animation<double> _wordmarkIn;
+  late final Animation<double> _taglineIn;
+  late final Animation<double> _ctaIn;
+  late final Animation<double> _trustIn;
 
   @override
   void initState() {
     super.initState();
-    _fade = CurvedAnimation(parent: _ac, curve: Curves.easeOut);
-    _logoSlide = Tween<Offset>(
-      begin: const Offset(0, -0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ac, curve: Curves.easeOutCubic));
-    _btnSlide = Tween<Offset>(
-      begin: const Offset(0, 0.25),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _ac,
-      curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
-    ));
-    _trustFade = CurvedAnimation(
-      parent: _ac,
-      curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
-    );
-    _ac.forward();
+
+    Animation<double> beat(double begin, double end, [Curve? curve]) =>
+        CurvedAnimation(
+          parent: _timeline,
+          curve: Interval(
+            begin,
+            end,
+            curve: curve ?? Curves.easeOutCubic,
+          ),
+        );
+
+    _skyIn = beat(0.00, 0.30);
+    _cloudsIn = beat(0.00, 0.35, Curves.easeOut);
+    _cardIn = beat(0.15, 0.48, Curves.easeOutBack);
+    _badgeIn = beat(0.30, 0.50, Curves.elasticOut);
+    _wordmarkIn = beat(0.38, 0.62, Curves.easeOutCubic);
+    _taglineIn = beat(0.50, 0.72, Curves.easeOutBack);
+    _ctaIn = beat(0.62, 0.84, Curves.easeOutCubic);
+    _trustIn = beat(0.77, 0.93, Curves.easeOut);
+
+    _timeline.forward();
+    _ambient.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final content = context.read<ContentController>();
@@ -80,8 +99,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _ac.dispose();
-    _breath.dispose();
+    _timeline.dispose();
+    _ambient.dispose();
     super.dispose();
   }
 
@@ -97,213 +116,264 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    // Single-screen fit on short and tall phones alike.
-    final logoSize = (size.height * 0.042).clamp(30.0, 38.0).toDouble();
+    // Short phones get a smaller lockup so the card keeps its room.
+    final logoSize = (size.height * 0.038).clamp(26.0, 34.0).toDouble();
 
     return Scaffold(
-      backgroundColor: _navyDeep,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Where the artwork's bottom edge lands on this screen.
-          final artBottom = (constraints.maxWidth * _artAspect)
-              .clamp(0.0, constraints.maxHeight);
-          // The colour bridge starts inside the artwork, at the point where
-          // the artwork's own alpha starts to fall away.
-          final scrimTop = (artBottom - 240).clamp(0.0, constraints.maxHeight);
+      backgroundColor: _SplashPalette.navyDeep,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ---------- Layer 1: the sky ----------
+          FadeTransition(
+            opacity: _skyIn,
+            child: const _SkyBackdrop(),
+          ),
 
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              // Base wash: sky at the top, brand navy under the dock. Also the
-              // fallback if the artwork ever fails to decode.
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF3E7CC4),
-                      _skyMid,
-                      Color(0xFF2E5AA8),
-                      _navyDeep,
-                    ],
-                    stops: [0.0, 0.35, 0.78, 1.0],
-                  ),
-                ),
+          // ---------- Layer 2: drifting clouds (behind everything else) ----------
+          FadeTransition(
+            opacity: _cloudsIn,
+            child: AnimatedBuilder(
+              animation: _ambient,
+              builder: (context, _) => CustomPaint(
+                painter: _CloudPainter(progress: _ambient.value),
               ),
+            ),
+          ),
 
-              // The scene, whole and uncropped, pinned to the top, with its
-              // own last 240 dp faded to alpha. A colour band laid *over* the
-              // art still leaves the art's edge legible; fading the pixels
-              // themselves is what actually removes the cut under his shoes.
-              ShaderMask(
-                blendMode: BlendMode.dstIn,
-                shaderCallback: (rect) => LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const [
-                    Colors.white,
-                    Colors.white,
-                    Colors.transparent
-                  ],
-                  stops: [
-                    0.0,
-                    ((artBottom - 240) / constraints.maxHeight).clamp(0.0, 1.0),
-                    (artBottom / constraints.maxHeight).clamp(0.0, 1.0),
-                  ],
-                ).createShader(rect),
-                child: AnimatedBuilder(
-                  animation: _breath,
-                  builder: (context, child) => Transform.scale(
-                    // 1.03 → 1.0 with a long ease; invisible frame to frame,
-                    // alive over six seconds.
-                    scale:
-                        1.03 - 0.03 * Curves.easeInOut.transform(_breath.value),
-                    alignment: Alignment.topCenter,
-                    child: child,
+          // ---------- Layer 3: the storybook card ----------
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+              child: Column(
+                children: [
+                  _Lockup(
+                    logoSize: logoSize,
+                    badgeIn: _badgeIn,
+                    wordmarkIn: _wordmarkIn,
+                    taglineIn: _taglineIn,
                   ),
-                  child: Image.asset(
-                    'assets/illustrations/splash_hero.webp',
-                    fit: BoxFit.fitWidth,
-                    alignment: Alignment.topCenter,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-
-              // Colour bridge under the faded artwork: warms the stone path
-              // into brand navy so the dock never reads as an empty slab.
-              Positioned(
-                top: scrimTop,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: const IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        // A hint of the path's own stone tone (not a full
-                        // wash — that read as brown haze over the meadow).
-                        colors: [
-                          Color(0x005A4E46),
-                          Color(0x405A4E46),
-                          Color(0xCC1F3A7A),
-                          _navyDeep,
-                        ],
-                        stops: [0.0, 0.32, 0.70, 1.0],
+                  const SizedBox(height: AppSpacing.sm),
+                  Expanded(
+                    child: Center(
+                      child: _StorybookCard(
+                        entrance: _cardIn,
+                        ambient: _ambient,
                       ),
                     ),
                   ),
-                ),
-              ),
-
-              // A soft brand glow behind the CTA so the dock has depth instead
-              // of reading as empty space.
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: 220,
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: const Alignment(0, 0.55),
-                        radius: 0.85,
-                        colors: [
-                          AppColors.primary.withValues(alpha: 0.38),
-                          AppColors.primary.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
+                  const SizedBox(height: AppSpacing.md),
+                  _Dock(
+                    ctaIn: _ctaIn,
+                    trustIn: _trustIn,
+                    onBegin: _begin,
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
               ),
+            ),
+          ),
 
-              // Soft halo *behind the wordmark* instead of a full-width
-              // feather: the old band washed the treetops in the corners and
-              // made the whole top of the scene look hazy.
-              Positioned(
-                top: -60,
-                left: 0,
-                right: 0,
-                height: 250,
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: const Alignment(0, 0.35),
-                        radius: 0.75,
-                        // Very light: the wordmark already carries a white
-                        // stroke, so this only needs to lift it off the sky —
-                        // a stronger halo turns into a visible white cloud.
-                        colors: [
-                          Colors.white.withValues(alpha: 0.16),
-                          Colors.white.withValues(alpha: 0.05),
-                          Colors.white.withValues(alpha: 0.0),
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
+          // ---------- Layer 4: sparkles in front ----------
+          IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _ambient,
+              builder: (context, _) => CustomPaint(
+                painter: _SparklePainter(progress: _ambient.value),
               ),
-
-              FadeTransition(
-                opacity: _fade,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    child: Column(
-                      children: [
-                        SlideTransition(
-                          position: _logoSlide,
-                          // Compact one-line lockup: stays in the sky band of
-                          // the artwork, clear of the hero character's head.
-                          child: BrandLogo(fontSize: logoSize, compact: true),
-                        ),
-                        const Spacer(),
-                        SlideTransition(
-                          position: _btnSlide,
-                          child: Column(
-                            children: [
-                              AppButton(
-                                label: "Let's Begin",
-                                icon: Icons.arrow_forward_rounded,
-                                variant: AppButtonVariant.primary,
-                                shine: true,
-                                onPressed: _begin,
-                              ),
-                              const SizedBox(height: AppSpacing.sm + 2),
-                              FadeTransition(
-                                opacity: _trustFade,
-                                child: const _TrustLine(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// One quiet line of reassurance under the CTA — the first thing a parent
-/// wants to know about a kids' learning app.
-class _TrustLine extends StatelessWidget {
-  const _TrustLine();
+// ---------------------------------------------------------------------------
+// The lockup
+// ---------------------------------------------------------------------------
+
+class _Lockup extends StatelessWidget {
+  const _Lockup({
+    required this.logoSize,
+    required this.badgeIn,
+    required this.wordmarkIn,
+    required this.taglineIn,
+  });
+
+  final double logoSize;
+  final Animation<double> badgeIn;
+  final Animation<double> wordmarkIn;
+  final Animation<double> taglineIn;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([badgeIn, wordmarkIn]),
+      builder: (context, child) => Transform.scale(
+        // Badge pops first (elastic), the wordmark then grows into place.
+        scale: 0.72 + 0.28 * badgeIn.value,
+        child: Opacity(
+          opacity: wordmarkIn.value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, 12 * (1 - wordmarkIn.value)),
+            child: child,
+          ),
+        ),
+      ),
+      child: BrandLogo(
+        fontSize: logoSize,
+        compact: true,
+        // The tagline rides in on its own beat instead of with the wordmark.
+        taglineReveal: taglineIn,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The storybook card
+// ---------------------------------------------------------------------------
+
+/// The hero art framed like a storybook portrait: it keeps the artwork's own
+/// aspect ratio, so the character is always whole — head to shoes — instead of
+/// being cropped by whatever the phone's aspect happens to be.
+class _StorybookCard extends StatelessWidget {
+  const _StorybookCard({required this.entrance, required this.ambient});
+
+  final Animation<double> entrance;
+  final Animation<double> ambient;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([entrance, ambient]),
+      builder: (context, child) {
+        final e = entrance.value;
+        // Two full breath cycles, ending where it started, so the idle motion
+        // stops cleanly instead of freezing mid-pose.
+        final breathe = math.sin(ambient.value * math.pi * 4) * 1.6;
+        return Transform.translate(
+          offset: Offset(0, 40 * (1 - e) + breathe),
+          child: Transform.scale(
+            scale: (0.86 + 0.14 * e) * (1 + 0.005 * e),
+            child: Opacity(opacity: e.clamp(0.0, 1.0), child: child),
+          ),
+        );
+      },
+      child: AspectRatio(
+        aspectRatio: _SplashScreenState._artAspect,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: _SplashPalette.navyDeep.withValues(alpha: 0.34),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.45),
+                blurRadius: 2,
+                offset: const Offset(0, -1),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // The art, whole. No fade at the bottom: once the frame
+                // supplies the edge, fading the scene inside it just reads as
+                // fog over the character's feet.
+                ColoredBox(
+                  color: _SplashPalette.navyDeep,
+                  child: Image.asset(
+                    'assets/illustrations/splash_hero.webp',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                ),
+                // A whisper of shade at the very bottom so the white keyline
+                // never sits on a blown-out bright edge.
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(0, 0.86),
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x0013276B), Color(0x6613276B)],
+                    ),
+                  ),
+                ),
+                // Inner keyline — the "printed page" edge.
+                IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        width: 2.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The dock
+// ---------------------------------------------------------------------------
+
+class _Dock extends StatelessWidget {
+  const _Dock({
+    required this.ctaIn,
+    required this.trustIn,
+    required this.onBegin,
+  });
+
+  final Animation<double> ctaIn;
+  final Animation<double> trustIn;
+  final VoidCallback onBegin;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: ctaIn,
+      builder: (context, child) => Opacity(
+        opacity: ctaIn.value.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, 26 * (1 - ctaIn.value)),
+          child: child,
+        ),
+      ),
+      child: Column(
+        children: [
+          AppButton(
+            label: "Let's Begin",
+            icon: Icons.arrow_forward_rounded,
+            variant: AppButtonVariant.primary,
+            shine: true,
+            onPressed: onBegin,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FadeTransition(opacity: trustIn, child: const _TrustChip()),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustChip extends StatelessWidget {
+  const _TrustChip();
 
   static const _style = TextStyle(
     color: Color(0xE6FFFFFF),
@@ -314,16 +384,14 @@ class _TrustLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A glass chip anchors the line: bare text on a gradient looks like it
-    // drifted up from the CTA instead of being part of the design.
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: Colors.white.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
@@ -343,4 +411,177 @@ class _TrustLine extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Sky, clouds, sparkles
+// ---------------------------------------------------------------------------
+
+class _SplashPalette {
+  const _SplashPalette._();
+
+  static const navyDeep = Color(0xFF13276B);
+  static const navyMid = Color(0xFF1F3A7A);
+  static const skyMid = Color(0xFF5F9EDE);
+  static const skyHigh = Color(0xFF3E7CC4);
+}
+
+class _SkyBackdrop extends StatelessWidget {
+  const _SkyBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                _SplashPalette.skyHigh,
+                _SplashPalette.skyMid,
+                Color(0xFF2E5AA8),
+                _SplashPalette.navyMid,
+                _SplashPalette.navyDeep,
+              ],
+              stops: [0.0, 0.26, 0.58, 0.82, 1.0],
+            ),
+          ),
+        ),
+        // Sun bloom behind the lockup — the scene's only warm light.
+        Positioned(
+          top: -130,
+          left: 0,
+          right: 0,
+          height: 430,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0, 0.55),
+                radius: 0.55,
+                colors: [
+                  const Color(0xFFFFF3D6).withValues(alpha: 0.55),
+                  const Color(0xFFFFE3A8).withValues(alpha: 0.18),
+                  Colors.white.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 0.45, 1.0],
+              ),
+            ),
+          ),
+        ),
+        // Brand glow under the dock so the bottom never reads as empty space.
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 260,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0, 0.75),
+                radius: 0.8,
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.40),
+                  AppColors.primary.withValues(alpha: 0.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A handful of soft clouds that drift a little, then rest. `progress` runs
+/// 0→1 once; the drift is one full sine period so the clouds park where they
+/// started rather than stopping mid-slide.
+class _CloudPainter extends CustomPainter {
+  const _CloudPainter({required this.progress});
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final drift = math.sin(progress * math.pi * 2);
+    final puffs = <(double dx, double dy, double r, double drift, double a)>[
+      (0.18, 0.10, 0.13, 26, 0.30),
+      (0.82, 0.16, 0.10, -20, 0.24),
+      (0.06, 0.30, 0.09, 14, 0.18),
+      (0.95, 0.36, 0.12, -16, 0.16),
+    ];
+    final paint = Paint()
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+    for (final (dx, dy, r, d, a) in puffs) {
+      final unit = size.width * r;
+      paint.color =
+          Colors.white.withValues(alpha: a * (0.75 + 0.25 * (1 - drift.abs())));
+      final cx = size.width * dx + d * drift;
+      final cy = size.height * dy;
+      // Three lobes make a cloud silhouette without an asset.
+      canvas.drawCircle(Offset(cx, cy), unit, paint);
+      canvas.drawCircle(
+          Offset(cx - unit * 0.85, cy + unit * 0.28), unit * 0.72, paint);
+      canvas.drawCircle(
+          Offset(cx + unit * 0.9, cy + unit * 0.22), unit * 0.66, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CloudPainter oldDelegate) =>
+      oldDelegate.progress != progress;
+}
+
+/// Three sparkles that twinkle three times and settle. Positioned clear of the
+/// lockup so they never sit on top of the wordmark.
+class _SparklePainter extends CustomPainter {
+  const _SparklePainter({required this.progress});
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final spots = <(double x, double y, double r, double phase)>[
+      (0.12, 0.30, 7, 0.0),
+      (0.88, 0.44, 5.5, 0.35),
+      (0.20, 0.62, 4.5, 0.7),
+      (0.80, 0.70, 6, 0.15),
+    ];
+    for (final (x, y, r, phase) in spots) {
+      final pulse = (math.sin((progress * 3 + phase) * math.pi * 2) + 1) / 2;
+      final radius = r * (0.55 + 0.45 * pulse);
+      final alpha = 0.25 + 0.55 * pulse;
+      _drawSparkle(canvas, Offset(size.width * x, size.height * y), radius,
+          Colors.white.withValues(alpha: alpha));
+    }
+  }
+
+  void _drawSparkle(Canvas canvas, Offset c, double r, Color color) {
+    final paint = Paint()..color = color;
+    final glow = Paint()
+      ..color = color.withValues(alpha: color.a * 0.5)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+    // Four-point star: two crossed tapered diamonds.
+    for (final angle in [0.0, math.pi / 2]) {
+      canvas.save();
+      canvas.translate(c.dx, c.dy);
+      canvas.rotate(angle);
+      final path = Path()
+        ..moveTo(0, -r)
+        ..quadraticBezierTo(r * 0.16, -r * 0.16, r, 0)
+        ..quadraticBezierTo(r * 0.16, r * 0.16, 0, r)
+        ..quadraticBezierTo(-r * 0.16, r * 0.16, -r, 0)
+        ..quadraticBezierTo(-r * 0.16, -r * 0.16, 0, -r)
+        ..close();
+      canvas.drawPath(path, glow);
+      canvas.drawPath(path, paint);
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SparklePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
