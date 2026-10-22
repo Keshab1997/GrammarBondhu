@@ -91,14 +91,21 @@ class _AppButtonState extends State<AppButton> {
       duration: const Duration(milliseconds: 120),
       curve: Curves.easeOutCubic,
       height: 56,
-      padding: EdgeInsets.symmetric(horizontal: widget.expand ? 0 : AppSpacing.xl),
+      padding:
+          EdgeInsets.symmetric(horizontal: widget.expand ? 0 : AppSpacing.xl),
       transform: Matrix4.translationValues(0, _pressed ? 2 : 0, 0),
       decoration: BoxDecoration(
         gradient: disabled ? null : gradient,
-        color: disabled ? AppColors.textMuted.withValues(alpha: 0.5) : (widget.variant == AppButtonVariant.outline ? Colors.white : null),
+        color: disabled
+            ? AppColors.textMuted.withValues(alpha: 0.5)
+            : (widget.variant == AppButtonVariant.outline
+                ? Colors.white
+                : null),
         borderRadius: BorderRadius.circular(AppRadii.button),
         border: widget.variant == AppButtonVariant.outline
-            ? Border.all(color: AppColors.primary.withValues(alpha: disabled ? 0.3 : 1), width: 1.8)
+            ? Border.all(
+                color: AppColors.primary.withValues(alpha: disabled ? 0.3 : 1),
+                width: 1.8)
             : null,
         boxShadow: disabled ? [] : shadow,
       ),
@@ -312,8 +319,8 @@ class LanguageChip extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          padding:
-              const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm, vertical: 8),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : AppColors.primarySoft,
             borderRadius: BorderRadius.circular(AppRadii.chip),
@@ -330,7 +337,8 @@ class LanguageChip extends StatelessWidget {
                 Text(flag!, style: const TextStyle(fontSize: 16))
               else
                 Icon(Icons.language,
-                    size: 16, color: selected ? Colors.white : AppColors.primary),
+                    size: 16,
+                    color: selected ? Colors.white : AppColors.primary),
               const SizedBox(width: 6),
               Text(
                 label,

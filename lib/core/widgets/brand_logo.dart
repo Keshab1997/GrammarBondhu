@@ -111,7 +111,11 @@ class BrandLogo extends StatelessWidget {
               // Gold fill on top.
               ShaderMask(
                 shaderCallback: (b) => const LinearGradient(
-                  colors: [AppColors.goldTop, AppColors.accent, AppColors.accentDark],
+                  colors: [
+                    AppColors.goldTop,
+                    AppColors.accent,
+                    AppColors.accentDark
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ).createShader(b),

@@ -57,7 +57,11 @@ class AppColors {
   static const chapterGradient = [Color(0xFF2563EB), Color(0xFF38BDF8)];
   static const rewardGradient = [Color(0xFFFFD54F), Color(0xFFFF9800)];
   static const successGradient = [Color(0xFF10B981), Color(0xFF34D399)];
-  static const skyGradient = [Color(0xFF60A5FA), Color(0xFFBAE6FD), Colors.white];
+  static const skyGradient = [
+    Color(0xFF60A5FA),
+    Color(0xFFBAE6FD),
+    Colors.white
+  ];
   static const cardGradient = [Colors.white, Color(0xFFF8FAFC)];
 }
 

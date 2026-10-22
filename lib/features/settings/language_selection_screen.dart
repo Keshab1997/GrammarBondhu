@@ -22,9 +22,27 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   late String _selected = context.read<SettingsController>().supportLanguage;
 
   static const _options = [
-    (code: 'en', flag: '🇬🇧', icon: 'flag_en', name: 'English', detail: 'Main Language'),
-    (code: 'bn', flag: '🇧🇩', icon: 'flag_bn', name: 'বাংলা', detail: 'Translation'),
-    (code: 'hi', flag: '🇮🇳', icon: 'flag_hi', name: 'हिन्दी', detail: 'Translation'),
+    (
+      code: 'en',
+      flag: '🇬🇧',
+      icon: 'flag_en',
+      name: 'English',
+      detail: 'Main Language'
+    ),
+    (
+      code: 'bn',
+      flag: '🇧🇩',
+      icon: 'flag_bn',
+      name: 'বাংলা',
+      detail: 'Translation'
+    ),
+    (
+      code: 'hi',
+      flag: '🇮🇳',
+      icon: 'flag_hi',
+      name: 'हिन्दी',
+      detail: 'Translation'
+    ),
   ];
 
   @override
@@ -69,7 +87,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                                   errorBuilder: (_, __, ___) => Container(
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [AppColors.primary, AppColors.skyTop],
+                                        colors: [
+                                          AppColors.primary,
+                                          AppColors.skyTop
+                                        ],
                                       ),
                                       borderRadius: BorderRadius.circular(22),
                                     ),

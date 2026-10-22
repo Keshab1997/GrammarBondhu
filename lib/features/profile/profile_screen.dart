@@ -24,12 +24,17 @@ class ProfileScreen extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
+        padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
         children: [
           // Hero banner with gradient + avatar.
           AppCard(
             gradient: const LinearGradient(
-              colors: [AppColors.primaryDark, AppColors.primary, AppColors.skyTop],
+              colors: [
+                AppColors.primaryDark,
+                AppColors.primary,
+                AppColors.skyTop
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -59,8 +64,8 @@ class ProfileScreen extends StatelessWidget {
                       child: Image.asset(
                         'assets/illustrations/progress_avatar.webp',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const CharacterAvatar(characterId: 'rahul', size: 78),
+                        errorBuilder: (_, __, ___) => const CharacterAvatar(
+                            characterId: 'rahul', size: 78),
                       ),
                     ),
                   ),
@@ -78,8 +83,10 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [AppColors.goldTop, AppColors.accentDark]),
+                          gradient: const LinearGradient(colors: [
+                            AppColors.goldTop,
+                            AppColors.accentDark
+                          ]),
                           borderRadius: BorderRadius.circular(AppRadii.chip),
                         ),
                         child: Text(
@@ -193,21 +200,18 @@ class _MenuTile extends StatelessWidget {
             Expanded(child: Text(label, style: text.bodyLarge)),
             if (trailing != null) ...[
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(AppRadii.chip),
                 ),
                 child: Text(trailing!,
                     style: text.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary)),
+                        fontWeight: FontWeight.w800, color: AppColors.primary)),
               ),
               const SizedBox(width: AppSpacing.sm),
             ],
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textMuted),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
           ],
         ),
       ),

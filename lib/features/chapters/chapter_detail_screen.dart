@@ -59,7 +59,8 @@ class ChapterDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   child: Row(
                     children: [
                       IconButton(
@@ -94,7 +95,8 @@ class ChapterDetailScreen extends StatelessWidget {
                             label: 'Story',
                             detail: '${chapter.scenes.length} scenes'),
                         _CheckRow(
-                            label: 'Grammar Lesson', detail: 'Rules & examples'),
+                            label: 'Grammar Lesson',
+                            detail: 'Rules & examples'),
                         _CheckRow(
                           label: 'Quiz (${chapter.quiz.length} Questions)',
                           detail: record.completed

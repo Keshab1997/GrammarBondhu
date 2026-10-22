@@ -226,14 +226,16 @@ class _ContinueCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(AppRadii.chip),
                   ),
                   child: Text(
-                    record.started ? 'Continue Your Journey' : 'Start Your Journey',
+                    record.started
+                        ? 'Continue Your Journey'
+                        : 'Start Your Journey',
                     style: text.bodySmall?.copyWith(
                         color: Colors.white, fontWeight: FontWeight.w700),
                   ),
@@ -436,16 +438,15 @@ class _ProgressCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(child: Text(title, style: text.titleMedium)),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(AppRadii.chip),
                 ),
                 child: Text(trailing,
                     style: text.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary)),
+                        fontWeight: FontWeight.w800, color: AppColors.primary)),
               ),
             ],
           ),
@@ -527,11 +528,10 @@ class _DailyGoalCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text('$done/$target',
-                  style: text.titleLarge
-                      ?.copyWith(color: AppColors.accentDeep)),
+                  style:
+                      text.titleLarge?.copyWith(color: AppColors.accentDeep)),
               Text('questions',
-                  style: text.bodySmall
-                      ?.copyWith(color: AppColors.accentDeep)),
+                  style: text.bodySmall?.copyWith(color: AppColors.accentDeep)),
             ],
           ),
         ],

@@ -70,7 +70,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.md, top: AppSpacing.sm),
+                padding: const EdgeInsets.only(
+                    right: AppSpacing.md, top: AppSpacing.sm),
                 child: TextButton(
                   onPressed: _skip,
                   child: Text(
@@ -204,8 +205,7 @@ class _OnboardingPage extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Column(
               children: [
                 Text(
@@ -230,8 +230,8 @@ class _OnboardingPage extends StatelessWidget {
                 Text(
                   data.body,
                   textAlign: TextAlign.center,
-                  style: text.bodyLarge?.copyWith(
-                      height: 1.5, color: AppColors.textSecondary),
+                  style: text.bodyLarge
+                      ?.copyWith(height: 1.5, color: AppColors.textSecondary),
                 ),
               ],
             ),

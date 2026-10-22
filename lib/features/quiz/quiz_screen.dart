@@ -117,8 +117,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).maybePop(),
-                        icon:
-                            const Icon(Icons.close_rounded, color: Colors.white),
+                        icon: const Icon(Icons.close_rounded,
+                            color: Colors.white),
                       ),
                       Expanded(
                         child: Column(
@@ -148,81 +148,82 @@ class _QuizScreenState extends State<QuizScreen> {
                     ],
                   ),
                 ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.fromLTRB(
-                      AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadii.sheet),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        question.question,
-                        style: text.headlineMedium?.copyWith(fontSize: 24),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      for (var i = 0; i < question.options.length; i++) ...[
-                        _OptionTile(
-                          label: question.options[i],
-                          state: !_submitted
-                              ? (i == _selected
-                                  ? _OptionState.selected
-                                  : _OptionState.idle)
-                              : i == question.correctIndex
-                                  ? _OptionState.correct
-                                  : i == _selected
-                                      ? _OptionState.wrong
-                                      : _OptionState.idle,
-                          enabled: !_submitted,
-                          onTap: () => setState(() => _selected = i),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(
+                        AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadii.sheet),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          question.question,
+                          style: text.headlineMedium?.copyWith(fontSize: 24),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
-                      const Spacer(),
-                      if (!_submitted)
-                        AppButton(
-                          label: 'Submit',
-                          variant: AppButtonVariant.success,
-                          onPressed:
-                              _selected == null ? null : () => _submit(chapter),
-                        )
-                      else ...[
-                        _FeedbackCard(
-                          isCorrect: isCorrect,
-                          correctAnswer: question.correctAnswer,
-                          explanation: question.explanation.of(lang),
-                          englishExplanation: question.explanation.en,
-                          showTranslation: lang != 'en',
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        if (!isCorrect)
-                          AppButton(
-                            label: 'Try Again',
-                            variant: AppButtonVariant.outline,
-                            onPressed: _tryAgain,
+                        const SizedBox(height: AppSpacing.lg),
+                        for (var i = 0; i < question.options.length; i++) ...[
+                          _OptionTile(
+                            label: question.options[i],
+                            state: !_submitted
+                                ? (i == _selected
+                                    ? _OptionState.selected
+                                    : _OptionState.idle)
+                                : i == question.correctIndex
+                                    ? _OptionState.correct
+                                    : i == _selected
+                                        ? _OptionState.wrong
+                                        : _OptionState.idle,
+                            enabled: !_submitted,
+                            onTap: () => setState(() => _selected = i),
                           ),
-                        const SizedBox(height: AppSpacing.sm),
-                        AppButton(
-                          label: _questionIndex < chapter.quiz.length - 1
-                              ? 'Next Question'
-                              : 'Finish Quiz',
-                          variant: AppButtonVariant.blue,
-                          onPressed: () => _next(chapter),
-                        ),
+                          const SizedBox(height: AppSpacing.sm),
+                        ],
+                        const Spacer(),
+                        if (!_submitted)
+                          AppButton(
+                            label: 'Submit',
+                            variant: AppButtonVariant.success,
+                            onPressed: _selected == null
+                                ? null
+                                : () => _submit(chapter),
+                          )
+                        else ...[
+                          _FeedbackCard(
+                            isCorrect: isCorrect,
+                            correctAnswer: question.correctAnswer,
+                            explanation: question.explanation.of(lang),
+                            englishExplanation: question.explanation.en,
+                            showTranslation: lang != 'en',
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          if (!isCorrect)
+                            AppButton(
+                              label: 'Try Again',
+                              variant: AppButtonVariant.outline,
+                              onPressed: _tryAgain,
+                            ),
+                          const SizedBox(height: AppSpacing.sm),
+                          AppButton(
+                            label: _questionIndex < chapter.quiz.length - 1
+                                ? 'Next Question'
+                                : 'Finish Quiz',
+                            variant: AppButtonVariant.blue,
+                            onPressed: () => _next(chapter),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ],
       ),
     );

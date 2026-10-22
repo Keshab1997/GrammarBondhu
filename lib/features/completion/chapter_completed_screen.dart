@@ -44,7 +44,11 @@ class ChapterCompletedScreen extends StatelessWidget {
             errorBuilder: (_, __, ___) => Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.skyTop, AppColors.skyBottom],
+                  colors: [
+                    AppColors.primary,
+                    AppColors.skyTop,
+                    AppColors.skyBottom
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -57,7 +61,11 @@ class ChapterCompletedScreen extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0x661B5FC1), Color(0x992F80ED), Color(0x6656CCF2)],
+                colors: [
+                  Color(0x661B5FC1),
+                  Color(0x992F80ED),
+                  Color(0x6656CCF2)
+                ],
               ),
             ),
           ),
@@ -74,7 +82,8 @@ class ChapterCompletedScreen extends StatelessWidget {
                         HomeShell.routeName,
                         (_) => false,
                       ),
-                      icon: const Icon(Icons.close_rounded, color: Colors.white),
+                      icon:
+                          const Icon(Icons.close_rounded, color: Colors.white),
                     ),
                   ),
                   Text(
@@ -106,8 +115,8 @@ class ChapterCompletedScreen extends StatelessWidget {
                   if (result.isPersonalBest) ...[
                     const SizedBox(height: AppSpacing.sm),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(AppRadii.chip),

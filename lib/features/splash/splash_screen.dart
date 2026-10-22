@@ -80,7 +80,11 @@ class _SplashScreenState extends State<SplashScreen>
             errorBuilder: (_, __, ___) => Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryDeeper, AppColors.primary, AppColors.skyTop],
+                  colors: [
+                    AppColors.primaryDeeper,
+                    AppColors.primary,
+                    AppColors.skyTop
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

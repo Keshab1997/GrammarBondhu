@@ -30,7 +30,8 @@ class AssetLookup {
     'splash_hero': 'assets/illustrations/splash_hero.webp',
     'onboarding_welcome': 'assets/illustrations/onboarding_welcome.webp',
     'onboarding_languages': 'assets/illustrations/onboarding_languages.webp',
-    'onboarding_story_world': 'assets/illustrations/onboarding_story_world.webp',
+    'onboarding_story_world':
+        'assets/illustrations/onboarding_story_world.webp',
     'login_hero': 'assets/illustrations/login_hero.webp',
     'chapter_completed': 'assets/illustrations/chapter_completed.webp',
     'quiz_time': 'assets/illustrations/quiz_time.webp',

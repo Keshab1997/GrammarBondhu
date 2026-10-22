@@ -24,9 +24,21 @@ class _HomeShellState extends State<HomeShell> {
 
   static const _destinations = [
     (icon: Icons.home_outlined, active: Icons.home_rounded, label: 'Home'),
-    (icon: Icons.menu_book_outlined, active: Icons.menu_book_rounded, label: 'Library'),
-    (icon: Icons.emoji_events_outlined, active: Icons.emoji_events_rounded, label: 'Rewards'),
-    (icon: Icons.person_outline_rounded, active: Icons.person_rounded, label: 'Profile'),
+    (
+      icon: Icons.menu_book_outlined,
+      active: Icons.menu_book_rounded,
+      label: 'Library'
+    ),
+    (
+      icon: Icons.emoji_events_outlined,
+      active: Icons.emoji_events_rounded,
+      label: 'Rewards'
+    ),
+    (
+      icon: Icons.person_outline_rounded,
+      active: Icons.person_rounded,
+      label: 'Profile'
+    ),
   ];
 
   @override

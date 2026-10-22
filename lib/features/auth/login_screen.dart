@@ -76,7 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         errorBuilder: (_, __, ___) => Container(
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.primaryDark, AppColors.primary],
+                              colors: [
+                                AppColors.primaryDark,
+                                AppColors.primary
+                              ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                             ),
@@ -136,9 +139,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 setState(() => _obscure = !_obscure),
                           ),
                         ),
-                        validator: (value) => (value == null || value.length < 4)
-                            ? 'Password needs 4+ characters'
-                            : null,
+                        validator: (value) =>
+                            (value == null || value.length < 4)
+                                ? 'Password needs 4+ characters'
+                                : null,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Align(
