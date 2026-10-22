@@ -18,6 +18,9 @@ class SettingsController extends ChangeNotifier {
   /// True when translations should be shown at all (support language != en).
   bool get showTranslations => _settings.supportLanguage != 'en';
 
+  /// Narration on/off — the master switch behind every speaker in the app.
+  bool get audioEnabled => _settings.audioEnabled;
+
   Future<void> setSupportLanguage(String code) async {
     if (!AppSettings.isSupportedLanguage(code)) return;
     _settings.supportLanguage = code;

@@ -6,6 +6,8 @@ import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/idle_motion.dart';
+import '../../core/widgets/listen_button.dart';
+import '../audio/audio_controller.dart';
 import '../../data/models/chapter.dart';
 import '../quiz/quiz_screen.dart';
 
@@ -51,9 +53,14 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     _chalk.forward();
   }
 
+  /// Held so narration can be silenced on the way out, when reading the
+  /// provider again is no longer safe.
+  AudioController? _audio;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _audio = AudioScope.maybeOf(context);
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
       _chalk.value = 1;
     }
@@ -61,11 +68,15 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
 
   @override
   void dispose() {
+    _audio?.stop();
     _chalk.dispose();
     super.dispose();
   }
 
   void _turn({required bool forward, required VoidCallback onFinish}) {
+    // The board is re-written on every turn; whatever was being read aloud
+    // belongs to the page that just left.
+    _audio?.stop();
     if (forward && _page == _pageCount - 1) {
       onFinish();
       return;
@@ -119,6 +130,15 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                   lesson: lesson,
                   lang: boardLang,
                   progress: _chalk,
+                  audioClipId: switch (_page) {
+                    // The rule is read in the board's own language; the
+                    // examples are always English, because that is the
+                    // sentence being taught; the last page is the learner's
+                    // turn, so the teacher speaks instead.
+                    0 => 'board_${widget.chapterId}_explain_$boardLang',
+                    1 => 'board_${widget.chapterId}_examples_en',
+                    _ => null,
+                  },
                 ),
               ),
 
@@ -166,7 +186,10 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                 left: AppSpacing.md,
                 right: teacherWidth * 0.52,
                 bottom: ctaTop + 10,
-                child: _TeacherSays(text: _teacherLine(boardLang, _page)),
+                child: _TeacherSays(
+                  text: _teacherLine(boardLang, _page),
+                  clipId: 'teach_${_page + 1}_$boardLang',
+                ),
               ),
 
               Positioned(
@@ -409,6 +432,7 @@ class _Board extends StatelessWidget {
     required this.lesson,
     required this.lang,
     required this.progress,
+    required this.audioClipId,
   });
 
   final int page;
@@ -417,6 +441,10 @@ class _Board extends StatelessWidget {
   final GrammarLesson lesson;
   final String lang;
   final Animation<double> progress;
+
+  /// Narration for what is written on this page; null on the "your turn"
+  /// page, where the teacher's own line is the thing to hear.
+  final String? audioClipId;
 
   /// Where the page is, written on the slate so the top bar can hold the
   /// language toggle instead.
@@ -522,6 +550,22 @@ class _Board extends StatelessWidget {
                 ],
               ),
             ),
+            // "Hear it" sits on the lower-left of the slate, at the edge of
+            // the area reserved for the teacher — above her speech bubble,
+            // and below the last chalk line, so it covers neither.
+            if (audioClipId != null)
+              Positioned(
+                left: 14,
+                bottom: (contentBottomInset - 30).clamp(12.0, 240.0),
+                child: _BoardListenChip(
+                  clipId: audioClipId!,
+                  label: switch (lang) {
+                    'bn' => 'শুনে নাও',
+                    'hi' => 'सुनकर देखो',
+                    _ => 'Hear it',
+                  },
+                ),
+              ),
             Positioned(
               right: 14,
               top: 30,
@@ -894,9 +938,12 @@ class _Teacher extends StatelessWidget {
 }
 
 class _TeacherSays extends StatelessWidget {
-  const _TeacherSays({required this.text});
+  const _TeacherSays({required this.text, required this.clipId});
 
   final String text;
+
+  /// `teach_<page>_<lang>` — the same line the bubble shows, spoken.
+  final String clipId;
 
   @override
   Widget build(BuildContext context) {
@@ -939,6 +986,8 @@ class _TeacherSays extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
+                    const Spacer(),
+                    ListenButton(clipId: clipId, size: 26),
                   ],
                 ),
                 const SizedBox(height: 3),
@@ -958,6 +1007,57 @@ class _TeacherSays extends StatelessWidget {
           child: CustomPaint(size: const Size(16, 20), painter: _TailPainter()),
         ),
       ],
+    );
+  }
+}
+
+/// A chalk-outlined pill on the slate: "hear this page".
+///
+/// Hidden outright when there is no clip or narration is switched off — a
+/// button that does nothing is worse than no button.
+class _BoardListenChip extends StatelessWidget {
+  const _BoardListenChip({required this.clipId, required this.label});
+
+  final String clipId;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final audio = AudioScope.maybeOf(context);
+    if (audio == null || !audio.canPlay(clipId)) return const SizedBox.shrink();
+    final playing = audio.isPlaying(clipId);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => audio.toggle(clipId),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: playing ? 0.26 : 0.12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              playing ? Icons.graphic_eq_rounded : Icons.volume_up_rounded,
+              size: 13,
+              color: Colors.white.withValues(alpha: 0.92),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.92),
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

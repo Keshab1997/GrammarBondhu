@@ -13,6 +13,10 @@ dependencies:
   provider: ^6.1.2
   # Local persistence for settings + progress (offline-first, no backend).
   shared_preferences: ^2.3.0
+  # Plays the pre-generated narration clips bundled in assets/audio/clips.
+  # Pre-generated on purpose: device TTS voices differ per phone, so a bundled
+  # clip is the only way every learner hears the same teacher.
+  just_audio: ^0.9.42
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +36,7 @@ flutter:
     - assets/branding/
     - assets/icons/
     - assets/audio/
+    - assets/audio/clips/
   fonts:
     # A rounded display face for headings and the wordmark. Latin only — Bangla
     # and Hindi headings fall through to the Noto families below.

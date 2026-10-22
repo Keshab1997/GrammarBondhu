@@ -7,6 +7,8 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/asset_lookup.dart';
+import '../../core/widgets/listen_button.dart';
+import '../audio/audio_controller.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/idle_motion.dart';
 import '../../data/models/chapter.dart';
@@ -50,12 +52,30 @@ class _StoryScreenState extends State<StoryScreen> {
   /// Local display language for translations: 'off', 'bn', 'hi'.
   String _translationLang = 'off';
 
+  /// Held so narration can be silenced on the way out, when reading the
+  /// provider again is no longer safe.
+  AudioController? _audio;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _audio = AudioScope.maybeOf(context);
+  }
+
+  @override
+  void dispose() {
+    // A line that keeps talking after the learner has moved on sounds broken.
+    _audio?.stop();
+    super.dispose();
+  }
+
   Chapter? get _chapter =>
       context.read<ContentController>().byId(widget.args.chapterId);
 
   void _advance() {
     final chapter = _chapter;
     if (chapter == null) return;
+    _audio?.stop();
     final scene = chapter.scenes[_sceneIndex];
     setState(() => _chosenChoice = null);
 
@@ -141,6 +161,8 @@ class _StoryScreenState extends State<StoryScreen> {
                 characterId: line.characterId,
                 line: line,
                 translationLang: _translationLang,
+                clipPrefix: 'story_${chapter.id}_$_sceneIndex'
+                    '_${_lineIndex.clamp(0, scene.dialogue.length - 1)}',
               ),
             ),
             // Bottom interaction zone: choices, then the advance hint.
@@ -555,11 +577,16 @@ class _DialogueBubble extends StatelessWidget {
     required this.characterId,
     required this.line,
     required this.translationLang,
+    required this.clipPrefix,
   });
 
   final String characterId;
   final DialogueLine line;
   final String translationLang;
+
+  /// `story_<chapter>_<scene>_<line>` — the clip id is the prefix plus the
+  /// language, so the bubble never has to know how assets are named.
+  final String clipPrefix;
 
   @override
   Widget build(BuildContext context) {
@@ -586,13 +613,23 @@ class _DialogueBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            name,
-            style: text.bodySmall?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.4,
-            ),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  name,
+                  style: text.bodySmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              // Heard, not read: the English line is what the learner is
+              // being taught to say, so it gets its own speaker.
+              ListenButton(clipId: '${clipPrefix}_en', size: 26),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -601,14 +638,23 @@ class _DialogueBubble extends StatelessWidget {
           ),
           if (translation != null && translation != line.text.en) ...[
             const Divider(height: AppSpacing.md),
-            Text(
-              _translationLabel(translationLang),
-              style: text.bodySmall?.copyWith(
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-                fontSize: 10,
-              ),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _translationLabel(translationLang),
+                    style: text.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                ListenButton(
+                    clipId: '${clipPrefix}_$translationLang', size: 24),
+              ],
             ),
             const SizedBox(height: 2),
             Text(translation, style: text.bodyMedium?.copyWith(height: 1.4)),

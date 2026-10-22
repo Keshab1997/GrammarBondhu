@@ -54,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
             _SettingsTile(
               icon: Icons.volume_up_rounded,
               color: AppColors.success,
-              label: 'Audio',
+              label: 'Voice narration',
               trailing: Switch(
                 value: s.audioEnabled,
                 activeThumbColor: AppColors.success,
