@@ -9,6 +9,7 @@ import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:grammar_bondhu/core/widgets/brand_logo.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
 
 Future<void> _pumpApp(WidgetTester tester) async {
@@ -81,6 +82,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Daily Goal'), findsOneWidget);
     expect(find.text('Chapter 1'), findsWidgets);
+  });
+
+  testWidgets('splash fits short and tall phones on one screen',
+      (tester) async {
+    for (final size in [const Size(360, 640), const Size(390, 844)]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpApp(tester);
+
+      // Logo lockup and CTA are both fully on screen, with the CTA clear
+      // of the top of the screen and inside the bottom edge — no scroll.
+      final logo = tester.getRect(find.byType(BrandLogo));
+      final cta = tester.getRect(find.text("Let's Begin"));
+      expect(logo.top, greaterThanOrEqualTo(0));
+      expect(logo.bottom, lessThan(size.height * 0.35));
+      expect(cta.bottom, lessThanOrEqualTo(size.height));
+      expect(cta.top, greaterThan(logo.bottom));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    }
   });
 
   testWidgets('onboarding flow reaches login screen', (tester) async {

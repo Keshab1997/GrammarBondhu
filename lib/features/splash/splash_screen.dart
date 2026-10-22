@@ -68,45 +68,66 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    // Single-screen fit: everything is sized off the screen height, so the
+    // logo, hero and CTA always fit together with no scrolling, on short
+    // and tall phones alike.
+    final logoSize = (size.height * 0.042).clamp(30.0, 38.0).toDouble();
+    // The artwork is 768x1376 (~0.56 aspect). On screens taller than the
+    // artwork, fitWidth shows the whole scene — head to shoes — with the
+    // CTA band below it; on wider screens cover fills the frame instead.
+    final fit = size.aspectRatio < 0.56 ? BoxFit.fitWidth : BoxFit.cover;
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Hero illustrated background.
-          Image.asset(
-            'assets/illustrations/splash_hero.webp',
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryDeeper,
-                    AppColors.primary,
-                    AppColors.skyTop
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+          // Base wash behind the artwork: sky at the top, deep blue where
+          // the CTA sits, so the artwork's bottom edge melts into it.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.skyTop,
+                  AppColors.primary,
+                  AppColors.primaryDeeper,
+                ],
+                stops: [0, 0.55, 1],
               ),
             ),
+          ),
+          // Hero illustrated scene, pinned to the top. It is never cropped
+          // over the character's head or shoes on tall phones (fitWidth),
+          // and the darkening wash below hides its bottom edge.
+          Image.asset(
+            'assets/illustrations/splash_hero.webp',
+            fit: fit,
+            alignment: Alignment.topCenter,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
           ),
           // Top gradient for logo legibility.
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
-                end: Alignment(0, 0.45),
-                colors: [Colors.black45, Colors.transparent],
+                end: Alignment(0, -0.1),
+                colors: [Colors.black38, Colors.transparent],
               ),
             ),
           ),
-          // Bottom gradient for button legibility.
+          // Bottom wash: darkens the scene's lower edge into the base
+          // gradient and keeps the golden CTA readable.
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0, 0.6),
+                begin: Alignment(0, 0.35),
                 end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color(0x661B5FC1)],
+                colors: [
+                  Colors.transparent,
+                  Color(0xCC1E3A8A),
+                ],
               ),
             ),
           ),
@@ -114,17 +135,21 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: _fade,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
                 child: Column(
                   children: [
-                    const SizedBox(height: AppSpacing.sm),
                     SlideTransition(
                       position: _logoSlide,
                       // Compact one-line lockup: stays in the sky band of
                       // the artwork, clear of the hero character's head.
-                      child: const BrandLogo(fontSize: 36, compact: true),
+                      child: BrandLogo(
+                        fontSize: logoSize,
+                        compact: true,
+                      ),
                     ),
-                    const Spacer(),
                     const Spacer(),
                     SlideTransition(
                       position: _btnSlide,
@@ -135,7 +160,6 @@ class _SplashScreenState extends State<SplashScreen>
                         onPressed: _begin,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
                   ],
                 ),
               ),

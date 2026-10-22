@@ -210,124 +210,131 @@ class BrandLogo extends StatelessWidget {
         ),
         SizedBox(height: fontSize * 0.28),
         // One-line wordmark: Grammar (blue, white halo) + Bondhu (gold).
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            // White outline first: deep-blue 'Grammar' on a blue sky is
-            // unreadable without it. Mirrors the Bondhu sticker below.
-            Stack(
-              children: [
-                Text(
-                  'Grammar',
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w900,
-                    foreground: Paint()
-                      ..style = PaintingStyle.stroke
-                      ..strokeWidth = fontSize * 0.16
-                      ..strokeJoin = StrokeJoin.round
-                      ..color = Colors.white,
-                    letterSpacing: 0.3,
-                    height: 1.0,
-                  ),
-                ),
-                ShaderMask(
-                  shaderCallback: (b) => const LinearGradient(
-                    colors: [AppColors.primaryDeeper, AppColors.primary],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ).createShader(b),
-                  child: Text(
+        // Scale-down fit so the line can never overflow a narrow phone.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              // White outline first: deep-blue 'Grammar' on a blue sky is
+              // unreadable without it. Mirrors the Bondhu sticker below.
+              Stack(
+                children: [
+                  Text(
                     'Grammar',
                     style: TextStyle(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      foreground: Paint()
+                        ..style = PaintingStyle.stroke
+                        ..strokeWidth = fontSize * 0.16
+                        ..strokeJoin = StrokeJoin.round
+                        ..color = Colors.white,
                       letterSpacing: 0.3,
                       height: 1.0,
-                      shadows: const [
-                        Shadow(
-                            color: Color(0x55000000),
-                            offset: Offset(0, 3),
-                            blurRadius: 8),
-                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(width: fontSize * 0.22),
-            // Bondhu (gold fill over a dark stroke, as in the stacked logo).
-            Stack(
-              children: [
-                Text(
-                  'Bondhu',
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w900,
-                    foreground: Paint()
-                      ..style = PaintingStyle.stroke
-                      ..strokeWidth = fontSize * 0.045
-                      ..strokeJoin = StrokeJoin.round
-                      ..color = AppColors.accentDeep,
-                    letterSpacing: 0.6,
-                    height: 1.0,
+                  ShaderMask(
+                    shaderCallback: (b) => const LinearGradient(
+                      colors: [AppColors.primaryDeeper, AppColors.primary],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ).createShader(b),
+                    child: Text(
+                      'Grammar',
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                        height: 1.0,
+                        shadows: const [
+                          Shadow(
+                              color: Color(0x55000000),
+                              offset: Offset(0, 3),
+                              blurRadius: 8),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                ShaderMask(
-                  shaderCallback: (b) => const LinearGradient(
-                    colors: [
-                      AppColors.goldTop,
-                      AppColors.accent,
-                      AppColors.accentDark
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ).createShader(b),
-                  child: Text(
+                ],
+              ),
+              SizedBox(width: fontSize * 0.22),
+              // Bondhu (gold fill over a dark stroke, as in the stacked logo).
+              Stack(
+                children: [
+                  Text(
                     'Bondhu',
                     style: TextStyle(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      foreground: Paint()
+                        ..style = PaintingStyle.stroke
+                        ..strokeWidth = fontSize * 0.045
+                        ..strokeJoin = StrokeJoin.round
+                        ..color = AppColors.accentDeep,
                       letterSpacing: 0.6,
                       height: 1.0,
-                      shadows: const [
-                        Shadow(
-                            color: Color(0x66000000),
-                            offset: Offset(0, 3),
-                            blurRadius: 8),
-                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  ShaderMask(
+                    shaderCallback: (b) => const LinearGradient(
+                      colors: [
+                        AppColors.goldTop,
+                        AppColors.accent,
+                        AppColors.accentDark
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ).createShader(b),
+                    child: Text(
+                      'Bondhu',
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 0.6,
+                        height: 1.0,
+                        shadows: const [
+                          Shadow(
+                              color: Color(0x66000000),
+                              offset: Offset(0, 3),
+                              blurRadius: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         if (showTagline) ...[
           SizedBox(height: fontSize * 0.3),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: fontSize * 0.34,
-              vertical: fontSize * 0.13,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.28),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-            ),
-            child: Text(
-              'LEARN ENGLISH THROUGH STORIES',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: fontSize * 0.27,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 1.5,
-                height: 1.0,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: fontSize * 0.34,
+                vertical: fontSize * 0.13,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.28),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+              ),
+              child: Text(
+                'LEARN ENGLISH THROUGH STORIES',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: fontSize * 0.27,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 1.5,
+                  height: 1.0,
+                ),
               ),
             ),
           ),
