@@ -148,76 +148,130 @@ class _QuizScreenState extends State<QuizScreen> {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(
-                        AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadii.sheet),
+                // Where you are in the set, as a bar rather than another label.
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md + 8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      value: (_questionIndex + 1) / chapter.quiz.length,
+                      minHeight: 6,
+                      backgroundColor: Colors.white24,
+                      valueColor:
+                          const AlwaysStoppedAnimation(AppColors.accent),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          question.question,
-                          style: text.headlineMedium?.copyWith(fontSize: 24),
-                          textAlign: TextAlign.center,
+                  ),
+                ),
+                // The card used to be a full-height container with a Spacer,
+                // which left ~600 dp of blank white under four answer options.
+                // It now hugs the content, centres in the space that is left,
+                // and only scrolls when the question is a long one.
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight - AppSpacing.md * 2,
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        for (var i = 0; i < question.options.length; i++) ...[
-                          _OptionTile(
-                            label: question.options[i],
-                            state: !_submitted
-                                ? (i == _selected
-                                    ? _OptionState.selected
-                                    : _OptionState.idle)
-                                : i == question.correctIndex
-                                    ? _OptionState.correct
-                                    : i == _selected
-                                        ? _OptionState.wrong
-                                        : _OptionState.idle,
-                            enabled: !_submitted,
-                            onTap: () => setState(() => _selected = i),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                        ],
-                        const Spacer(),
-                        if (!_submitted)
-                          AppButton(
-                            label: 'Submit',
-                            variant: AppButtonVariant.success,
-                            onPressed: _selected == null
-                                ? null
-                                : () => _submit(chapter),
-                          )
-                        else ...[
-                          _FeedbackCard(
-                            isCorrect: isCorrect,
-                            correctAnswer: question.correctAnswer,
-                            explanation: question.explanation.of(lang),
-                            englishExplanation: question.explanation.en,
-                            showTranslation: lang != 'en',
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          if (!isCorrect)
-                            AppButton(
-                              label: 'Try Again',
-                              variant: AppButtonVariant.outline,
-                              onPressed: _tryAgain,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadii.sheet),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    question.question,
+                                    style: text.headlineMedium
+                                        ?.copyWith(fontSize: 24),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  for (var i = 0;
+                                      i < question.options.length;
+                                      i++) ...[
+                                    _OptionTile(
+                                      index: i,
+                                      label: question.options[i],
+                                      state: !_submitted
+                                          ? (i == _selected
+                                              ? _OptionState.selected
+                                              : _OptionState.idle)
+                                          : i == question.correctIndex
+                                              ? _OptionState.correct
+                                              : i == _selected
+                                                  ? _OptionState.wrong
+                                                  : _OptionState.idle,
+                                      enabled: !_submitted,
+                                      onTap: () =>
+                                          setState(() => _selected = i),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                  ],
+                                  const SizedBox(height: AppSpacing.md),
+                                  if (!_submitted) ...[
+                                    AppButton(
+                                      label: 'Submit',
+                                      variant: AppButtonVariant.success,
+                                      onPressed: _selected == null
+                                          ? null
+                                          : () => _submit(chapter),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    // A greyed-out button with no reason reads
+                                    // as broken.
+                                    Text(
+                                      _selected == null
+                                          ? 'Pick an answer to continue'
+                                          : 'Tap Submit when you are ready',
+                                      textAlign: TextAlign.center,
+                                      style: text.bodyMedium?.copyWith(
+                                        color: AppColors.textMuted,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ] else ...[
+                                    _FeedbackCard(
+                                      isCorrect: isCorrect,
+                                      correctAnswer: question.correctAnswer,
+                                      explanation:
+                                          question.explanation.of(lang),
+                                      englishExplanation:
+                                          question.explanation.en,
+                                      showTranslation: lang != 'en',
+                                    ),
+                                    const SizedBox(height: AppSpacing.md),
+                                    if (!isCorrect)
+                                      AppButton(
+                                        label: 'Try Again',
+                                        variant: AppButtonVariant.outline,
+                                        onPressed: _tryAgain,
+                                      ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    AppButton(
+                                      label: _questionIndex <
+                                              chapter.quiz.length - 1
+                                          ? 'Next Question'
+                                          : 'Finish Quiz',
+                                      variant: AppButtonVariant.blue,
+                                      onPressed: () => _next(chapter),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          const SizedBox(height: AppSpacing.sm),
-                          AppButton(
-                            label: _questionIndex < chapter.quiz.length - 1
-                                ? 'Next Question'
-                                : 'Finish Quiz',
-                            variant: AppButtonVariant.blue,
-                            onPressed: () => _next(chapter),
-                          ),
-                        ],
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -234,12 +288,14 @@ enum _OptionState { idle, selected, correct, wrong }
 
 class _OptionTile extends StatelessWidget {
   const _OptionTile({
+    required this.index,
     required this.label,
     required this.state,
     required this.enabled,
     required this.onTap,
   });
 
+  final int index;
   final String label;
   final _OptionState state;
   final bool enabled;
@@ -264,10 +320,50 @@ class _OptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.button),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: 14),
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              horizontal: AppSpacing.md, vertical: 13),
+          child: Row(
+            children: [
+              // A/B/C/D marker: the list stops looking like four text fields
+              // and starts looking like a quiz.
+              Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: switch (state) {
+                    _OptionState.idle => AppColors.background,
+                    _OptionState.selected => AppColors.primary,
+                    _OptionState.correct => AppColors.success,
+                    _OptionState.wrong => AppColors.error,
+                  },
+                ),
+                child: Text(
+                  String.fromCharCode(65 + index),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: state == _OptionState.idle
+                        ? AppColors.textSecondary
+                        : Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm + 4),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+              ),
+              if (state == _OptionState.correct)
+                const Icon(Icons.check_circle_rounded,
+                    color: AppColors.success, size: 20),
+              if (state == _OptionState.wrong)
+                const Icon(Icons.cancel_rounded,
+                    color: AppColors.error, size: 20),
+            ],
           ),
         ),
       ),

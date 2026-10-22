@@ -107,6 +107,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    _StreakStrip(
+                      streakDays: p.streakDays,
+                      today: DateTime.now(),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _ChapterXpCard(
+                      chapters: content.chapters
+                          .map((c) => (
+                                title: c.title.en,
+                                xp: progress.chapterProgress(c.id).xpEarned,
+                                stars: progress.chapterProgress(c.id).stars,
+                                done: progress.isCompleted(c.id),
+                              ))
+                          .toList(),
+                    ),
                   ] else if (_tab == 1) ...[
                     for (final chapter in content.chapters)
                       Padding(
@@ -236,17 +252,29 @@ class _LevelCard extends StatelessWidget {
     return AppCard(
       child: Row(
         children: [
-          // Progress hero avatar (storyboard frame 14: Rahul portrait with level info).
-          ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: SizedBox(
-              width: 64,
-              height: 64,
-              child: Image.asset(
-                'assets/illustrations/progress_avatar.webp',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const CharacterAvatar(characterId: 'rahul', size: 64),
+          // A circle, not a rounded square: the square crop sliced the top of
+          // the portrait's head on every device.
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.accent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: ClipOval(
+              child: SizedBox(
+                width: 62,
+                height: 62,
+                child: Image.asset(
+                  'assets/illustrations/progress_avatar.webp',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) =>
+                      const CharacterAvatar(characterId: 'rahul', size: 62),
+                ),
               ),
             ),
           ),
@@ -264,6 +292,179 @@ class _LevelCard extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Seven dots ending on today; filled for each day the streak covers.
+///
+/// The data model keeps a streak length and a last-study date, so this is a
+/// true reading of what was already earned rather than decoration.
+class _StreakStrip extends StatelessWidget {
+  const _StreakStrip({required this.streakDays, required this.today});
+
+  final int streakDays;
+  final DateTime today;
+
+  static const _labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final filled = streakDays.clamp(0, 7);
+    // Index 6 is today, so the week runs backwards from it.
+    final todayIndex = today.weekday - 1;
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department_rounded,
+                  color: AppColors.accentDark, size: 20),
+              const SizedBox(width: 6),
+              Text('This week', style: text.titleMedium),
+              const Spacer(),
+              Text(
+                streakDays == 0
+                    ? 'Start today'
+                    : '$streakDays day${streakDays == 1 ? '' : 's'} in a row',
+                style: text.bodyMedium?.copyWith(
+                  color: streakDays == 0
+                      ? AppColors.textMuted
+                      : AppColors.accentDeep,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var i = 0; i < 7; i++)
+                Column(
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: i >= 7 - filled && streakDays > 0
+                            ? AppColors.accentSoft
+                            : AppColors.background,
+                        border: i == 6
+                            ? Border.all(color: AppColors.primary, width: 1.6)
+                            : null,
+                      ),
+                      child: Icon(
+                        i >= 7 - filled && streakDays > 0
+                            ? Icons.local_fire_department_rounded
+                            : Icons.remove_rounded,
+                        size: 15,
+                        color: i >= 7 - filled && streakDays > 0
+                            ? AppColors.accentDark
+                            : AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _labels[(todayIndex - (6 - i)) % 7],
+                      style: text.bodyMedium?.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: i == 6 ? AppColors.primary : AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// XP earned per chapter — the only per-chapter number the app actually keeps,
+/// so the chart is honest at zero as well as at five.
+class _ChapterXpCard extends StatelessWidget {
+  const _ChapterXpCard({required this.chapters});
+
+  final List<({String title, int xp, int stars, bool done})> chapters;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final maxXp = chapters.fold<int>(1, (m, c) => c.xp > m ? c.xp : m);
+    final empty = chapters.every((c) => c.xp == 0);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.bar_chart_rounded,
+                  color: AppColors.primary, size: 20),
+              const SizedBox(width: 6),
+              Text('XP by chapter', style: text.titleMedium),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (empty)
+            Text(
+              'Answer a quiz and your first bar shows up here.',
+              style: text.bodyMedium?.copyWith(color: AppColors.textMuted),
+            )
+          else
+            for (final c in chapters) ...[
+              Row(
+                children: [
+                  SizedBox(
+                    width: 96,
+                    child: Text(
+                      c.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodyMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: LinearProgressIndicator(
+                        value: c.xp / maxXp,
+                        minHeight: 10,
+                        backgroundColor: AppColors.background,
+                        valueColor:
+                            const AlwaysStoppedAnimation(AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  SizedBox(
+                    width: 36,
+                    child: Text(
+                      '${c.xp}',
+                      textAlign: TextAlign.right,
+                      style: text.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
         ],
       ),
     );

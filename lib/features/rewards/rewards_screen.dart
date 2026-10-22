@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../story/story_screen.dart';
 
 /// Rewards tab — streak, coins, XP and lightweight achievements.
 class RewardsScreen extends StatelessWidget {
@@ -47,24 +48,29 @@ class RewardsScreen extends StatelessWidget {
         children: [
           Text('Rewards', style: text.titleLarge),
           const SizedBox(height: AppSpacing.md),
-          // Rewards trophy hero (matches storyboard reward vibe).
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadii.card),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.asset(
-                'assets/illustrations/rewards_trophy.webp',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: AppColors.rewardGradient),
+          // A trophy above a row of zeroes reads as "nothing here, with paint
+          // on top". Before the first chapter it is a door instead of a shelf.
+          if (p.totalXp == 0 && p.completedChapterCount == 0)
+            _StartHereCard()
+          else
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.asset(
+                  'assets/illustrations/rewards_trophy.webp',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: const BoxDecoration(
+                      gradient:
+                          LinearGradient(colors: AppColors.rewardGradient),
+                    ),
+                    child: const Icon(Icons.emoji_events_rounded,
+                        size: 72, color: Colors.white),
                   ),
-                  child: const Icon(Icons.emoji_events_rounded,
-                      size: 72, color: Colors.white),
                 ),
               ),
             ),
-          ),
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -162,6 +168,81 @@ class _BigStat extends StatelessWidget {
         Text(label,
             style: text.bodyMedium?.copyWith(color: AppColors.textPrimary)),
       ],
+    );
+  }
+}
+
+/// Zero state for the rewards tab: one clear way in, and what waits behind the
+/// first finished chapter.
+class _StartHereCard extends StatelessWidget {
+  const _StartHereCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                ),
+                child: const Icon(Icons.emoji_events_rounded,
+                    color: AppColors.accent, size: 24),
+              ),
+              const SizedBox(width: AppSpacing.sm + 2),
+              Expanded(
+                child: Text(
+                  'Your first trophy is one chapter away',
+                  style: text.titleLarge?.copyWith(
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Finish The New Student to bank coins, XP and your first badge. '
+            'Every quiz answer counts toward the daily goal.',
+            style: text.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppButton(
+            label: 'Start chapter 1',
+            icon: Icons.play_arrow_rounded,
+            variant: AppButtonVariant.primary,
+            onPressed: () => Navigator.of(context).pushNamed(
+              StoryScreen.routeName,
+              arguments: const StoryArgs('ch01'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
