@@ -32,13 +32,16 @@ void main() {
     await _pumpApp(tester);
 
     expect(find.text('Grammar'), findsOneWidget);
-    expect(find.text('Bondhu'), findsOneWidget);
+    // 'Bondhu' is drawn twice on purpose: a gold fill over a dark stroke
+    // layer for the 3D outline in BrandLogo.
+    expect(find.text('Bondhu'), findsNWidgets(2));
     expect(find.text("Let's Begin"), findsOneWidget);
 
     await tester.tap(find.text("Let's Begin"));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to GrammarBondhu!'), findsOneWidget);
+    // The heading is rendered as 'Welcome to\nGrammarBondhu!'.
+    expect(find.textContaining('Welcome to'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
   });
 
@@ -71,6 +74,10 @@ void main() {
 
     expect(find.text('Hello, Rahul!'), findsOneWidget);
     expect(find.text('Start Your Journey'), findsOneWidget);
+    // The daily-goal card sits below the fold in the home ListView; it is
+    // only built once scrolled into view.
+    await tester.scrollUntilVisible(find.text('Daily Goal'), 200);
+    await tester.pumpAndSettle();
     expect(find.text('Daily Goal'), findsOneWidget);
     expect(find.text('Chapter 1'), findsWidgets);
   });
