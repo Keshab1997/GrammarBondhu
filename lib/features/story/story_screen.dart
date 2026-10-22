@@ -105,7 +105,21 @@ class _StoryScreenState extends State<StoryScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _SceneBackdrop(backgroundId: scene.backgroundId),
+            // A 320 ms cross-fade on the plate only: the cast stays put, so a
+            // scene change reads like a cut in a film rather than a page swap.
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 320),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              layoutBuilder: (current, previous) => Stack(
+                fit: StackFit.expand,
+                children: [...previous, if (current != null) current],
+              ),
+              child: _SceneBackdrop(
+                key: ValueKey(scene.backgroundId ?? 'none'),
+                backgroundId: scene.backgroundId,
+              ),
+            ),
             // Ground shading: the characters need something to stand on.
             const IgnorePointer(
               child: DecoratedBox(
@@ -427,7 +441,7 @@ class _Character extends StatelessWidget {
     final path = AssetLookup.fullBodyPath(id);
     final name = AssetLookup.characterDisplayName(id);
 
-    final art = path == null
+    Widget art = path == null
         ? _FallbackBody(name: name, height: height)
         : Image.asset(
             path,
@@ -439,6 +453,21 @@ class _Character extends StatelessWidget {
                 _FallbackBody(name: name, height: height),
           );
 
+    // A touch of warmth on whoever is talking. Dimming the listener alone left
+    // the speaker looking like anyone else; the highlight does the pointing.
+    if (isSpeaker) {
+      art = ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (rect) => const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0x14FFF3D6), Color(0x00FFF3D6)],
+          stops: [0.0, 0.45],
+        ).createShader(Offset.zero & rect.size),
+        child: art,
+      );
+    }
+
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 220),
       opacity: isSpeaker ? 1 : 0.82,
@@ -447,29 +476,107 @@ class _Character extends StatelessWidget {
         curve: Curves.easeOutCubic,
         scale: isSpeaker ? 1 : 0.97,
         alignment: Alignment.bottomCenter,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Contact shadow: without it the feet float over the scene.
-            Container(
-              width: height * 0.26,
-              height: height * 0.035,
-              margin: EdgeInsets.only(bottom: height * 0.004),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.28),
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 14,
-                  ),
-                ],
+        // A slow breathing bob keeps a still standee from looking frozen. It is
+        // smaller than the speaker scale change so the two never fight.
+        child: _IdleBob(
+          period: isSpeaker ? 3800 : 4600,
+          phase: id.hashCode % 1000 / 1000,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              // Contact shadow: without it the feet float over the scene.
+              Container(
+                width: height * 0.26,
+                height: height * 0.035,
+                margin: EdgeInsets.only(bottom: height * 0.004),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.28),
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            art,
-          ],
+              art,
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Breathing bob for a still standee.
+///
+/// Two characters on a static plate is a screenshot; a 0.6 % scale drift over
+/// four seconds is enough for the eye to read them as alive, and cheap enough
+/// to run on a low-RAM phone.
+class _IdleBob extends StatefulWidget {
+  const _IdleBob({
+    required this.child,
+    required this.period,
+    required this.phase,
+  });
+
+  final Widget child;
+  final int period;
+  final double phase;
+
+  @override
+  State<_IdleBob> createState() => _IdleBobState();
+}
+
+class _IdleBobState extends State<_IdleBob>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: Duration(milliseconds: widget.period),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    // Staggered so two cast members never breathe in unison.
+    _controller.value = widget.phase;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Respect the OS "remove animations" preference — and, as a side effect,
+    // leave the tree perfectly still in widget tests, which need it to settle.
+    // The ticker itself has to stop, not just the builder.
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(
+          (math.sin(_controller.value * 2 * math.pi) + 1) / 2,
+        );
+        return Transform.scale(
+          scale: 1 + t * 0.006,
+          alignment: Alignment.bottomCenter,
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }
@@ -898,7 +1005,7 @@ class _Foreground extends StatelessWidget {
 /// from the bottom. A soft top vignette hides the hard end of the crop and
 /// gives the bubble some air.
 class _SceneBackdrop extends StatelessWidget {
-  const _SceneBackdrop({required this.backgroundId});
+  const _SceneBackdrop({super.key, required this.backgroundId});
 
   final String? backgroundId;
 

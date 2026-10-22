@@ -40,11 +40,16 @@ Future<void> _pump(WidgetTester tester, Widget screen, Size size) async {
           create: (_) => ProgressController(store, store.loadProgress()),
         ),
       ],
-      child: MaterialApp(
-        home: screen,
-        theme: ThemeData(useMaterial3: true),
-        onUnknownRoute: (settings) =>
-            MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
+      // The story stage has a continuous idle bob; asking for reduced motion is
+      // how a test gets a tree that settles (and how the OS gets a still app).
+      child: MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: MaterialApp(
+          home: screen,
+          theme: ThemeData(useMaterial3: true),
+          onUnknownRoute: (settings) =>
+              MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
+        ),
       ),
     ),
   );
@@ -146,7 +151,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('to unlock'), findsNWidgets(4));
 
-    await tester.tap(find.text('Completed'));
+    await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
     expect(find.textContaining('to unlock'), findsNothing);
   });
