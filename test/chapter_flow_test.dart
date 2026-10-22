@@ -142,15 +142,29 @@ void main() {
     expect(AssetLookup.foregroundPath('bg_does_not_exist'), isNull);
   });
 
-  testWidgets('grammar lesson stages the rule on the board', (tester) async {
+  testWidgets('grammar lesson turns its three board pages', (tester) async {
     await _pump(tester, const GrammarLessonScreen(chapterId: 'ch01'),
         const Size(353, 784));
     await tester.pump(const Duration(seconds: 2));
 
-    // The scripted reveal must end with the rule and every example readable.
-    expect(find.text('am / is / are'), findsWidgets);
+    // Page 1: the rule, written on the board.
+    expect(find.text('TODAY’S RULE'), findsOneWidget);
+    expect(find.text('am / is / are'), findsOneWidget);
     expect(find.textContaining('We use am with I'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+
+    // Page 2: examples, with the translation under each one.
+    await tester.tap(find.text('Next'));
+    await tester.pump(const Duration(seconds: 2));
     expect(find.text('I am a student.'), findsOneWidget);
+    expect(find.text('He is my friend.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Page 3: the learner's turn, and only then the quiz.
+    await tester.tap(find.text('Next'));
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('Say it yourself'), findsOneWidget);
+    expect(find.text('Start the quiz'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -14,9 +14,8 @@ import '../quiz/quiz_screen.dart';
 /// It used to be a white card: a title, a paragraph, a list of examples and a
 /// round avatar in the corner — a document with a picture on it. A learner
 /// opening "the grammar lesson" expects to be *taught*, so the rule is written
-/// on a board that the teacher is standing in front of, the examples are chalk
-/// lines under it, and the sentence in the learner's own language comes out of
-/// the teacher's mouth rather than out of a paragraph.
+/// on a board, Mrs. Sen stands in front of it with a pointer, and the page
+/// turns in her rhythm: the rule first, then the examples, then "your turn".
 class GrammarLessonScreen extends StatefulWidget {
   const GrammarLessonScreen({super.key, required this.chapterId});
 
@@ -30,10 +29,16 @@ class GrammarLessonScreen extends StatefulWidget {
 
 class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     with SingleTickerProviderStateMixin {
-  /// Drives the chalk reveal: the rule is "written" line by line when the
-  /// screen opens, which is what sells the board as a board.
+  /// The board is written, not rendered: each page sweeps in line by line.
   late final AnimationController _chalk = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1500));
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
+
+  int _page = 0;
+
+  /// Rule → examples → remember. Three beats, one board.
+  static const _pageCount = 3;
 
   @override
   void initState() {
@@ -55,6 +60,18 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     super.dispose();
   }
 
+  void _turn({required bool forward, required VoidCallback onFinish}) {
+    if (forward && _page == _pageCount - 1) {
+      onFinish();
+      return;
+    }
+    setState(
+        () => _page = (_page + (forward ? 1 : -1)).clamp(0, _pageCount - 1));
+    _chalk
+      ..reset()
+      ..forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final content = context.watch<ContentController>();
@@ -69,108 +86,132 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     final lang = settings.supportLanguage;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B2A24),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const _ClassroomWall(),
+      backgroundColor: const Color(0xFF16241E),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final h = constraints.maxHeight;
+          final ctaTop = _ctaHeight(context);
+          final teacherHeight = h * 0.40;
+          final teacherWidth = teacherHeight * _teacherAspect;
 
-          // The wall the board hangs on, then the board, then the person
-          // standing in front of it.
-          Positioned.fill(
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                  _TopBar(
-                    chapter: chapter,
-                    onBack: () => Navigator.of(context).maybePop(),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.sm, 0, AppSpacing.sm, 0),
-                      child: _Board(
-                        lesson: lesson,
-                        lang: lang,
-                        progress: _chalk,
-                      ),
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              const _ClassroomWall(),
+
+              // The board, full width, standing behind the teacher.
+              Positioned(
+                left: AppSpacing.sm + 4,
+                right: AppSpacing.sm + 4,
+                top: MediaQuery.paddingOf(context).top + 64,
+                bottom: ctaTop + 8,
+                child: _Board(
+                  page: _page,
+                  pageCount: _pageCount,
+                  // Text keeps clear of the body standing in front of it.
+                  contentBottomInset: teacherHeight * 0.85,
+                  lesson: lesson,
+                  lang: lang,
+                  progress: _chalk,
+                ),
+              ),
+
+              // Those little things a classroom is made of.
+              Positioned(
+                left: AppSpacing.sm + 4,
+                right: AppSpacing.sm + 4,
+                top: MediaQuery.paddingOf(context).top,
+                child: _TopBar(
+                  chapter: chapter,
+                  status: 'PAGE ${_page + 1} OF $_pageCount',
+                  onBack: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+
+              // Mrs. Sen, in front of the board, pointer across it.
+              Positioned(
+                right: -14,
+                bottom: ctaTop - 6,
+                height: teacherHeight,
+                child: const IdleBob(
+                  period: 5000,
+                  amplitude: 0.005,
+                  child: _Teacher(),
+                ),
+              ),
+
+              // What she is saying about the page that is up.
+              Positioned(
+                left: AppSpacing.md,
+                right: teacherWidth * 0.52,
+                bottom: ctaTop + 10,
+                child: _TeacherSays(text: _teacherLine(lang, _page)),
+              ),
+
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _CtaBar(
+                  label: _page == _pageCount - 1 ? 'Start the quiz' : 'Next',
+                  icon: _page == _pageCount - 1
+                      ? Icons.quiz_rounded
+                      : Icons.arrow_forward_rounded,
+                  onBack: _page == 0
+                      ? null
+                      : () => _turn(forward: false, onFinish: () {}),
+                  onPressed: () => _turn(
+                    forward: true,
+                    onFinish: () => Navigator.of(context).pushNamed(
+                      QuizScreen.routeName,
+                      arguments: widget.chapterId,
                     ),
                   ),
-                  // Room for the teacher, who stands in front of the board and
-                  // is cropped by the CTA bar rather than floating above it.
-                  SizedBox(height: _teacherLane(context)),
-                ],
+                ),
               ),
-            ),
-          ),
-
-          // The teacher herself: full body, on the right, feet behind the CTA.
-          Positioned(
-            right: -10,
-            bottom: _ctaHeight(context) - 40,
-            height: _teacherHeight(context),
-            child: const IdleBob(period: 4600, child: _Teacher()),
-          ),
-
-          // What she is saying, in the learner's own language.
-          Positioned(
-            left: AppSpacing.md,
-            right: _teacherWidth(context) * 0.55,
-            bottom: _ctaHeight(context) + 6,
-            child: _TeacherSays(text: _teacherLine(lang, lesson)),
-          ),
-
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _CtaBar(
-              onPressed: () => Navigator.of(context).pushNamed(
-                QuizScreen.routeName,
-                arguments: widget.chapterId,
-              ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  /// Height reserved so the board stops at the teacher's hairline instead of
-  /// running underneath her.
-  static double _teacherLane(BuildContext context) =>
-      MediaQuery.sizeOf(context).height * 0.34;
-
-  static double _teacherHeight(BuildContext context) =>
-      MediaQuery.sizeOf(context).height * 0.46;
-
-  /// Where the CTA bar starts, so the bubble and the teacher can sit above it.
   static double _ctaHeight(BuildContext context) =>
-      92 + MediaQuery.paddingOf(context).bottom;
+      88 + MediaQuery.paddingOf(context).bottom;
 
-  static double _teacherWidth(BuildContext context) =>
-      _teacherHeight(context) * 0.34;
+  /// Standee aspect from the exported art (479 × 703).
+  static const double _teacherAspect = 479 / 703;
 
-  /// One sentence, in the language the learner reads in. The explanation itself
-  /// is long — that belongs on the board; this is the teacher pointing at it.
-  static String _teacherLine(String lang, GrammarLesson lesson) {
+  /// One sentence per page, in the language the learner reads in. The long
+  /// explanation belongs on the board; this is the teacher talking over it.
+  static String _teacherLine(String lang, int page) {
     switch (lang) {
       case 'hi':
-        return 'यह नियम बोर्ड पर लिखा है। नीचे के उदाहरण पढ़ो और खुद बोलकर देखो।';
+        return switch (page) {
+          0 => 'यह नियम बोर्ड पर है। ध्यान से देखो।',
+          1 => 'उदाहरण ज़ोर से पढ़ो — मैं सुन रही हूँ।',
+          _ => 'अब अपनी बारी। क्विज़ में आज़माओ।',
+        };
       case 'en':
-        return 'The rule is on the board. Read the examples under it and say '
-            'each one out loud.';
+        return switch (page) {
+          0 => 'The rule is on the board — read it carefully.',
+          1 => 'Read each example out loud; I am listening.',
+          _ => 'Your turn now. Try it in the quiz.',
+        };
       default:
-        return 'নিয়মটা বোর্ডে লিখেছি। নিচের উদাহরণগুলো পড়ে জোরে বলে দেখো।';
+        return switch (page) {
+          0 => 'নিয়মটা বোর্ডে লিখেছি। ভালো করে দেখো।',
+          1 => 'উদাহরণগুলো জোরে পড়ো — আমি শুনছি।',
+          _ => 'এবার তোমার পালা। কুইজে চেষ্টা করে দেখো।',
+        };
     }
   }
 }
 
 // ---------------------------------------------------------------- the room ---
 
-/// The classroom wall behind the board: the room plate, darkened and slightly
-/// blurred so the board (and the person in front of it) own the frame.
+/// The classroom wall behind the board: the room plate, darkened so the board
+/// and the person in front of it own the frame.
 class _ClassroomWall extends StatelessWidget {
   const _ClassroomWall();
 
@@ -191,12 +232,8 @@ class _ClassroomWall extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xCC0F172A),
-                Color(0x990F172A),
-                Color(0xE6101E18),
-              ],
-              stops: [0.0, 0.45, 1.0],
+              colors: [Color(0xD90F172A), Color(0x99101814), Color(0xE6101E18)],
+              stops: [0.0, 0.5, 1.0],
             ),
           ),
         ),
@@ -206,9 +243,14 @@ class _ClassroomWall extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.chapter, required this.onBack});
+  const _TopBar({
+    required this.chapter,
+    required this.status,
+    required this.onBack,
+  });
 
   final Chapter chapter;
+  final String status;
   final VoidCallback onBack;
 
   @override
@@ -234,7 +276,7 @@ class _TopBar extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: text.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.72),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -246,9 +288,9 @@ class _TopBar extends StatelessWidget {
               color: AppColors.accent,
               borderRadius: BorderRadius.circular(999),
             ),
-            child: const Text(
-              'IN CLASS',
-              style: TextStyle(
+            child: Text(
+              status,
+              style: const TextStyle(
                 color: Color(0xFF4A3410),
                 fontSize: 9,
                 fontWeight: FontWeight.w900,
@@ -288,14 +330,20 @@ class _GlassButton extends StatelessWidget {
 // --------------------------------------------------------------- the board ---
 
 /// A blackboard, drawn rather than photographed: wooden frame, chalk tray, and
-/// the rule written on it in chalk.
+/// the page written on it in chalk.
 class _Board extends StatelessWidget {
   const _Board({
+    required this.page,
+    required this.pageCount,
+    required this.contentBottomInset,
     required this.lesson,
     required this.lang,
     required this.progress,
   });
 
+  final int page;
+  final int pageCount;
+  final double contentBottomInset;
   final GrammarLesson lesson;
   final String lang;
   final Animation<double> progress;
@@ -319,77 +367,109 @@ class _Board extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(9),
-      child: Stack(
-        children: [
-          // The slate itself.
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(9),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2F4B3C), Color(0xFF21362C)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
-          ),
-          // Chalk haze: corners are never evenly erased.
-          Positioned.fill(
-            child: IgnorePointer(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(9),
+        child: Stack(
+          children: [
+            Positioned.fill(
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(9),
-                  gradient: RadialGradient(
-                    center: const Alignment(-0.4, -0.6),
-                    radius: 1.1,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.10),
-                      Colors.white.withValues(alpha: 0.0),
-                    ],
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF2F4B3C), Color(0xFF21362C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
               ),
             ),
-          ),
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-              child: _BoardContent(
-                lesson: lesson,
-                lang: lang,
-                progress: progress,
+            // Chalk haze: corners are never evenly erased.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: const Alignment(-0.4, -0.6),
+                      radius: 1.1,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.10),
+                        Colors.white.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          // Chalk tray with a couple of sticks and an eraser.
-          const Positioned(
-            left: 10,
-            right: 10,
-            bottom: -3,
-            child: _ChalkTray(),
-          ),
-        ],
+            Positioned.fill(
+              child: Padding(
+                // The teacher stands in the lower right of the slate, so the
+                // chalk stops above her head rather than beside it.
+                padding:
+                    EdgeInsets.fromLTRB(16, 14, 16, 12 + contentBottomInset),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  // Switcher children centre themselves; the chalk belongs at
+                  // the top of the slate, where a teacher starts writing.
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.topLeft,
+                    children: [...previous, if (current != null) current],
+                  ),
+                  child: _BoardPage(
+                    key: ValueKey(page),
+                    page: page,
+                    lesson: lesson,
+                    lang: lang,
+                    progress: progress,
+                  ),
+                ),
+              ),
+            ),
+            // Chalk dots: how far through the lesson you are.
+            Positioned(
+              right: 14,
+              top: 12,
+              child: Row(
+                children: [
+                  for (var i = 0; i < pageCount; i++)
+                    Container(
+                      width: i == page ? 16 : 7,
+                      height: 7,
+                      margin: const EdgeInsets.only(right: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white
+                            .withValues(alpha: i == page ? 0.85 : 0.28),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _BoardContent extends StatelessWidget {
-  const _BoardContent({
+/// One page of the board. Each block is written in turn as the sweep runs.
+class _BoardPage extends StatelessWidget {
+  const _BoardPage({
+    super.key,
+    required this.page,
     required this.lesson,
     required this.lang,
     required this.progress,
   });
 
+  final int page;
   final GrammarLesson lesson;
   final String lang;
   final Animation<double> progress;
 
-  /// Chalk: soft white, a faint halo so it sits on the slate, and a hint of
-  /// dust under the strokes.
-  static TextStyle chalk(double size,
-      {double alpha = 0.94, FontWeight w = FontWeight.w600}) {
+  static TextStyle chalk(
+    double size, {
+    double alpha = 0.94,
+    FontWeight w = FontWeight.w600,
+  }) {
     return TextStyle(
       fontSize: size,
       height: 1.35,
@@ -406,93 +486,185 @@ class _BoardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Each block is written in turn: title, rule, then one line per example.
-    final lines = <Widget>[
+    final children = <Widget>[
       _ChalkLine(
         progress: progress,
-        from: 0.00,
-        to: 0.22,
-        child: Text('TODAY’S RULE',
-            style: chalk(11, alpha: 0.55, w: FontWeight.w800)),
+        from: 0.0,
+        to: 0.25,
+        child: Text(_kicker, style: chalk(11, alpha: 0.55, w: FontWeight.w800)),
       ),
-      _ChalkLine(
-        progress: progress,
-        from: 0.12,
-        to: 0.40,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(lesson.title.en, style: chalk(26, w: FontWeight.w700)),
-            const SizedBox(height: 6),
-            // The underline is drawn, not printed — a teacher's stroke.
-            _ChalkUnderline(progress: progress, from: 0.30, to: 0.50),
-          ],
-        ),
-      ),
-      _ChalkLine(
-        progress: progress,
-        from: 0.42,
-        to: 0.66,
-        child: Text(lesson.explanation.en, style: chalk(14.5, alpha: 0.88)),
-      ),
-      _ChalkLine(
-        progress: progress,
-        from: 0.56,
-        to: 0.66,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Divider(
-            height: 1,
-            thickness: 1,
-            color: Colors.white.withValues(alpha: 0.16),
-          ),
-        ),
-      ),
-      for (var i = 0; i < lesson.examples.length; i++)
+    ];
+
+    if (page == 0) {
+      children.addAll([
         _ChalkLine(
           progress: progress,
-          from: 0.62 + i * 0.09,
-          to: 0.78 + i * 0.09,
+          from: 0.12,
+          to: 0.45,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(lesson.title.en, style: chalk(25, w: FontWeight.w700)),
+              const SizedBox(height: 6),
+              _ChalkUnderline(progress: progress, from: 0.34, to: 0.55),
+            ],
+          ),
+        ),
+        _ChalkLine(
+          progress: progress,
+          from: 0.46,
+          to: 0.72,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 2, right: 8),
-                  child: Icon(Icons.check_rounded,
-                      size: 16, color: Colors.white.withValues(alpha: 0.55)),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(lesson.examples[i].sentence, style: chalk(15)),
-                      if (lesson.examples[i].note.of(lang).isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Text(
-                            lesson.examples[i].note.of(lang),
-                            style: chalk(12, alpha: 0.55),
-                          ),
-                        ),
-                    ],
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(lesson.explanation.en, style: chalk(14.5, alpha: 0.88)),
+          ),
+        ),
+        // The same rule as a table — how a teacher actually leaves it on the
+        // board, and it fills the slate instead of trailing off into nothing.
+        for (var i = 0; i < _table.length; i++)
+          _ChalkLine(
+            progress: progress,
+            from: 0.70 + i * 0.09,
+            to: 0.84 + i * 0.09,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 118,
+                    child: Text(_table[i].$1, style: chalk(14, alpha: 0.75)),
                   ),
-                ),
-              ],
+                  Text('—', style: chalk(14, alpha: 0.4)),
+                  const SizedBox(width: 10),
+                  Text(
+                    _table[i].$2,
+                    style: chalk(17, w: FontWeight.w700).copyWith(
+                        color: AppColors.accent.withValues(alpha: 0.95)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ]);
+    } else if (page == 1) {
+      children.addAll([
+        _ChalkLine(
+          progress: progress,
+          from: 0.1,
+          to: 0.3,
+          child: Text('Examples', style: chalk(20, w: FontWeight.w700)),
+        ),
+        for (var i = 0; i < lesson.examples.length; i++)
+          _ChalkLine(
+            progress: progress,
+            from: 0.24 + i * 0.14,
+            to: 0.5 + i * 0.14,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3, right: 8),
+                    child: Icon(Icons.check_rounded,
+                        size: 16, color: Colors.white.withValues(alpha: 0.55)),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(lesson.examples[i].sentence, style: chalk(15)),
+                        if (lesson.examples[i].note.of(lang).isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
+                            child: Text(
+                              lesson.examples[i].note.of(lang),
+                              style: chalk(12, alpha: 0.55),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ]);
+    } else {
+      children.addAll([
+        _ChalkLine(
+          progress: progress,
+          from: 0.1,
+          to: 0.3,
+          child: Text('Say it yourself', style: chalk(20, w: FontWeight.w700)),
+        ),
+        _ChalkLine(
+          progress: progress,
+          from: 0.25,
+          to: 0.45,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Fill the gap out loud, then check below.',
+              style: chalk(13, alpha: 0.7),
             ),
           ),
         ),
-    ];
+        for (var i = 0; i < _gaps.length; i++)
+          _ChalkLine(
+            progress: progress,
+            from: 0.35 + i * 0.14,
+            to: 0.6 + i * 0.14,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                '${i + 1}.  ${_gaps[i].$1}',
+                style: chalk(15),
+              ),
+            ),
+          ),
+        _ChalkLine(
+          progress: progress,
+          from: 0.8,
+          to: 1.0,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(_answers, style: chalk(12, alpha: 0.5)),
+          ),
+        ),
+      ]);
+    }
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines,
+        children: children,
       ),
     );
   }
+
+  String get _kicker => switch (page) {
+        0 => 'TODAY’S RULE',
+        1 => 'ON THE BOARD',
+        _ => 'YOUR TURN',
+      };
+
+  /// Three gaps that only need the rule that was just taught.
+  static final List<(String,)> _gaps = [
+    ('I ___ a student.',),
+    ('He ___ my friend.',),
+    ('They ___ classmates.',),
+  ];
+
+  static const _answers = 'Answers: am · is · are';
+
+  /// Subject → verb, the three rows a teacher writes under the rule.
+  static const List<(String, String)> _table = [
+    ('I', 'am'),
+    ('he / she / it', 'is'),
+    ('you / we / they', 'are'),
+  ];
 }
 
 /// Reveals its child between two points of the chalk animation.
@@ -563,67 +735,6 @@ class _ChalkUnderline extends StatelessWidget {
   }
 }
 
-class _ChalkTray extends StatelessWidget {
-  const _ChalkTray();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 9,
-          decoration: BoxDecoration(
-            color: const Color(0xFF6B4226),
-            borderRadius: BorderRadius.circular(3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 26, right: 20),
-          child: Row(
-            children: [
-              _stick(const Color(0xFFF4EFE6), 30),
-              const SizedBox(width: 6),
-              _stick(const Color(0xFFF7E7A6), 20),
-              const SizedBox(width: 6),
-              _stick(const Color(0xFFEFC9C9), 14),
-              const Spacer(),
-              // Eraser, sitting where a teacher would leave it.
-              Container(
-                width: 46,
-                height: 11,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2.5),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3E6B8C), Color(0xFF2C4E68)],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _stick(Color color, double width) => Container(
-        width: width,
-        height: 6,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(3),
-        ),
-      );
-}
-
 // ------------------------------------------------------------- the teacher ---
 
 class _Teacher extends StatelessWidget {
@@ -631,13 +742,19 @@ class _Teacher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The standee is already sized by the Positioned that holds it.
     return Image.asset(
-      'assets/characters/teacher_full.webp',
+      'assets/characters/teacher_pointer.webp',
       fit: BoxFit.contain,
       alignment: Alignment.bottomRight,
       filterQuality: FilterQuality.medium,
-      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      // The pointer pose is new art; the plain standee keeps the screen usable
+      // if the asset is ever missing.
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/characters/teacher_full.webp',
+        fit: BoxFit.contain,
+        alignment: Alignment.bottomRight,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      ),
     );
   }
 }
@@ -655,7 +772,7 @@ class _TeacherSays extends StatelessWidget {
       children: [
         Flexible(
           child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: const BorderRadius.only(
@@ -666,7 +783,7 @@ class _TeacherSays extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
+                  color: Colors.black.withValues(alpha: 0.28),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -690,7 +807,7 @@ class _TeacherSays extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   text,
                   style: theme.bodyMedium?.copyWith(
@@ -702,13 +819,9 @@ class _TeacherSays extends StatelessWidget {
             ),
           ),
         ),
-        // Tail, pointing at her.
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: CustomPaint(
-            size: const Size(16, 20),
-            painter: _TailPainter(),
-          ),
+          child: CustomPaint(size: const Size(16, 20), painter: _TailPainter()),
         ),
       ],
     );
@@ -733,8 +846,16 @@ class _TailPainter extends CustomPainter {
 // ------------------------------------------------------------------- CTA -----
 
 class _CtaBar extends StatelessWidget {
-  const _CtaBar({required this.onPressed});
+  const _CtaBar({
+    required this.label,
+    required this.icon,
+    required this.onBack,
+    required this.onPressed,
+  });
 
+  final String label;
+  final IconData icon;
+  final VoidCallback? onBack;
   final VoidCallback onPressed;
 
   @override
@@ -742,27 +863,49 @@ class _CtaBar extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.md,
+        AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.md + MediaQuery.paddingOf(context).bottom,
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            const Color(0x00101E18),
-            const Color(0xE6101E18),
-            const Color(0xFF101E18),
-          ],
-          stops: const [0.0, 0.45, 1.0],
+          colors: [Color(0x00101E18), Color(0xFF101E18)],
+          stops: [0.0, 0.55],
         ),
       ),
-      child: AppButton(
-        label: 'Start the quiz',
-        icon: Icons.quiz_rounded,
-        variant: AppButtonVariant.primary,
-        onPressed: onPressed,
+      child: Row(
+        children: [
+          if (onBack != null) ...[
+            SizedBox(
+              width: 56,
+              child: OutlinedButton(
+                onPressed: onBack,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.35), width: 1.6),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.button),
+                  ),
+                ),
+                child: const Icon(Icons.arrow_back_rounded),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Expanded(
+            child: AppButton(
+              label: label,
+              icon: icon,
+              variant: AppButtonVariant.primary,
+              onPressed: onPressed,
+            ),
+          ),
+        ],
       ),
     );
   }
