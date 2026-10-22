@@ -5,6 +5,7 @@ import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
+import 'package:grammar_bondhu/core/utils/asset_lookup.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_detail_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
 import 'package:grammar_bondhu/features/story/story_screen.dart';
@@ -112,6 +113,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('BENGALI'), findsOneWidget);
+  });
+
+  testWidgets('story bubble sits above the speaker, not over them',
+      (tester) async {
+    await _pump(tester, const StoryScreen(args: StoryArgs('ch01')),
+        const Size(353, 784));
+
+    final bubble = tester.getRect(find.byType(AnimatedOpacity).first);
+    // The bubble must end above the stage floor, with the speaker drawn below.
+    expect(bubble.bottom, lessThan(784));
+
+    // Every character asset for the scene resolves from the full-body map.
+    expect(AssetLookup.fullBodyPath('rahul'), isNotNull);
+    expect(AssetLookup.fullBodyPath('teacher'), isNotNull);
+    expect(AssetLookup.fullBodyPath('priya'), isNotNull);
   });
 
   testWidgets('chapter list filters by real chapter state', (tester) async {

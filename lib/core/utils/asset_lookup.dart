@@ -13,6 +13,15 @@ class AssetLookup {
     'teacher': 'assets/characters/teacher.webp',
   };
 
+  /// Full-body cut-outs (transparent PNG/WebP) used by the story stage, where
+  /// the characters stand in the scene and speak in bubbles. The portrait
+  /// files above stay for avatars.
+  static const Map<String, String> fullBodyCharacters = {
+    'rahul': 'assets/characters/rahul_full.webp',
+    'priya': 'assets/characters/priya_full.webp',
+    'teacher': 'assets/characters/teacher_full.webp',
+  };
+
   static const Map<String, String> backgrounds = {
     'bg_school_gate': 'assets/backgrounds/bg_school_gate.webp',
     'bg_classroom': 'assets/backgrounds/bg_classroom.webp',
@@ -55,6 +64,9 @@ class AssetLookup {
   };
 
   static String? characterPath(String characterId) => characters[characterId];
+
+  static String? fullBodyPath(String characterId) =>
+      fullBodyCharacters[characterId];
 
   static String? backgroundPath(String backgroundId) =>
       backgrounds[backgroundId];
