@@ -123,6 +123,22 @@ class AppShadows {
       ];
 }
 
+/// Font families declared in `pubspec.yaml`.
+///
+/// The display face is bundled rather than taken from the platform, and the two
+/// Noto families are the *fallback* for every string in the app: a phone with no
+/// Bengali system font would otherwise paint Bangla as tofu boxes.
+class AppFonts {
+  const AppFonts._();
+
+  static const display = 'Baloo2';
+  static const bengali = 'NotoSansBengali';
+  static const devanagari = 'NotoSansDevanagari';
+
+  /// Latin first (the body face), then the scripts the app actually teaches.
+  static const fallback = <String>[bengali, devanagari];
+}
+
 class AppRadii {
   const AppRadii._();
 
@@ -172,23 +188,29 @@ ThemeData buildAppTheme() {
   ));
 
   final textTheme = base.textTheme.copyWith(
+    // Headings get the rounded display face: one change that lifts every screen
+    // at once, and it is friendly without being childish.
     displaySmall: base.textTheme.displaySmall?.copyWith(
       color: AppColors.textPrimary,
-      fontWeight: FontWeight.w800,
+      fontFamily: AppFonts.display,
+      fontWeight: FontWeight.w700,
       letterSpacing: -0.3,
     ),
     headlineMedium: base.textTheme.headlineMedium?.copyWith(
       color: AppColors.textPrimary,
-      fontWeight: FontWeight.w800,
+      fontFamily: AppFonts.display,
+      fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
     ),
     headlineSmall: base.textTheme.headlineSmall?.copyWith(
       color: AppColors.textPrimary,
-      fontWeight: FontWeight.w800,
+      fontFamily: AppFonts.display,
+      fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
     ),
     titleLarge: base.textTheme.titleLarge?.copyWith(
       color: AppColors.textPrimary,
+      fontFamily: AppFonts.display,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.1,
     ),
@@ -215,8 +237,12 @@ ThemeData buildAppTheme() {
     ),
   );
 
+  final scriptSafeTheme = textTheme.apply(
+    fontFamilyFallback: AppFonts.fallback,
+  );
+
   return base.copyWith(
-    textTheme: textTheme,
+    textTheme: scriptSafeTheme,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: AppColors.textPrimary,
@@ -224,7 +250,7 @@ ThemeData buildAppTheme() {
       scrolledUnderElevation: 0,
       centerTitle: true,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
-      titleTextStyle: textTheme.titleLarge,
+      titleTextStyle: scriptSafeTheme.titleLarge,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -234,7 +260,7 @@ ThemeData buildAppTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.button),
         ),
-        textStyle: textTheme.labelLarge,
+        textStyle: scriptSafeTheme.labelLarge,
         elevation: 0,
       ),
     ),
@@ -246,13 +272,15 @@ ThemeData buildAppTheme() {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.button),
         ),
-        textStyle: textTheme.labelLarge?.copyWith(color: AppColors.primary),
+        textStyle:
+            scriptSafeTheme.labelLarge?.copyWith(color: AppColors.primary),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        textStyle: textTheme.labelLarge?.copyWith(color: AppColors.primary),
+        textStyle:
+            scriptSafeTheme.labelLarge?.copyWith(color: AppColors.primary),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(

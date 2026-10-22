@@ -32,3 +32,24 @@ flutter:
     - assets/branding/
     - assets/icons/
     - assets/audio/
+  fonts:
+    # A rounded display face for headings and the wordmark. Latin only — Bangla
+    # and Hindi headings fall through to the Noto families below.
+    - family: Baloo2
+      fonts:
+        - asset: assets/fonts/Baloo2-600.ttf
+          weight: 600
+        - asset: assets/fonts/Baloo2-700.ttf
+          weight: 700
+    # Bundled, not borrowed from the OS: without these a phone with no Bengali
+    # system font renders every Bangla string as tofu boxes.
+    - family: NotoSansBengali
+      fonts:
+        - asset: assets/fonts/NotoSansBengali-Regular.ttf
+        - asset: assets/fonts/NotoSansBengali-SemiBold.ttf
+          weight: 600
+    - family: NotoSansDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
+        - asset: assets/fonts/NotoSansDevanagari-SemiBold.ttf
+          weight: 600

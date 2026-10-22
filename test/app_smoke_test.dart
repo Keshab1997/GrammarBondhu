@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grammar_bondhu/app/app.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
+import 'package:grammar_bondhu/app/theme/app_theme.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
@@ -27,6 +28,18 @@ Future<void> _pumpApp(WidgetTester tester) async {
 }
 
 void main() {
+  test('theme carries the bundled display face and script fallbacks', () {
+    final theme = buildAppTheme();
+    // Headings use the rounded display face …
+    expect(theme.textTheme.headlineMedium?.fontFamily, AppFonts.display);
+    expect(theme.textTheme.displaySmall?.fontFamily, AppFonts.display);
+    // … and every style can fall back to the bundled Bangla/Hindi families,
+    // so a phone with no Bengali system font never paints tofu boxes.
+    expect(theme.textTheme.bodyMedium?.fontFamilyFallback, AppFonts.fallback);
+    expect(theme.textTheme.titleLarge?.fontFamilyFallback, AppFonts.fallback);
+    expect(AppFonts.fallback, contains(AppFonts.bengali));
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('splash shows branding and starts onboarding on first run',
