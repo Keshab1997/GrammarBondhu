@@ -117,10 +117,12 @@ class _SplashScreenState extends State<SplashScreen>
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
                   children: [
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.sm),
                     SlideTransition(
                       position: _logoSlide,
-                      child: const BrandLogo(fontSize: 44),
+                      // Compact one-line lockup: stays in the sky band of
+                      // the artwork, clear of the hero character's head.
+                      child: const BrandLogo(fontSize: 36, compact: true),
                     ),
                     const Spacer(),
                     const Spacer(),

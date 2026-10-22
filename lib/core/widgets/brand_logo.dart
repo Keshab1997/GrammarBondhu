@@ -7,13 +7,25 @@ import '../../app/theme/app_theme.dart';
 /// Richer 3D feel: multi-layered shadows, tiny grad-cap glyph, playful
 /// color split between "Grammar" (deep blue) and "Bondhu" (gold).
 class BrandLogo extends StatelessWidget {
-  const BrandLogo({super.key, this.fontSize = 40, this.showTagline = true});
+  const BrandLogo({
+    super.key,
+    this.fontSize = 40,
+    this.showTagline = true,
+    this.compact = false,
+  });
 
   final double fontSize;
   final bool showTagline;
 
+  /// One-line lockup for the splash screen: badge, then "Grammar Bondhu"
+  /// side by side and the tagline in a pill. The stacked lockup is ~190 dp
+  /// tall and lands on the hero character's head; this one is ~125 dp, so
+  /// it stays in the sky band of the splash artwork.
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
+    if (compact) return _buildCompact(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -160,6 +172,146 @@ class BrandLogo extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildCompact(BuildContext context) {
+    final badgeSize = fontSize * 1.25;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Small cap badge.
+        Container(
+          width: badgeSize,
+          height: badgeSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [AppColors.primaryDark, AppColors.primary],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.85), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.45),
+                blurRadius: fontSize * 0.5,
+                offset: Offset(0, fontSize * 0.16),
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.school_rounded,
+            size: fontSize * 0.62,
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: fontSize * 0.28),
+        // One-line wordmark: Grammar (blue, white halo) + Bondhu (gold).
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            ShaderMask(
+              shaderCallback: (b) => const LinearGradient(
+                colors: [AppColors.primaryDeeper, AppColors.primary],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ).createShader(b),
+              child: Text(
+                'Grammar',
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 0.3,
+                  height: 1.0,
+                  shadows: const [
+                    Shadow(color: Color(0xE6FFFFFF), blurRadius: 6),
+                    Shadow(
+                        color: Color(0x55000000),
+                        offset: Offset(0, 3),
+                        blurRadius: 8),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: fontSize * 0.22),
+            // Bondhu (gold fill over a dark stroke, as in the stacked logo).
+            Stack(
+              children: [
+                Text(
+                  'Bondhu',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = fontSize * 0.045
+                      ..color = AppColors.accentDeep,
+                    letterSpacing: 0.6,
+                    height: 1.0,
+                  ),
+                ),
+                ShaderMask(
+                  shaderCallback: (b) => const LinearGradient(
+                    colors: [
+                      AppColors.goldTop,
+                      AppColors.accent,
+                      AppColors.accentDark
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ).createShader(b),
+                  child: Text(
+                    'Bondhu',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.6,
+                      height: 1.0,
+                      shadows: const [
+                        Shadow(
+                            color: Color(0x66000000),
+                            offset: Offset(0, 3),
+                            blurRadius: 8),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (showTagline) ...[
+          SizedBox(height: fontSize * 0.3),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: fontSize * 0.34,
+              vertical: fontSize * 0.13,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+            ),
+            child: Text(
+              'LEARN ENGLISH THROUGH STORIES',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: fontSize * 0.27,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 1.5,
+                height: 1.0,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
