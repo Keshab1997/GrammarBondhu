@@ -61,6 +61,18 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // AGP 9 turns on R8 for release builds. Our plugins reach their Java
+            // side through JNI (shared_preferences → the `jni` package, Pigeon
+            // registrars like SharedPreferencesApiRegistrar), so nothing in the
+            // Java bytecode references those methods — R8 strips them and the
+            // release app dies before the first frame with:
+            //   NoSuchMethodError: no non-static method
+            //   "...SharedPreferencesApiRegistrar;.getAll(...)"
+            // The plugins ship no consumer ProGuard rules, so shrinking stays off
+            // (the Flutter template default). Dart is AOT-compiled either way, and
+            // a store build uses an AAB, so the size cost is small.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
