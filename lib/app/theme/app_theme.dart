@@ -159,7 +159,10 @@ ThemeData buildAppTheme() {
       surface: AppColors.surface,
     ),
     scaffoldBackgroundColor: AppColors.background,
-    fontFamily: 'Roboto',
+    // No explicit font family: an unlisted family name ('Roboto' here) is not in
+    // the asset FontManifest, so the engine falls back to the serif default and
+    // the whole app renders in a serif face. Leaving it unset uses the platform
+    // default, which is already Roboto on Android.
     splashFactory: InkSparkle.splashFactory,
   );
 
