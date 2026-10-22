@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:grammar_bondhu/core/widgets/brand_logo.dart';
+import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
 
 Future<void> _pumpApp(WidgetTester tester) async {
@@ -104,6 +105,43 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
     }
+  });
+
+  testWidgets('chapter list works as a standalone route (Material ancestor)',
+      (tester) async {
+    // Regression: /chapters is pushed on its own (Home quick action), where
+    // the route LookupBoundary hides outer Materials — the filter chips'
+    // InkWell threw "No Material widget found" there.
+    SharedPreferences.setMockInitialValues({});
+    final store = await LocalStore.open();
+    final content = ContentController(ContentRepository());
+    await content.load();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: content),
+          ChangeNotifierProvider(
+            create: (_) => SettingsController(store, store.loadSettings()),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ProgressController(store, store.loadProgress()),
+          ),
+        ],
+        child: MaterialApp(
+          home: const ChapterListScreen(),
+          theme: ThemeData(useMaterial3: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chapters'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Grammar'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('onboarding flow reaches login screen', (tester) async {

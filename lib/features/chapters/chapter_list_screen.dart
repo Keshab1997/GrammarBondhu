@@ -37,90 +37,102 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
     final progress = context.watch<ProgressController>();
     final chapters = content.chapters;
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                if (Navigator.of(context).canPop())
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                Text('Chapters', style: Theme.of(context).textTheme.titleLarge),
-              ],
+    // Own Scaffold/Material: this screen is both a tab inside HomeShell
+    // and a standalone route (/chapters, from the Home quick action), and
+    // a route's LookupBoundary hides any Material above it — the filter
+    // chips' InkWell crashed there with "No Material widget found".
+    // The background matches the home shell's wash so the tab looks the
+    // same nested as it does standalone.
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F5FB),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  if (Navigator.of(context).canPop())
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                    ),
+                  Text('Chapters',
+                      style: Theme.of(context).textTheme.titleLarge),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: 'Story',
-                  selected: _filter == _ChapterFilter.story,
-                  onTap: () => setState(() => _filter = _ChapterFilter.story),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _FilterChip(
-                  label: 'Grammar',
-                  selected: _filter == _ChapterFilter.grammar,
-                  onTap: () => setState(() => _filter = _ChapterFilter.grammar),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _FilterChip(
-                  label: 'Locked',
-                  selected: _filter == _ChapterFilter.locked,
-                  onTap: () => setState(() => _filter = _ChapterFilter.locked),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Expanded(
-            child: chapters.isEmpty
-                ? const Center(child: Text('Chapters are loading…'))
-                : ListView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    itemCount: chapters.length,
-                    itemBuilder: (context, index) {
-                      final chapter = chapters[index];
-                      final unlocked = _isUnlocked(chapters, index, progress);
-                      final record = progress.chapterProgress(chapter.id);
-                      final isLocked = !unlocked;
-
-                      if (_filter == _ChapterFilter.locked && !isLocked) {
-                        return const SizedBox.shrink();
-                      }
-                      if (_filter == _ChapterFilter.grammar && isLocked) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _ChapterCard(
-                          chapter: chapter,
-                          number: index + 1,
-                          locked: isLocked,
-                          completed: record.completed,
-                          inProgress:
-                              unlocked && record.started && !record.completed,
-                          stars: record.stars,
-                          onTap: isLocked
-                              ? null
-                              : () => Navigator.of(context).pushNamed(
-                                    ChapterDetailScreen.routeName,
-                                    arguments: chapter.id,
-                                  ),
-                        ),
-                      );
-                    },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'Story',
+                    selected: _filter == _ChapterFilter.story,
+                    onTap: () => setState(() => _filter = _ChapterFilter.story),
                   ),
-          ),
-        ],
+                  const SizedBox(width: AppSpacing.sm),
+                  _FilterChip(
+                    label: 'Grammar',
+                    selected: _filter == _ChapterFilter.grammar,
+                    onTap: () =>
+                        setState(() => _filter = _ChapterFilter.grammar),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _FilterChip(
+                    label: 'Locked',
+                    selected: _filter == _ChapterFilter.locked,
+                    onTap: () =>
+                        setState(() => _filter = _ChapterFilter.locked),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Expanded(
+              child: chapters.isEmpty
+                  ? const Center(child: Text('Chapters are loading…'))
+                  : ListView.builder(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      itemCount: chapters.length,
+                      itemBuilder: (context, index) {
+                        final chapter = chapters[index];
+                        final unlocked = _isUnlocked(chapters, index, progress);
+                        final record = progress.chapterProgress(chapter.id);
+                        final isLocked = !unlocked;
+
+                        if (_filter == _ChapterFilter.locked && !isLocked) {
+                          return const SizedBox.shrink();
+                        }
+                        if (_filter == _ChapterFilter.grammar && isLocked) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _ChapterCard(
+                            chapter: chapter,
+                            number: index + 1,
+                            locked: isLocked,
+                            completed: record.completed,
+                            inProgress:
+                                unlocked && record.started && !record.completed,
+                            stars: record.stars,
+                            onTap: isLocked
+                                ? null
+                                : () => Navigator.of(context).pushNamed(
+                                      ChapterDetailScreen.routeName,
+                                      arguments: chapter.id,
+                                    ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -136,22 +148,28 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
+    // Material + InkWell (same pattern as AppCard): the ink needs its own
+    // Material to paint on, and the colour lives on the Material so the
+    // splash is not hidden under the chip's fill.
+    return Material(
+      color: selected ? AppColors.primary : AppColors.primarySoft,
       borderRadius: BorderRadius.circular(AppRadii.chip),
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.primarySoft,
-          borderRadius: BorderRadius.circular(AppRadii.chip),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : AppColors.primary,
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.chip),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : AppColors.primary,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
           ),
         ),
       ),
