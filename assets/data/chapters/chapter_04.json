@@ -159,8 +159,8 @@
     {
       "question_id": "ch04_q2",
       "question": "They ___ very happy yesterday.",
-      "options": ["were", "was", "are", "is"],
-      "correct_index": 0,
+      "options": ["was", "are", "were", "is"],
+      "correct_index": 2,
       "explanation": {
         "en": "With they, use 'were' — They were happy.",
         "bn": "they-এর সাথে 'were' বসে — They were happy.",
@@ -170,8 +170,8 @@
     {
       "question_id": "ch04_q3",
       "question": "Rahul ___ the story to the class.",
-      "options": ["told", "tell", "tells", "telling"],
-      "correct_index": 0,
+      "options": ["tell", "told", "tells", "telling"],
+      "correct_index": 1,
       "explanation": {
         "en": "The action happened yesterday, so use the past form: tell becomes told.",
         "bn": "কাজটা গতকাল হয়েছিল, তাই past রূপ: tell হয়ে যায় told।",
@@ -181,8 +181,8 @@
     {
       "question_id": "ch04_q4",
       "question": "We ___ to the banyan tree and found the box.",
-      "options": ["walked", "walk", "walks", "walking"],
-      "correct_index": 0,
+      "options": ["walk", "walks", "walking", "walked"],
+      "correct_index": 3,
       "explanation": {
         "en": "Regular verbs take -ed in the past: walk becomes walked.",
         "bn": "সাধারণ ক্রিয়ার past-এ -ed বসে: walk হয়ে যায় walked।",

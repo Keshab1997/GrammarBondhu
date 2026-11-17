@@ -161,8 +161,8 @@
     {
       "question_id": "ch02_q1",
       "question": "She ___ English every day.",
-      "options": ["studies", "study", "studying", "studied"],
-      "correct_index": 0,
+      "options": ["study", "studying", "studies", "studied"],
+      "correct_index": 2,
       "explanation": {
         "en": "With she, the verb takes -s (or -es). Study becomes studies.",
         "bn": "she-এর সাথে ক্রিয়ায় -s (বা -es) বসে। Study হয়ে যায় studies।",
@@ -183,8 +183,8 @@
     {
       "question_id": "ch02_q3",
       "question": "Rahul ___ stories at night.",
-      "options": ["reads", "read", "reading", "is read"],
-      "correct_index": 0,
+      "options": ["read", "reading", "is read", "reads"],
+      "correct_index": 3,
       "explanation": {
         "en": "Rahul is one boy, like 'he'. So the verb takes -s: reads.",
         "bn": "রাহুল একজন ছেলে, মানে 'he'-এর মতো। তাই ক্রিয়ায় -s বসে: reads।",
@@ -194,8 +194,8 @@
     {
       "question_id": "ch02_q4",
       "question": "I ___ breakfast at 7 o'clock.",
-      "options": ["eat", "eats", "eating", "eaten"],
-      "correct_index": 0,
+      "options": ["eats", "eating", "eat", "eaten"],
+      "correct_index": 2,
       "explanation": {
         "en": "With I, use the base verb — eat, never eats.",
         "bn": "I-এর সাথে মূল ক্রিয়া বসে — eat, কখনোই eats নয়।",
@@ -205,8 +205,8 @@
     {
       "question_id": "ch02_q5",
       "question": "We ___ games after school.",
-      "options": ["play", "plays", "playing", "played"],
-      "correct_index": 0,
+      "options": ["plays", "play", "playing", "played"],
+      "correct_index": 1,
       "explanation": {
         "en": "With we, use the base verb: play.",
         "bn": "we-এর সাথে মূল ক্রিয়া: play।",
