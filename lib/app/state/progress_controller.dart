@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../core/logic/quiz_eval.dart';
 import '../../data/local/local_store.dart';
 import '../../data/models/chapter.dart';
 import '../../data/models/progress.dart';
+import '../../data/remote/progress_cloud_backup.dart';
 
 /// Learner progress: XP, coins, streaks, chapter completion, resume points.
 class ProgressController extends ChangeNotifier {
@@ -13,6 +16,58 @@ class ProgressController extends ChangeNotifier {
   UserProgress _progress;
 
   UserProgress get progress => _progress;
+
+  ProgressCloudBackup? _cloudBackup;
+  String? _cloudUserId;
+  Future<void> _cloudQueue = Future<void>.value();
+  bool _cloudSyncing = false;
+  Object? _lastCloudSyncError;
+
+  bool get cloudConnected => _cloudBackup != null && _cloudUserId != null;
+  bool get cloudSyncing => _cloudSyncing;
+  Object? get lastCloudSyncError => _lastCloudSyncError;
+
+  /// Connects this controller to the signed-in learner's private backup.
+  /// Local and cloud progress are merged before either copy is replaced.
+  Future<void> connectCloudBackup({
+    required String userId,
+    ProgressCloudBackup? backup,
+  }) async {
+    _cloudBackup = backup ?? ProgressCloudBackup();
+    _cloudUserId = userId;
+    await syncCloudNow();
+  }
+
+  /// Retries synchronization explicitly, e.g. from the Profile screen.
+  Future<void> syncCloudNow() async {
+    final backup = _cloudBackup;
+    final userId = _cloudUserId;
+    if (backup == null || userId == null) {
+      throw StateError('No cloud account is connected.');
+    }
+    await _cloudQueue;
+    _cloudSyncing = true;
+    _lastCloudSyncError = null;
+    notifyListeners();
+    try {
+      final merged = await backup.synchronize(userId, _progress);
+      _progress = merged;
+      await _store.saveProgress(_progress);
+    } catch (error) {
+      _lastCloudSyncError = error;
+      rethrow;
+    } finally {
+      _cloudSyncing = false;
+      notifyListeners();
+    }
+  }
+
+  void disconnectCloudBackup() {
+    _cloudBackup = null;
+    _cloudUserId = null;
+    _lastCloudSyncError = null;
+    notifyListeners();
+  }
 
   ChapterProgress chapterProgress(String chapterId) =>
       _progress.chapter(chapterId);
@@ -75,7 +130,9 @@ class ProgressController extends ChangeNotifier {
       final targetXp = xp;
       if (targetXp > previousXp) grantedXp = targetXp - previousXp;
     }
-    record.xpEarned += grantedXp;
+    record
+      ..xpEarned += grantedXp
+      ..coinsEarned += grantedCoins;
 
     _progress
       ..totalXp += grantedXp
@@ -126,7 +183,33 @@ class ProgressController extends ChangeNotifier {
     await _persist();
   }
 
-  Future<void> _persist() => _store.saveProgress(_progress);
+  Future<void> _persist() async {
+    await _store.saveProgress(_progress);
+    if (!cloudConnected) return;
+    _cloudQueue = _cloudQueue.then((_) => _syncLatestCloudSnapshot());
+    unawaited(_cloudQueue);
+  }
+
+  /// Background sync stays off the learner's critical path: local progress is
+  /// saved first and a network failure never interrupts the lesson.
+  Future<void> _syncLatestCloudSnapshot() async {
+    final backup = _cloudBackup;
+    final userId = _cloudUserId;
+    if (backup == null || userId == null) return;
+    _cloudSyncing = true;
+    notifyListeners();
+    try {
+      final merged = await backup.synchronize(userId, _progress);
+      _progress = UserProgress.mergeForCloud(_progress, merged);
+      await _store.saveProgress(_progress);
+      _lastCloudSyncError = null;
+    } catch (error) {
+      _lastCloudSyncError = error;
+    } finally {
+      _cloudSyncing = false;
+      notifyListeners();
+    }
+  }
 }
 
 /// Result of one completed quiz run (used by the reward screen).

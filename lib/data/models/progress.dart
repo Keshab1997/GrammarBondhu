@@ -94,6 +94,75 @@ class UserProgress {
 
   bool get dailyGoalReached => questionsAnsweredToday >= dailyGoalQuestions;
 
+  /// Merges two device snapshots without adding duplicate XP or quiz attempts.
+  /// Per-chapter achievements use the strongest value, while missed questions
+  /// are unioned so neither device loses its review list.
+  static UserProgress mergeForCloud(UserProgress local, UserProgress remote) {
+    final mergedChapters = <String, ChapterProgress>{};
+    for (final id in {...local.chapters.keys, ...remote.chapters.keys}) {
+      final a = local.chapters[id];
+      final b = remote.chapters[id];
+      if (a == null || b == null) {
+        final source = a ?? b!;
+        mergedChapters[id] = ChapterProgress.fromJson(source.toJson());
+        continue;
+      }
+
+      final openedOnRemote = _isLater(b.lastOpenedAt, a.lastOpenedAt);
+      mergedChapters[id] = ChapterProgress(
+        chapterId: id,
+        completed: a.completed || b.completed,
+        stars: a.stars > b.stars ? a.stars : b.stars,
+        bestScorePercent: a.bestScorePercent > b.bestScorePercent
+            ? a.bestScorePercent
+            : b.bestScorePercent,
+        xpEarned: a.xpEarned > b.xpEarned ? a.xpEarned : b.xpEarned,
+        coinsEarned:
+            a.coinsEarned > b.coinsEarned ? a.coinsEarned : b.coinsEarned,
+        attempts: a.attempts > b.attempts ? a.attempts : b.attempts,
+        resumeSceneIndex:
+            openedOnRemote ? b.resumeSceneIndex : a.resumeSceneIndex,
+        lastOpenedAt: _laterDate(a.lastOpenedAt, b.lastOpenedAt),
+        missedQuestionIds: {...a.missedQuestionIds, ...b.missedQuestionIds},
+      );
+    }
+
+    final chapterXp = mergedChapters.values
+        .fold<int>(0, (sum, chapter) => sum + chapter.xpEarned);
+    final chapterCoins = mergedChapters.values
+        .fold<int>(0, (sum, chapter) => sum + chapter.coinsEarned);
+    final questionDate =
+        _laterDate(local.lastQuestionDate, remote.lastQuestionDate);
+    final sameQuestionDay = local.lastQuestionDate != null &&
+        remote.lastQuestionDate != null &&
+        _sameDay(local.lastQuestionDate!, remote.lastQuestionDate!);
+    final questionsToday = sameQuestionDay || questionDate == null
+        ? (local.questionsAnsweredToday > remote.questionsAnsweredToday
+            ? local.questionsAnsweredToday
+            : remote.questionsAnsweredToday)
+        : questionDate == remote.lastQuestionDate
+            ? remote.questionsAnsweredToday
+            : local.questionsAnsweredToday;
+
+    return UserProgress(
+      chapters: mergedChapters,
+      totalXp: [local.totalXp, remote.totalXp, chapterXp].reduce(
+        (a, b) => a > b ? a : b,
+      ),
+      coins: [local.coins, remote.coins, chapterCoins].reduce(
+        (a, b) => a > b ? a : b,
+      ),
+      streakDays: local.streakDays > remote.streakDays
+          ? local.streakDays
+          : remote.streakDays,
+      questionsAnsweredToday: questionsToday,
+      // Goal and UI preferences belong to the device doing the restore.
+      dailyGoalQuestions: local.dailyGoalQuestions,
+      lastStudyDate: _laterDate(local.lastStudyDate, remote.lastStudyDate),
+      lastQuestionDate: questionDate,
+    );
+  }
+
   factory UserProgress.fromJson(Map<String, dynamic> json) {
     final chapters = <String, ChapterProgress>{};
     final raw = json['chapters'] as Map<String, dynamic>? ?? {};
@@ -129,6 +198,17 @@ class UserProgress {
       };
 }
 
+DateTime? _laterDate(DateTime? a, DateTime? b) => _isLater(b, a) ? b : a;
+
+bool _isLater(DateTime? candidate, DateTime? reference) {
+  if (candidate == null) return false;
+  if (reference == null) return true;
+  return candidate.isAfter(reference);
+}
+
+bool _sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
 class ChapterProgress {
   ChapterProgress({
     required this.chapterId,
@@ -136,6 +216,7 @@ class ChapterProgress {
     this.stars = 0,
     this.bestScorePercent = 0,
     this.xpEarned = 0,
+    this.coinsEarned = 0,
     this.attempts = 0,
     this.resumeSceneIndex,
     this.lastOpenedAt,
@@ -149,6 +230,7 @@ class ChapterProgress {
   int stars;
   int bestScorePercent;
   int xpEarned;
+  int coinsEarned;
   int attempts;
 
   /// Quiz questions the learner has answered incorrectly and can review later.
@@ -167,6 +249,7 @@ class ChapterProgress {
         stars: (json['stars'] as num?)?.toInt() ?? 0,
         bestScorePercent: (json['best_score_percent'] as num?)?.toInt() ?? 0,
         xpEarned: (json['xp_earned'] as num?)?.toInt() ?? 0,
+        coinsEarned: (json['coins_earned'] as num?)?.toInt() ?? 0,
         attempts: (json['attempts'] as num?)?.toInt() ?? 0,
         missedQuestionIds: (json['missed_question_ids'] as List?)
                 ?.whereType<String>()
@@ -184,6 +267,7 @@ class ChapterProgress {
         'stars': stars,
         'best_score_percent': bestScorePercent,
         'xp_earned': xpEarned,
+        'coins_earned': coinsEarned,
         'attempts': attempts,
         'missed_question_ids': missedQuestionIds.toList()..sort(),
         'resume_scene_index': resumeSceneIndex,

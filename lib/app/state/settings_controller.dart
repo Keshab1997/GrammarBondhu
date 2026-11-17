@@ -21,6 +21,9 @@ class SettingsController extends ChangeNotifier {
   /// Narration on/off — the master switch behind every speaker in the app.
   bool get audioEnabled => _settings.audioEnabled;
 
+  bool get cloudConnected =>
+      !_settings.isGuest && (_settings.cloudAccountId?.isNotEmpty ?? false);
+
   Future<void> setSupportLanguage(String code) async {
     if (!AppSettings.isSupportedLanguage(code)) return;
     _settings.supportLanguage = code;
@@ -50,19 +53,39 @@ class SettingsController extends ChangeNotifier {
   Future<void> signInLocally(String displayName) async {
     _settings
       ..displayName = displayName.trim()
+      ..cloudAccountId = null
       ..isGuest = false;
     notifyListeners();
     await _store.saveSettings(_settings);
   }
 
-  /// Account-backed profile. Firebase owns the account; this device only keeps
-  /// the greeting name so every screen still works offline.
-  Future<void> signInWithGoogle(String displayName) =>
-      signInLocally(displayName);
+  /// Account-backed profile. The UID is an identifier only; auth credentials
+  /// remain owned by Firebase and are never copied into local preferences.
+  Future<void> signInWithGoogle({
+    required String displayName,
+    required String userId,
+  }) async {
+    _settings
+      ..displayName = displayName.trim()
+      ..cloudAccountId = userId
+      ..isGuest = false;
+    notifyListeners();
+    await _store.saveSettings(_settings);
+  }
+
+  Future<void> signOutToGuest() async {
+    _settings
+      ..displayName = null
+      ..cloudAccountId = null
+      ..isGuest = true;
+    notifyListeners();
+    await _store.saveSettings(_settings);
+  }
 
   Future<void> continueAsGuest() async {
     _settings
       ..displayName = null
+      ..cloudAccountId = null
       ..isGuest = true;
     notifyListeners();
     await _store.saveSettings(_settings);

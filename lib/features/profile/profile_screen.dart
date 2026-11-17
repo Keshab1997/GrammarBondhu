@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/state/progress_controller.dart';
+import '../auth/google_auth.dart';
+import '../auth/login_screen.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
@@ -20,7 +22,9 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final settings = context.watch<SettingsController>();
-    final p = context.watch<ProgressController>().progress;
+    final progressController = context.watch<ProgressController>();
+    final p = progressController.progress;
+    final cloudConnected = settings.cloudConnected;
 
     return SafeArea(
       child: ListView(
@@ -104,30 +108,69 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           AppCard(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.cloud_off_rounded,
-                    color: AppColors.primary, size: 24),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Learning as a guest',
-                        style: text.titleMedium,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      cloudConnected
+                          ? Icons.cloud_done_rounded
+                          : Icons.cloud_off_rounded,
+                      color: cloudConnected
+                          ? AppColors.success
+                          : AppColors.primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cloudConnected
+                                ? 'Google account connected'
+                                : 'Learning as a guest',
+                            style: text.titleMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            cloudConnected
+                                ? _backupStatus(progressController)
+                                : 'Your progress is saved on this device. '
+                                    'Connect Google when you want to back it up.',
+                            style: text.bodyMedium,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Your progress is saved on this device. You can keep '
-                        'learning without an account; Google sign-in and cloud '
-                        'backup will be optional.',
-                        style: text.bodyMedium,
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                if (cloudConnected) ...[
+                  AppButton(
+                    label: progressController.cloudSyncing
+                        ? 'Syncing…'
+                        : 'Sync backup now',
+                    icon: Icons.cloud_sync_rounded,
+                    variant: AppButtonVariant.blue,
+                    onPressed: progressController.cloudSyncing
+                        ? null
+                        : () => _syncBackup(context, settings),
+                  ),
+                  TextButton(
+                    onPressed: () => _signOut(context),
+                    child: const Text('Disconnect Google account'),
+                  ),
+                ] else
+                  AppButton(
+                    label: 'Connect Google',
+                    icon: Icons.account_circle_outlined,
+                    variant: AppButtonVariant.outline,
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(LoginScreen.routeName),
+                  ),
               ],
             ),
           ),
@@ -190,6 +233,82 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _backupStatus(ProgressController progress) {
+    if (progress.cloudSyncing) return 'Syncing your progress…';
+    if (progress.lastCloudSyncError != null) {
+      return 'Your progress is safe on this device. The last backup failed; '
+          'tap Sync backup now to retry.';
+    }
+    if (!progress.cloudConnected) {
+      return 'Google is connected. Sync your local progress to this account.';
+    }
+    return 'Progress stays on this device and syncs after learning.';
+  }
+
+  Future<void> _syncBackup(
+      BuildContext context, SettingsController settings) async {
+    final userId = settings.settings.cloudAccountId;
+    if (userId == null) return;
+    final progress = context.read<ProgressController>();
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await progress.connectCloudBackup(userId: userId);
+      if (context.mounted) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Progress backup is up to date.')),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Backup could not reach Firebase. Your local progress is safe; '
+              'please try again when you are online.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Disconnect Google?'),
+        content: const Text(
+          'Your progress stays on this device. The cloud copy remains in your '
+          'account and stops syncing until you connect again.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Disconnect'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final settings = context.read<SettingsController>();
+    final progress = context.read<ProgressController>();
+    final messenger = ScaffoldMessenger.of(context);
+    await GoogleAuth.instance.signOut();
+    progress.disconnectCloudBackup();
+    await settings.signOutToGuest();
+    if (context.mounted) {
+      messenger.showSnackBar(
+        const SnackBar(
+            content: Text('Disconnected. Progress stays on device.')),
+      );
+    }
   }
 }
 

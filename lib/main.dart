@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'app/app.dart';
@@ -8,6 +10,7 @@ import 'data/local/local_store.dart';
 import 'data/repositories/content_repository.dart';
 import 'features/audio/audio_controller.dart';
 import 'features/audio/audio_port.dart';
+import 'features/auth/google_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,4 +34,27 @@ Future<void> main() async {
     progressController: progressController,
     audioController: audioController,
   ));
+
+  // Only a previously connected account reaches Firebase, and this runs after
+  // the first frame so guests and first launches stay offline and responsive.
+  if (settingsController.settings.cloudAccountId != null) {
+    unawaited(_restoreCloudBackup(settingsController, progressController));
+  }
+}
+
+Future<void> _restoreCloudBackup(
+  SettingsController settings,
+  ProgressController progress,
+) async {
+  final expectedUserId = settings.settings.cloudAccountId;
+  if (expectedUserId == null) return;
+  try {
+    final user = await GoogleAuth.instance.restoreUser();
+    if (user == null || user.uid != expectedUserId) return;
+    await progress.connectCloudBackup(userId: user.uid);
+  } catch (error) {
+    // Firebase may be temporarily unavailable or not configured in this build;
+    // local learning continues and Profile can retry later.
+    debugPrint('GrammarBondhu cloud restore unavailable: $error');
+  }
 }

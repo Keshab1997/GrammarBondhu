@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/state/progress_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
@@ -53,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Captured before the first await: the widget may be gone by the time the
     // account sheet closes.
     final settings = context.read<SettingsController>();
+    final progress = context.read<ProgressController>();
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -62,9 +64,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user == null) throw const SignInUnavailable();
       final name = user.displayName?.trim();
       await settings.signInWithGoogle(
-        (name == null || name.isEmpty) ? user.email ?? '' : name,
+        displayName: (name == null || name.isEmpty) ? user.email ?? '' : name,
+        userId: user.uid,
       );
+      var backupSucceeded = false;
+      try {
+        await progress.connectCloudBackup(userId: user.uid);
+        backupSucceeded = true;
+      } catch (_) {
+        // Authentication still succeeds; profile offers a retry for backup.
+      }
       if (!mounted) return;
+      messenger.showSnackBar(SnackBar(
+        content: Text(backupSucceeded
+            ? 'Google connected. Your progress is backed up.'
+            : 'Google connected, but backup could not finish. Retry from Profile.'),
+      ));
       navigator.pushNamedAndRemoveUntil(HomeShell.routeName, (_) => false);
     } on SignInCancelled {
       // Closing the account sheet is a choice, not an error worth a message.

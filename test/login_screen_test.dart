@@ -54,6 +54,7 @@ void main() {
       expect(find.text('Your name (optional)'), findsOneWidget);
       expect(find.text('Continue'), findsOneWidget);
       expect(find.text('Continue without a name'), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
       expect(find.text('Password'), findsNothing);
       expect(find.text('Login'), findsNothing);
       expect(find.text('Sign Up'), findsNothing);

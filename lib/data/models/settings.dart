@@ -9,6 +9,7 @@ class AppSettings {
     this.notificationsEnabled = true,
     this.onboardingComplete = false,
     this.displayName,
+    this.cloudAccountId,
     this.isGuest = true,
   });
 
@@ -20,6 +21,9 @@ class AppSettings {
 
   /// Display name for the local profile; null while in guest mode.
   String? displayName;
+
+  /// Firebase UID only; no credential or token is stored here.
+  String? cloudAccountId;
   bool isGuest;
 
   static const supportedLanguages = ['en', 'bn', 'hi'];
@@ -35,6 +39,7 @@ class AppSettings {
       notificationsEnabled: json['notifications_enabled'] as bool? ?? true,
       onboardingComplete: json['onboarding_complete'] as bool? ?? false,
       displayName: json['display_name'] as String?,
+      cloudAccountId: json['cloud_account_id'] as String?,
       isGuest: json['is_guest'] as bool? ?? true,
     );
   }
@@ -45,6 +50,7 @@ class AppSettings {
         'notifications_enabled': notificationsEnabled,
         'onboarding_complete': onboardingComplete,
         'display_name': displayName,
+        'cloud_account_id': cloudAccountId,
         'is_guest': isGuest,
       };
 }

@@ -33,6 +33,13 @@ class GoogleAuth {
 
   bool get isSignedIn => _ready && FirebaseAuth.instance.currentUser != null;
 
+  /// Restores Firebase's persisted session only when the caller knows the
+  /// learner previously opted in. This never opens the account picker.
+  Future<User?> restoreUser() async {
+    await _ensureReady();
+    return FirebaseAuth.instance.currentUser;
+  }
+
   /// Starts Google's account picker and exchanges the ID token for a Firebase
   /// session. Throws [SignInCancelled] / [SignInUnavailable] so the caller can
   /// word its message; anything else is a real error worth surfacing too.
@@ -60,6 +67,8 @@ class GoogleAuth {
   /// Drops both sessions. Best effort: a guest who never signed in has nothing
   /// to clear, and a failed revoke must not block the learner from continuing.
   Future<void> signOut() async {
+    // If no Firebase session has been restored this process, there is no
+    // signed-in session to revoke; keep guest sign-out available offline.
     if (!_ready) return;
     try {
       await FirebaseAuth.instance.signOut();

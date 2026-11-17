@@ -54,13 +54,18 @@ void main() {
       await store.saveProgress(progress);
 
       final settings = store.loadSettings();
-      settings.supportLanguage = 'hi';
+      settings
+        ..supportLanguage = 'hi'
+        ..cloudAccountId = 'firebase-user-1'
+        ..isGuest = false;
       await store.saveSettings(settings);
 
       final store2 = await LocalStore.open();
       expect(store2.loadProgress().totalXp, 42);
       expect(store2.loadProgress().chapter('ch01').completed, true);
       expect(store2.loadSettings().supportLanguage, 'hi');
+      expect(store2.loadSettings().cloudAccountId, 'firebase-user-1');
+      expect(store2.loadSettings().isGuest, false);
     });
 
     test('missed quiz questions persist and can be cleared', () async {
@@ -127,6 +132,7 @@ void main() {
       expect(controller.chapterProgress('ch01').resumeSceneIndex, isNull);
       expect(controller.progress.totalXp, 50);
       expect(controller.progress.coins, 10);
+      expect(controller.chapterProgress('ch01').coinsEarned, 10);
     });
 
     test('worse rerun does not double-grant rewards', () async {

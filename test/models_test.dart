@@ -149,10 +149,17 @@ void main() {
     });
 
     test('round-trips through JSON', () {
-      final s = AppSettings(supportLanguage: 'hi', audioEnabled: false);
+      final s = AppSettings(
+        supportLanguage: 'hi',
+        audioEnabled: false,
+        cloudAccountId: 'firebase-user-1',
+        isGuest: false,
+      );
       final copy = AppSettings.fromJson(s.toJson());
       expect(copy.supportLanguage, 'hi');
       expect(copy.audioEnabled, false);
+      expect(copy.cloudAccountId, 'firebase-user-1');
+      expect(copy.isGuest, false);
     });
   });
 }
