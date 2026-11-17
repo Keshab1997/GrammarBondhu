@@ -41,6 +41,12 @@ class _QuizScreenState extends State<QuizScreen> {
       } else {
         await progress.markQuestionForReview(chapter.id, question.id);
       }
+      // Counted here, on the submitted answer, not when the quiz ends: the
+      // learner's daily progress should move the moment they answer, and a
+      // quiz left half-finished must not erase what was already answered.
+      // `_submitted` is still false on this path, so re-tapping Submit cannot
+      // double count.
+      await progress.registerQuestionAnswered();
       if (!mounted) return;
       setState(() {
         _submitted = true;

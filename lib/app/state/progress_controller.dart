@@ -134,10 +134,12 @@ class ProgressController extends ChangeNotifier {
       ..xpEarned += grantedXp
       ..coinsEarned += grantedCoins;
 
+    // No registerQuestionAnswered here: the daily counter is advanced once per
+    // submitted answer by the quiz screen. Counting the run here as a single
+    // question is what made a five-question quiz look like one.
     _progress
       ..totalXp += grantedXp
       ..coins += grantedCoins
-      ..registerQuestionAnswered(moment)
       ..registerStudyDay(moment);
 
     // Chapter finished → clear the resume point.
@@ -153,6 +155,35 @@ class ProgressController extends ChangeNotifier {
       isPersonalBest: isBest,
       firstCompletion: firstCompletion,
     );
+  }
+
+  /// The daily question target the learner chose in Settings.
+  ///
+  /// Stored in the progress snapshot rather than in [AppSettings] because the
+  /// cloud merge already treats `dailyGoalQuestions` as this device's own
+  /// preference - moving it to a second store would let the two disagree.
+  int get dailyGoalQuestions => _progress.dailyGoalQuestions;
+
+  /// Saves a new daily target. False when the value was unusable or unchanged.
+  Future<bool> setDailyGoal(int target) async {
+    final changed = _progress.setDailyGoal(target);
+    if (!changed) return false;
+    notifyListeners();
+    await _persist();
+    return true;
+  }
+
+  /// Counts one *submitted* quiz answer toward today's goal.
+  ///
+  /// Called per answer, not per quiz: a learner who answers three questions
+  /// and stops has made progress, and a quiz that is abandoned half way must
+  /// still count what was actually answered. Deliberately does not register a
+  /// study day - a streak is about showing up, which only a finished quiz
+  /// proves.
+  Future<void> registerQuestionAnswered({DateTime? now}) async {
+    _progress.registerQuestionAnswered(now ?? DateTime.now());
+    notifyListeners();
+    await _persist();
   }
 
   /// Adds an incorrect quiz answer to the learner's local review list.

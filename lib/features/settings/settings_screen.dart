@@ -5,6 +5,7 @@ import '../../app/state/progress_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../data/models/progress.dart';
 import 'language_selection_screen.dart';
 
 /// Screen 15 — language, audio, notifications and app preferences.
@@ -50,6 +51,7 @@ class SettingsScreen extends StatelessWidget {
               onTap: () => Navigator.of(context)
                   .pushNamed(LanguageSelectionScreen.routeName),
             ),
+            _DailyGoalSetting(),
             _SettingsTile(
               icon: Icons.volume_up_rounded,
               color: AppColors.success,
@@ -191,6 +193,144 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('Close'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Daily question target: a row of chips, not a slider or a text field.
+///
+/// The goal has to be legible at a glance and tappable without precision, and
+/// the five presets are the whole range that makes sense for a learner doing
+/// one chapter a day. Choosing one writes straight through to the progress
+/// snapshot, so it survives a restart and the Home card reflects it.
+class _DailyGoalSetting extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final progress = context.watch<ProgressController>();
+    final selected = progress.dailyGoalQuestions;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 2,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentDark.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadii.chip),
+                  ),
+                  child: const Icon(Icons.flag_rounded,
+                      color: AppColors.accentDark, size: 20),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Daily question goal', style: text.bodyLarge),
+                      const SizedBox(height: 2),
+                      Text(
+                        'How many quiz questions you aim to answer each day',
+                        style: text.bodySmall
+                            ?.copyWith(color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm + 2),
+            // Wrap, so the chips fold onto a second line at a large font
+            // scale or on a 320 dp phone instead of overflowing.
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final target in UserProgress.dailyGoalChoices)
+                  _GoalChip(
+                    target: target,
+                    selected: target == selected,
+                    onTap: () =>
+                        context.read<ProgressController>().setDailyGoal(target),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GoalChip extends StatelessWidget {
+  const _GoalChip({
+    required this.target,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int target;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Announced as a choice with its state; the tick only decorates it, so
+    // the chip is excluded from semantics and described in one label.
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$target questions a day',
+      child: ExcludeSemantics(
+        child: Material(
+          color: selected ? AppColors.accentDark : AppColors.background,
+          borderRadius: BorderRadius.circular(AppRadii.chip),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadii.chip),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 48,
+                minWidth: 56,
+              ),
+              child: Center(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (selected) ...[
+                        const Icon(Icons.check_rounded,
+                            size: 16, color: Colors.white),
+                        const SizedBox(width: 4),
+                      ],
+                      Text(
+                        '$target',
+                        style: TextStyle(
+                          color:
+                              selected ? Colors.white : AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -94,6 +94,21 @@ class UserProgress {
 
   bool get dailyGoalReached => questionsAnsweredToday >= dailyGoalQuestions;
 
+  /// The targets a learner can actually pick. A free-text goal invites "500",
+  /// which is not a goal, it is a way to feel behind every day.
+  static const List<int> dailyGoalChoices = [3, 5, 10, 15, 20];
+
+  /// Sets the daily target, clamped to a range the goal card can draw.
+  ///
+  /// Returns false when the value was unusable and nothing changed, so a
+  /// caller can ignore the write instead of persisting a no-op.
+  bool setDailyGoal(int target) {
+    if (target < 1 || target > 100) return false;
+    if (dailyGoalQuestions == target) return false;
+    dailyGoalQuestions = target;
+    return true;
+  }
+
   /// Merges two device snapshots without adding duplicate XP or quiz attempts.
   /// Per-chapter achievements use the strongest value, while missed questions
   /// are unioned so neither device loses its review list.
@@ -176,7 +191,11 @@ class UserProgress {
       coins: (json['coins'] as num?)?.toInt() ?? 0,
       streakDays: (json['streak_days'] as num?)?.toInt() ?? 0,
       questionsAnsweredToday: (json['questions_today'] as num?)?.toInt() ?? 0,
-      dailyGoalQuestions: (json['daily_goal_questions'] as num?)?.toInt() ?? 5,
+      // A stored 0 (or a hand-edited 999) would divide by zero on the goal
+      // card or leave the learner permanently behind, so it is clamped on the
+      // way in, not trusted because it came from disk.
+      dailyGoalQuestions:
+          ((json['daily_goal_questions'] as num?)?.toInt() ?? 5).clamp(1, 100),
       lastStudyDate: json['last_study_date'] == null
           ? null
           : DateTime.tryParse(json['last_study_date'] as String),
