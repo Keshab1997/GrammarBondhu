@@ -302,79 +302,75 @@ python3 tool/ci_watch.py      # after pushing: waits for CI and prints the faili
 
 ## Project overview
 
-**Docify** (`com.keshabstudios.docify`) is a Flutter app that resizes photos,
-signatures, PDFs and CVs for job and exam application forms. Core promises:
+**GrammarBondhu** (`com.keshabstudios.grammarbondhu`) is an offline-first Flutter
+app that teaches English grammar through stories, lessons and quizzes, with
+Bengali and Hindi explanations. Its current core promises are:
 
-- **Documents stay on the device.** Nothing is uploaded unless the user
-  explicitly starts a Drive backup.
-- **Guest-first.** Every tool works with no account. Sign-in is an optional
-  extra (Google Sign-In + Firebase, backing up to the user's own Drive).
-- **AdMob is the only monetization.**
+- **Guest-first.** Learners can start without an account; onboarding must not
+  require sign-in.
+- **On-device by default.** Progress and preferences are stored locally, and
+  the learning content is bundled with the app.
+- **Cloud backup is optional and user-initiated.** Google sign-in and backing
+  up progress are planned; do not imply cloud backup is available until it is
+  implemented and configured.
 
 ## Repository layout
 
 ```
 lib/
-├── main.dart               # entry point → MainNavScreen (no login gate!)
-├── app_info.dart           # app name / version constants
-├── models/                 # SavedDoc, exam presets, CV template info
-├── screens/                # home, tools, documents, profile + bottom nav
-│   └── tools/              # one screen per tool + CV builder
-├── services/               # app_auth (Firebase/Google), Drive API + sync,
-│   └── cv/                 # CV PDF engine + templates
-├── theme/                  # colors, typography, motion
-├── tools/                  # tool_registry (metadata for all tools)
-└── widgets/                # shared UI (ad banner, sync sheet, ...)
+├── main.dart               # app bootstrap and local-store/controller wiring
+├── app/                    # root app, router, theme and state controllers
+├── core/                   # quiz logic, asset helpers and shared widgets
+├── data/                   # local persistence, models and content repository
+└── features/               # onboarding, home, chapters, story, quiz, profile,
+                            # progress, rewards, settings and audio
 
-tool/                       # agent pack: preflight.py + ci_watch.py (see AGENTS.md above)
-
-android/                    # Gradle project (key.properties is git-ignored)
-assets/                     # tool artwork, logos
-distribution/whatsnew/      # Play release notes (en-US, bn-BD)
-docs/                       # privacy policy, store listings, sync setup
-.github/workflows/          # ci, manual-build, release, publish-release,
-                            # web-preview
+tool/                       # agent pack: preflight.py + ci_watch.py (see above)
+assets/data/                # manifest and bundled chapter JSON
+assets/audio/               # bundled narration clips
+assets/                     # illustrations, characters, backgrounds and fonts
+test/                       # widget, model, content and flow tests
+android/                    # Android application project
+.github/workflows/          # ci, manual-build, publish-release and web-preview
 ```
 
 ## Invariants — do not break these
 
-1. **No sign-in at launch.** `main()` must never trigger Google/Firebase
-   authentication UI or network calls. Sign-in starts only from an explicit
-   user tap (Profile tab button or Drive sync sheet). Do not re-add
-   `attemptLightweightAuthentication()` or any "silent restore" at startup.
-2. **Guest mode is first-class.** If `google-services.json` is absent,
-   `AppAuth.firebaseReady` is `false` and every feature still works locally.
-   Never make a tool depend on auth.
-3. **On-device by default.** Files are written to the app sandbox
-   (`DocStore`); Drive is opt-in with the `drive.file` scope only — either a
-   manual sync run or the opt-in "Automatic backup" toggle, which is strictly
-   silent (signed in + Drive already granted, never prompts).
+1. **No sign-in gate at launch.** Splash/onboarding must lead into the app as a
+   guest. Never block learning on account creation or start auth/network calls
+   silently at launch.
+2. **Guest mode is first-class.** Every chapter, lesson and quiz must work
+   without Firebase configuration or an account.
+3. **Local progress is authoritative until opt-in backup exists.** Keep learner
+   progress on-device by default. When optional Google sign-in/cloud backup is
+   implemented, it must start only after an explicit learner action and must
+   preserve locally earned progress during the initial backup/restore flow.
 4. **Never commit secrets.** This includes `google-services.json`,
-   `android/key.properties`, `*.jks`/`*.keystore`, `*.pem`, tokens, and
-   Firebase/Drive credentials. CI receives them via repository secrets —
-   keep it that way.
+   `android/key.properties`, `*.jks`/`*.keystore`, `*.pem`, tokens, and Firebase
+   credentials. Use repository secrets or other approved local-only config.
 
 ## Making changes
 
 - **Small, focused diffs.** One concern per commit; prefer editing existing
   files over adding new ones.
 - **Commit style:** conventional commits, matching history —
-  `fix(auth): …`, `feat(cv): …`, `chore(ci): …`, `docs: …`.
-  Scope names already in use: `auth`, `android`, `ci`, `release`, `cv`.
+  `fix(quiz): …`, `feat(chapters): …`, `chore(ci): …`, `docs: …`.
+  Prefer feature scopes such as `home`, `onboarding`, `profile`, `settings`,
+  `quiz` and `chapters`.
 - **Push straight to `main`** — no feature branch, no pull request. Batch small
   changes; the human runs *Flutter CI* once per batch.
-- **Check recent history** before editing heavily-touched files
-  (e.g. `lib/services/app_auth.dart`) and keep diffs clean.
+- **Check recent history** before editing heavily-touched files and keep diffs
+  clean.
 
 ## Code style
 
-- `flutter_lints` (see `analysis_options.yaml`) — CI enforces it, so write
-  lint-clean code even though you must not run the analyzer yourself.
+- `flutter_lints` (see `analysis_options.yaml`) — CI enforces it; write
+  lint-clean code and follow the check policy near the top of this file.
 - Format with the standard `dart format` style (CI checks formatting).
-- Comment the **why**, not the what — existing code does this consistently
-  (e.g. `app_auth.dart`, `sync_sheet.dart`). Match that voice.
-- UI text is plain English; store/release metadata additionally ships in
-  Bengali (`bn-BD`) under `distribution/` and `docs/`.
+- Comment the **why**, not the what — match the focused rationale comments in
+  the existing feature screens and controllers.
+- UI chrome is currently English; chapter dialogue, explanations and quiz
+  content are supplied in English, Bengali and Hindi in `assets/data/chapters/`.
 
 ## Working with GitHub
 
