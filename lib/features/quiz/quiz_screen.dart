@@ -27,12 +27,19 @@ class _QuizScreenState extends State<QuizScreen> {
   int? _selected;
   bool _submitted = false;
   bool _submitting = false;
+  bool _finishing = false;
   int _correctCount = 0;
 
   Future<void> _submit(Chapter chapter) async {
     if (_selected == null || _submitted || _submitting) return;
     final question = chapter.quiz[_questionIndex];
-    final correct = _selected == question.correctIndex;
+    // The answer is frozen here, before the first await. Saving takes two
+    // writes (review state, then the daily count), and the answer tiles used
+    // to stay tappable throughout: changing the selection mid-save left the
+    // feedback judging one option while review state, score and the daily
+    // count had been recorded for another.
+    final selected = _selected!;
+    final correct = selected == question.correctIndex;
     setState(() => _submitting = true);
     try {
       final progress = context.read<ProgressController>();
@@ -44,13 +51,16 @@ class _QuizScreenState extends State<QuizScreen> {
       // Counted here, on the submitted answer, not when the quiz ends: the
       // learner's daily progress should move the moment they answer, and a
       // quiz left half-finished must not erase what was already answered.
-      // `_submitted` is still false on this path, so re-tapping Submit cannot
-      // double count.
+      // `_submitting` stays true until the verdict is on screen, so the
+      // re-tap guard lives in `_submit` above, not in this flag.
       await progress.registerQuestionAnswered();
       if (!mounted) return;
       setState(() {
         _submitted = true;
         _submitting = false;
+        // The frozen answer the learner actually submitted, not whatever is
+        // selected when the save finishes.
+        _selected = selected;
         if (correct) _correctCount += 1;
       });
     } finally {
@@ -74,17 +84,32 @@ class _QuizScreenState extends State<QuizScreen> {
       });
       return;
     }
-    // Quiz finished — record the run and celebrate.
-    final result = await context.read<ProgressController>().recordQuizRun(
-          chapter: chapter,
-          correct: _correctCount,
-          total: chapter.quiz.length,
-        );
-    if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(
-      ChapterCompletedScreen.routeName,
-      arguments: CompletedArgs(chapterId: chapter.id, result: result),
-    );
+    // Quiz finished — record the run and celebrate. The flag is set before the
+    // await, so a finish already being saved cannot be started twice: two
+    // taps used to record two attempts, grant the reward twice and push the
+    // completed screen twice. A failed save clears it again, so the learner
+    // can retry instead of being left on a dead button.
+    if (_finishing) return;
+    setState(() => _finishing = true);
+    try {
+      final result = await context.read<ProgressController>().recordQuizRun(
+            chapter: chapter,
+            correct: _correctCount,
+            total: chapter.quiz.length,
+          );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(
+        ChapterCompletedScreen.routeName,
+        arguments: CompletedArgs(chapterId: chapter.id, result: result),
+      );
+    } catch (_) {
+      // A failed save must not leave Finish Quiz permanently dead. The run is
+      // applied before it is persisted, so a retry cannot double the reward;
+      // what it can do is give the learner the completion screen they asked
+      // for. Swallowed rather than rethrown: this is a button callback, and a
+      // raw error here would crash the screen instead of offering the retry.
+      if (mounted) setState(() => _finishing = false);
+    }
   }
 
   @override
@@ -237,7 +262,11 @@ class _QuizScreenState extends State<QuizScreen> {
                                               : i == _selected
                                                   ? _OptionState.wrong
                                                   : _OptionState.idle,
-                                      enabled: !_submitted,
+                                      // Inert from the first tap of Submit
+                                      // until the verdict is on screen, so
+                                      // the saved answer cannot be swapped
+                                      // underneath the feedback.
+                                      enabled: !_submitted && !_submitting,
                                       onTap: () =>
                                           setState(() => _selected = i),
                                     ),
@@ -290,7 +319,13 @@ class _QuizScreenState extends State<QuizScreen> {
                                           ? 'Next Question'
                                           : 'Finish Quiz',
                                       variant: AppButtonVariant.blue,
-                                      onPressed: () => _next(chapter),
+                                      // `_finishing` is set before the save is
+                                      // awaited, so a second tap in the same
+                                      // frame is already refused — the button
+                                      // only has to look the part.
+                                      onPressed: _finishing
+                                          ? null
+                                          : () => _next(chapter),
                                     ),
                                   ],
                                 ],
