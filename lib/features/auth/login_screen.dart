@@ -221,8 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         const Expanded(child: Divider()),
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             'or',
                             style: text.bodySmall
@@ -234,7 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     AppButton(
-                      label: _signingIn ? 'Signing in…' : 'Continue with Google',
+                      label:
+                          _signingIn ? 'Signing in…' : 'Continue with Google',
                       icon: Icons.account_circle_outlined,
                       variant: AppButtonVariant.outline,
                       onPressed: _signingIn ? null : _signInWithGoogle,
@@ -244,7 +244,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Your profile stays on this device. Google sign-in is '
                       'optional and never asked for at launch.',
                       textAlign: TextAlign.center,
-                      style: text.bodySmall?.copyWith(color: AppColors.textMuted),
+                      style:
+                          text.bodySmall?.copyWith(color: AppColors.textMuted),
                     ),
                   ],
                 ),

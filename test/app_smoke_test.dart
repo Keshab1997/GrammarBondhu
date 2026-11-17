@@ -161,7 +161,9 @@ void main() {
     expect(find.textContaining('to unlock'), findsWidgets);
   });
 
-  testWidgets('onboarding flow reaches login screen', (tester) async {
+  // Onboarding is the only gate before the app: there is no login wall, so
+  // Get Started lands straight on the home shell.
+  testWidgets('onboarding flow reaches the home shell', (tester) async {
     await _pumpApp(tester);
 
     await tester.tap(find.text("Let's Begin"));
@@ -179,7 +181,7 @@ void main() {
     await tester.tap(find.text('Get Started'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome Back!'), findsOneWidget);
-    expect(find.text('Continue as Guest'), findsOneWidget);
+    expect(find.byType(HomeShell), findsOneWidget);
+    expect(find.text('Explore the Story World'), findsNothing);
   });
 }
