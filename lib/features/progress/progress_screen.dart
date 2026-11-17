@@ -13,9 +13,11 @@ import '../quiz/quiz_screen.dart';
 
 /// Screen 14 — overview, per-chapter history and stats.
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key});
+  const ProgressScreen({super.key, this.now});
 
   static const routeName = '/progress';
+
+  final DateTime? now;
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -31,6 +33,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final progress = context.watch<ProgressController>();
     final language = context.watch<SettingsController>().supportLanguage;
     final p = progress.progress;
+    final now = widget.now ?? DateTime.now();
     final reviewCount = content.chapters.fold<int>(
       0,
       (count, chapter) =>
@@ -244,7 +247,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               value: '${p.streakDays} days'),
                           _StatRow(
                               label: 'Questions today',
-                              value: '${p.questionsAnsweredToday}'),
+                              value: '${p.questionsAnsweredOn(now)}'),
                           _StatRow(
                               label: 'Daily goal',
                               value: '${p.dailyGoalQuestions} questions'),

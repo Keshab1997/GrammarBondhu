@@ -6,13 +6,47 @@ import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
+import 'package:grammar_bondhu/data/models/chapter.dart';
 import 'package:grammar_bondhu/data/models/progress.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
+import 'package:grammar_bondhu/features/home/home_screen.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
+import 'package:grammar_bondhu/features/progress/progress_screen.dart';
 import 'package:grammar_bondhu/features/quiz/quiz_screen.dart';
 import 'package:grammar_bondhu/features/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+final _savedOn = DateTime(2026, 11, 18, 23, 50);
+final _nextDay = DateTime(2026, 11, 19, 0, 10);
+
+UserProgress _completedGoal(int target) => UserProgress(
+      questionsAnsweredToday: target,
+      dailyGoalQuestions: target,
+      lastQuestionDate: _savedOn,
+    );
+
+class _FixedDayProgressController extends ProgressController {
+  _FixedDayProgressController(super.store, super.initial);
+
+  @override
+  Future<void> registerQuestionAnswered({DateTime? now}) =>
+      super.registerQuestionAnswered(now: now ?? _nextDay);
+
+  @override
+  Future<QuizRunResult> recordQuizRun({
+    required Chapter chapter,
+    required int correct,
+    required int total,
+    DateTime? now,
+  }) =>
+      super.recordQuizRun(
+        chapter: chapter,
+        correct: correct,
+        total: total,
+        now: now ?? _nextDay,
+      );
+}
 
 /// The daily question goal: chosen in Settings, stored on the device, shown on
 /// Home, and advanced once per submitted answer rather than once per quiz.
@@ -25,18 +59,23 @@ Future<
       ContentController content,
       ProgressController progress,
       LocalStore store,
-    })> _pump(WidgetTester tester, Widget screen) async {
+    })> _pump(
+  WidgetTester tester,
+  Widget screen, {
+  UserProgress? savedProgress,
+}) async {
   SharedPreferences.setMockInitialValues({});
   final store = await LocalStore.open();
+  if (savedProgress != null) await store.saveProgress(savedProgress);
   final content = ContentController(ContentRepository());
   await content.load();
-  final progress = ProgressController(store, store.loadProgress());
+  final progress = _FixedDayProgressController(store, store.loadProgress());
 
   await tester.pumpWidget(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: content),
-        ChangeNotifierProvider.value(value: progress),
+        ChangeNotifierProvider<ProgressController>.value(value: progress),
         ChangeNotifierProvider(
           create: (_) => SettingsController(store, store.loadSettings()),
         ),
@@ -103,13 +142,40 @@ void main() {
     });
 
     test('goal reached follows the chosen target', () {
-      final p = UserProgress()..setDailyGoal(3);
-      final now = DateTime(2026, 11, 17);
-      p.registerQuestionAnswered(now);
-      p.registerQuestionAnswered(now);
+      final p = UserProgress(now: _savedOn)..setDailyGoal(3);
+      p.registerQuestionAnswered(_savedOn);
+      p.registerQuestionAnswered(_savedOn);
       expect(p.dailyGoalReached, isFalse);
-      p.registerQuestionAnswered(now);
+      p.registerQuestionAnswered(_savedOn);
       expect(p.dailyGoalReached, isTrue);
+    });
+
+    test('only the saved local calendar day gets credit', () {
+      final p = UserProgress(
+        questionsAnsweredToday: 5,
+        lastQuestionDate: _savedOn.toUtc(),
+        now: _nextDay,
+      );
+      final saved = p.toJson();
+
+      expect(p.questionsAnsweredOn(DateTime(2026, 11, 18, 8)), 5);
+      expect(p.questionsAnsweredOn(_nextDay), 0);
+      expect(p.questionsAnsweredOn(DateTime(2026, 11, 17)), 0);
+      expect(p.dailyGoalReached, isFalse);
+      expect(p.toJson(), saved);
+    });
+
+    test('missing or invalid question dates preserve the target, not credit',
+        () {
+      for (final date in [null, 'not a date', 42]) {
+        final p = UserProgress.fromJson({
+          'questions_today': 5,
+          'daily_goal_questions': 15,
+          if (date != null) 'last_question_date': date,
+        });
+        expect(p.questionsAnsweredOn(_nextDay), 0);
+        expect(p.dailyGoalQuestions, 15);
+      }
     });
   });
 
@@ -217,26 +283,75 @@ void main() {
       final progress = ProgressController(store, store.loadProgress());
       await progress.setDailyGoal(3);
 
-      await progress.registerQuestionAnswered();
+      await progress.registerQuestionAnswered(now: _nextDay);
       await tester.pump();
-      expect(progress.progress.questionsAnsweredToday, 1);
+      expect(progress.progress.questionsAnsweredOn(_nextDay), 1);
 
-      await progress.registerQuestionAnswered();
-      await progress.registerQuestionAnswered();
+      await progress.registerQuestionAnswered(now: _nextDay);
+      await progress.registerQuestionAnswered(now: _nextDay);
       await tester.pump();
-      expect(progress.progress.dailyGoalReached, isTrue);
+      expect(progress.progress.questionsAnsweredOn(_nextDay), 3);
     });
   });
 
+  group('reopening with a saved daily count', () {
+    for (final (date, target, count) in [
+      (_savedOn, 5, 5),
+      (_nextDay, 5, 0),
+      (_nextDay, 15, 0),
+    ]) {
+      testWidgets('Home shows $count/$target on reopen', (tester) async {
+        final saved = _completedGoal(target);
+        final harness = await _pump(
+          tester,
+          Scaffold(body: HomeScreen(now: date)),
+          savedProgress: saved,
+        );
+
+        await tester.scrollUntilVisible(find.text('Daily Goal'), 200);
+        await tester.pumpAndSettle();
+        expect(find.text('$count/$target'), findsOneWidget);
+        expect(
+          find.text('Goal complete — nicely done!'),
+          count == target ? findsOneWidget : findsNothing,
+        );
+        expect(harness.progress.progress.questionsAnsweredToday, target);
+        expect(harness.progress.progress.lastQuestionDate, _savedOn);
+        expect(harness.store.loadProgress().toJson(), saved.toJson());
+      });
+    }
+
+    for (final (date, count) in [(_savedOn, 5), (_nextDay, 0)]) {
+      testWidgets('Progress shows $count questions today on reopen',
+          (tester) async {
+        await _pump(
+          tester,
+          ProgressScreen(now: date),
+          savedProgress: _completedGoal(5),
+        );
+
+        await tester.tap(find.text('Stats'));
+        await tester.pumpAndSettle();
+        final row = find
+            .ancestor(
+              of: find.text('Questions today'),
+              matching: find.byType(Row),
+            )
+            .first;
+        expect(find.descendant(of: row, matching: find.text('$count')),
+            findsOneWidget);
+      });
+    }
+  });
+
   group('daily progress advances per submitted answer', () {
-    testWidgets('submitting answers one at a time reaches the goal',
-        (tester) async {
+    testWidgets('the first answer on a new day counts as one', (tester) async {
       final harness = await _pump(
         tester,
         QuizScreen(chapterId: 'ch01'),
+        savedProgress: _completedGoal(5),
       );
-      await harness.progress.setDailyGoal(5);
-      expect(harness.progress.progress.questionsAnsweredToday, 0);
+      expect(harness.progress.progress.questionsAnsweredOn(_nextDay), 0);
 
       final chapter = harness.content.chapters.first;
       for (var i = 0; i < 3; i++) {
@@ -250,7 +365,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          harness.progress.progress.questionsAnsweredToday,
+          harness.store.loadProgress().questionsAnsweredOn(_nextDay),
           i + 1,
           reason: 'answer ${i + 1} did not count toward the daily goal',
         );
@@ -263,7 +378,6 @@ void main() {
       }
       // Three of five: the card shows real progress before the quiz ends.
       expect(harness.progress.dailyGoalQuestions, 5);
-      expect(harness.progress.progress.dailyGoalReached, isFalse);
     });
 
     testWidgets('a wrong answer still counts - it was still answered',
@@ -330,14 +444,15 @@ void main() {
         }
       }
 
+      expect(harness.progress.progress.questionsAnsweredOn(_nextDay), total);
       await tester.ensureVisible(find.text('Finish Quiz'));
       await tester.tap(find.text('Finish Quiz'));
       await tester.pumpAndSettle();
 
-      // Exactly one per answer: recordQuizRun used to add one more for the
-      // whole run, which is the "once per quiz" bug in the other direction.
-      expect(harness.progress.progress.questionsAnsweredToday, total);
-      expect(harness.progress.progress.dailyGoalReached, isTrue);
+      final saved = harness.store.loadProgress();
+      expect(saved.chapters[chapter.id]?.completed, isTrue);
+      // Finishing records the run without adding another answer.
+      expect(saved.questionsAnsweredOn(_nextDay), total);
     });
   });
 }
