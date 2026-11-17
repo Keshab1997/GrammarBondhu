@@ -92361,7 +92361,7 @@ p=l.z
 q=A.hD(A.aQ(A.b([B.Lq,B.bZ,A.cm(A.bd(A.b([A.X("Learning as a guest",m,m,m,o,m,m),B.c7,A.X("Your progress is saved on this device. You can keep learning without an account; Google sign-in and cloud backup will be optional.",m,m,m,p,m,m)],n),B.J,B.l,B.o),1)],n),B.J,B.l,B.o,m),!0,m,m,B.ai)
 o=A.aQ(A.b([B.Lc,B.aC,A.X("Your Journey",m,m,m,o,m,m)],n),B.p,B.l,B.o,m)
 s=B.i.by(j.b,100)
-return A.eI(!0,A.vp(A.b([r,B.an,q,B.an,A.hD(A.bd(A.b([o,B.an,new A.pB(s/100,12,B.u,m,B.io,m),B.ha,A.X(""+s+" / 100 XP to next level",m,m,m,p,m,m)],n),B.J,B.l,B.o),!0,m,m,B.ai),B.an,new A.to(B.q7,B.u,"My Progress",m,new A.aha(a),m),new A.to(B.lJ,B.aY,"Language",k.b.a.toUpperCase(),new A.ahb(a),m),new A.to(B.ej,B.b9,"Achievements",m,new A.ahc(a),m),new A.to(B.q1,B.ot,"Settings",m,new A.ahd(a),m)],n),B.JQ),!0)}}
+return A.eI(!0,A.vp(A.b([r,B.an,q,B.an,A.hD(A.bd(A.b([o,B.an,new A.pB(s/100,12,B.u,m,B.io,m),B.ha,A.X(""+s+" / 100 XP to next level",m,m,m,p,m,m)],n),B.J,B.l,B.o),!0,m,m,B.ai),B.an,new A.to(B.q7,B.u,"My Progress",m,new A.aha(a),m),new A.to(B.lJ,B.aY,"Explanation language",k.b.a.toUpperCase(),new A.ahb(a),m),new A.to(B.ej,B.b9,"Achievements",m,new A.ahc(a),m),new A.to(B.q1,B.ot,"Settings",m,new A.ahd(a),m)],n),B.JQ),!0)}}
 A.ah9.prototype={
 $3(a,b,c){return B.Gj},
 $S:217}
