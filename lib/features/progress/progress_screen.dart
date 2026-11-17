@@ -92,41 +92,53 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       xpPerLevel: UserProgress.xpPerLevel,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    GridView.count(
-                      crossAxisCount: 2,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 1.5,
-                      children: [
-                        _StatTile(
-                          icon: Icons.menu_book_rounded,
-                          color: AppColors.primary,
-                          label: 'Chapters',
-                          value:
-                              '${p.completedChapterCount}/${content.chapters.length}',
-                        ),
-                        _StatTile(
-                          icon: Icons.quiz_rounded,
-                          color: AppColors.success,
-                          label: 'Quiz Answers',
-                          value: '${p.totalQuizAnswered}',
-                        ),
-                        _StatTile(
-                          icon: Icons.local_fire_department_rounded,
-                          color: AppColors.accentDark,
-                          label: 'Streak',
-                          value:
-                              '${p.streakDays} ${p.streakDays == 1 ? 'day' : 'days'}',
-                        ),
-                        _StatTile(
-                          icon: Icons.military_tech_rounded,
-                          color: AppColors.primaryDark,
-                          label: 'Total Points',
-                          value: '${p.totalXp}',
-                        ),
-                      ],
+                    // A GridView.count forces one height on every tile, and
+                    // no height is right at every font scale: the fixed
+                    // aspect ratio clipped 23 px at 200%, and a computed
+                    // height still missed because a label can wrap to two
+                    // lines on a narrow phone. A Wrap of IntrinsicHeight
+                    // tiles lets each one be as tall as its own text, which
+                    // is the only answer that survives both axes at once.
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final tileWidth =
+                            (constraints.maxWidth - AppSpacing.md) / 2;
+                        return Wrap(
+                          spacing: AppSpacing.md,
+                          runSpacing: AppSpacing.md,
+                          children: [
+                            _StatTile(
+                              icon: Icons.menu_book_rounded,
+                              color: AppColors.primary,
+                              label: 'Chapters',
+                              value:
+                                  '${p.completedChapterCount}/${content.chapters.length}',
+                            ),
+                            _StatTile(
+                              icon: Icons.quiz_rounded,
+                              color: AppColors.success,
+                              label: 'Quiz Answers',
+                              value: '${p.totalQuizAnswered}',
+                            ),
+                            _StatTile(
+                              icon: Icons.local_fire_department_rounded,
+                              color: AppColors.accentDark,
+                              label: 'Streak',
+                              value:
+                                  '${p.streakDays} ${p.streakDays == 1 ? 'day' : 'days'}',
+                            ),
+                            _StatTile(
+                              icon: Icons.military_tech_rounded,
+                              color: AppColors.primaryDark,
+                              label: 'Total Points',
+                              value: '${p.totalXp}',
+                            ),
+                          ]
+                              .map((tile) =>
+                                  SizedBox(width: tileWidth, child: tile))
+                              .toList(),
+                        );
+                      },
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _StreakStrip(
@@ -440,22 +452,28 @@ class _StreakStrip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // "12 days in a row" is the longest string on this card and the
+          // reason the row overflowed by 72 px once the system font scale
+          // went up: it wraps under the title instead of next to it.
           Row(
             children: [
               const Icon(Icons.local_fire_department_rounded,
                   color: AppColors.accentDark, size: 20),
               const SizedBox(width: 6),
-              Text('This week', style: text.titleMedium),
-              const Spacer(),
-              Text(
-                streakDays == 0
-                    ? 'Start today'
-                    : '$streakDays day${streakDays == 1 ? '' : 's'} in a row',
-                style: text.bodyMedium?.copyWith(
-                  color: streakDays == 0
-                      ? AppColors.textMuted
-                      : AppColors.accentDeep,
-                  fontWeight: FontWeight.w700,
+              Flexible(child: Text('This week', style: text.titleMedium)),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  streakDays == 0
+                      ? 'Start today'
+                      : '$streakDays day${streakDays == 1 ? '' : 's'} in a row',
+                  textAlign: TextAlign.end,
+                  style: text.bodyMedium?.copyWith(
+                    color: streakDays == 0
+                        ? AppColors.textMuted
+                        : AppColors.accentDeep,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -608,18 +626,18 @@ class _StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return AppCard(
+      // No fixed height anywhere: at a large font scale the label wraps to a
+      // second line and the tile grows with it. An ellipsis here would hide
+      // which number the tile is counting.
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 6),
-              Flexible(
-                child: Text(label,
-                    style: text.bodyMedium, overflow: TextOverflow.ellipsis),
-              ),
+              Flexible(child: Text(label, style: text.bodyMedium)),
             ],
           ),
           const SizedBox(height: 6),

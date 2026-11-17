@@ -58,22 +58,31 @@ class ListenButton extends StatelessWidget {
               ));
           }
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: background,
-            shape: BoxShape.circle,
-            border: Border.all(color: border),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            child: Icon(
-              playing ? Icons.graphic_eq_rounded : Icons.volume_up_rounded,
-              key: ValueKey(playing),
-              size: size * 0.56,
-              color: foreground,
+        // The circle stays the size the design asked for; the tap area
+        // around it does not. A fingertip does not shrink when the learner
+        // enlarges the font, and Material's floor is a 48 dp square - the
+        // old 26-30 dp circle was half of that.
+        child: SizedBox.square(
+          dimension: AppSpacing.xxl,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: background,
+                shape: BoxShape.circle,
+                border: Border.all(color: border),
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: Icon(
+                  playing ? Icons.graphic_eq_rounded : Icons.volume_up_rounded,
+                  key: ValueKey(playing),
+                  size: size * 0.56,
+                  color: foreground,
+                ),
+              ),
             ),
           ),
         ),

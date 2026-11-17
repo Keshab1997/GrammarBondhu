@@ -78,21 +78,31 @@ class RewardsScreen extends StatelessWidget {
               gradient: const LinearGradient(colors: AppColors.rewardGradient),
               borderRadius: BorderRadius.circular(AppRadii.card),
             ),
+            // Three stats in a row fit at default type and overflow by 88 px
+            // at 200%. Each stat takes an equal share and its label yields a
+            // line before the row does.
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _BigStat(
-                    icon: Icons.monetization_on_rounded,
-                    value: '${p.coins}',
-                    label: 'Coins'),
-                _BigStat(
-                    icon: Icons.local_fire_department_rounded,
-                    value: '${p.streakDays}',
-                    label: 'Day Streak'),
-                _BigStat(
-                    icon: Icons.military_tech_rounded,
-                    value: '${p.totalXp}',
-                    label: 'Total XP'),
+                Expanded(
+                  child: _BigStat(
+                      icon: Icons.monetization_on_rounded,
+                      value: '${p.coins}',
+                      label: 'Coins'),
+                ),
+                Expanded(
+                  child: _BigStat(
+                      icon: Icons.local_fire_department_rounded,
+                      value: '${p.streakDays}',
+                      label: 'Day Streak'),
+                ),
+                Expanded(
+                  child: _BigStat(
+                      icon: Icons.military_tech_rounded,
+                      value: '${p.totalXp}',
+                      label: 'Total XP'),
+                ),
               ],
             ),
           ),
@@ -163,10 +173,18 @@ class _BigStat extends StatelessWidget {
       children: [
         Icon(icon, color: AppColors.textPrimary, size: 28),
         const SizedBox(height: 4),
-        Text(value,
-            style: text.titleLarge?.copyWith(color: AppColors.textPrimary)),
-        Text(label,
-            style: text.bodyMedium?.copyWith(color: AppColors.textPrimary)),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: text.titleLarge?.copyWith(color: AppColors.textPrimary),
+        ),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: text.bodyMedium?.copyWith(color: AppColors.textPrimary),
+        ),
       ],
     );
   }

@@ -69,8 +69,15 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
-                  Text('Chapters',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  // At 200% type the page title alone no longer fits beside
+                  // the back button, so it takes the remaining width and may
+                  // wrap rather than pushing the row past the screen edge.
+                  Flexible(
+                    child: Text(
+                      'Chapters',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
                 ],
               ),
             ),

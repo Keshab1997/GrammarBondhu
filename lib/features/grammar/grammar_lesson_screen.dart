@@ -974,16 +974,23 @@ class _TeacherSays extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Speaker name and the narration button already filled the
+                // bubble at default type; at 200% the name overflowed by
+                // 44 px. Flexible lets the name wrap inside the bubble, and
+                // the button keeps its 48 dp target - a finger does not get
+                // smaller when the text gets bigger.
                 Row(
                   children: [
                     const Icon(Icons.record_voice_over_rounded,
                         size: 14, color: AppColors.primary),
                     const SizedBox(width: 4),
-                    Text(
-                      'Mrs. Sen',
-                      style: theme.bodySmall?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
+                    Flexible(
+                      child: Text(
+                        'Mrs. Sen',
+                        style: theme.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                     const Spacer(),

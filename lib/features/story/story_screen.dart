@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
+import '../../core/utils/accessible_layout.dart';
 import '../../core/utils/asset_lookup.dart';
 import '../../core/widgets/listen_button.dart';
 import '../audio/audio_controller.dart';
@@ -198,15 +199,21 @@ class _StoryScreenState extends State<StoryScreen> {
                                 size: 15,
                                 color: Colors.white.withValues(alpha: 0.95)),
                             const SizedBox(width: 6),
-                            Text(
-                              'Tap to continue',
-                              style: text.bodyMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                shadows: const [
-                                  Shadow(
-                                      color: Color(0x99000000), blurRadius: 6),
-                                ],
+                            // Long scales wrap the hint onto a second line
+                            // instead of running 125 px past the edge.
+                            Flexible(
+                              child: Text(
+                                'Tap to continue',
+                                textAlign: TextAlign.center,
+                                style: text.bodyMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  shadows: const [
+                                    Shadow(
+                                        color: Color(0x99000000),
+                                        blurRadius: 6),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -237,17 +244,49 @@ class _StoryScreenState extends State<StoryScreen> {
                         onTap: () => Navigator.of(context).maybePop(),
                       ),
                       const SizedBox(width: AppSpacing.sm),
+                      // Progress and the language switch share one row while
+                      // that fits, and stack when it does not. The switch is
+                      // never dropped: at a large font scale the learner needs
+                      // the translation most, so the row gives way instead.
                       Expanded(
-                        child: _SceneProgress(
-                          scene: _sceneIndex + 1,
-                          scenes: chapter.scenes.length,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      _TranslationToggle(
-                        lang: _translationLang,
-                        onChanged: (value) =>
-                            setState(() => _translationLang = value),
+                        child: AccessibleLayout.needsReflow(context)
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _SceneProgress(
+                                    scene: _sceneIndex + 1,
+                                    scenes: chapter.scenes.length,
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  // Full width, so the three segments split
+                                  // the row instead of measuring their own
+                                  // intrinsic widths (which is what pushed
+                                  // them 42 px past the edge at 200%).
+                                  _TranslationToggle(
+                                    lang: _translationLang,
+                                    stretch: true,
+                                    onChanged: (value) => setState(
+                                        () => _translationLang = value),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  Expanded(
+                                    child: _SceneProgress(
+                                      scene: _sceneIndex + 1,
+                                      scenes: chapter.scenes.length,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  _TranslationToggle(
+                                    lang: _translationLang,
+                                    onChanged: (value) => setState(
+                                        () => _translationLang = value),
+                                  ),
+                                ],
+                              ),
                       ),
                     ],
                   ),
@@ -789,10 +828,18 @@ class _GlassIconButton extends StatelessWidget {
 
 /// English · বাংলা · हिन्दी as a single segmented switch that cannot overflow.
 class _TranslationToggle extends StatelessWidget {
-  const _TranslationToggle({required this.lang, required this.onChanged});
+  const _TranslationToggle({
+    required this.lang,
+    required this.onChanged,
+    this.stretch = false,
+  });
 
   final String lang;
   final ValueChanged<String> onChanged;
+
+  /// When true the three segments share the available width equally, which is
+  /// what keeps Bengali and Hindi labels reachable at a large font scale.
+  final bool stretch;
 
   static const _options = <(String, String)>[
     ('off', 'EN'),
@@ -810,14 +857,23 @@ class _TranslationToggle extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: stretch ? MainAxisSize.max : MainAxisSize.min,
         children: [
           for (final (value, label) in _options)
-            _Segment(
-              label: label,
-              selected: lang == value,
-              onTap: () => onChanged(value),
-            ),
+            if (stretch)
+              Expanded(
+                child: _Segment(
+                  label: label,
+                  selected: lang == value,
+                  onTap: () => onChanged(value),
+                ),
+              )
+            else
+              _Segment(
+                label: label,
+                selected: lang == value,
+                onTap: () => onChanged(value),
+              ),
         ],
       ),
     );
@@ -837,21 +893,43 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.primary : Colors.transparent,
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
-              letterSpacing: 0.2,
+    // Same reasoning as ListenButton: the pill stays small, the target does
+    // not. `selected: true` is what tells a reader which language is active -
+    // colour alone does not survive a screen reader.
+    return Semantics(
+      button: true,
+      selected: selected,
+      // The visible text lives inside the ExcludeSemantics below, so the
+      // label has to be restated here - otherwise the segment is a button
+      // with no name at all.
+      label: label,
+      child: ExcludeSemantics(
+        child: Material(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(999),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AccessibleLayout.minTouchTarget,
+                minWidth: AccessibleLayout.minTouchTarget,
+              ),
+              child: Center(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

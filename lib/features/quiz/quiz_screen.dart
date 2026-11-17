@@ -5,6 +5,7 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
+import '../../core/utils/accessible_layout.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../data/models/chapter.dart';
 import '../completion/chapter_completed_screen.dart';
@@ -131,6 +132,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   child: Row(
                     children: [
                       IconButton(
+                        tooltip: 'Close quiz',
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.close_rounded,
                             color: Colors.white),
@@ -204,11 +206,14 @@ class _QuizScreenState extends State<QuizScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Text(
-                                    question.question,
-                                    style: text.headlineMedium
-                                        ?.copyWith(fontSize: 24),
-                                    textAlign: TextAlign.center,
+                                  Semantics(
+                                    header: true,
+                                    child: Text(
+                                      question.question,
+                                      style: text.headlineMedium
+                                          ?.copyWith(fontSize: 24),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                   const SizedBox(height: AppSpacing.lg),
                                   for (var i = 0;
@@ -325,61 +330,99 @@ class _OptionTile extends StatelessWidget {
       _OptionState.correct => (AppColors.successSoft, AppColors.success),
       _OptionState.wrong => (AppColors.errorSoft, AppColors.error),
     };
-    return Material(
-      color: background,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadii.button),
-        side: BorderSide(color: border, width: 1.6),
-      ),
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(AppRadii.button),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: 13),
-          child: Row(
-            children: [
-              // A/B/C/D marker: the list stops looking like four text fields
-              // and starts looking like a quiz.
-              Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: switch (state) {
-                    _OptionState.idle => AppColors.background,
-                    _OptionState.selected => AppColors.primary,
-                    _OptionState.correct => AppColors.success,
-                    _OptionState.wrong => AppColors.error,
-                  },
-                ),
-                child: Text(
-                  String.fromCharCode(65 + index),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    color: state == _OptionState.idle
-                        ? AppColors.textSecondary
-                        : Colors.white,
-                  ),
+    // A screen reader used to announce four bare answers: which one was
+    // picked, and whether it was right, lived only in the tile's colour and
+    // in two icons that carry no label. The letter, the selected state and
+    // the verdict are now part of what the reader says; the icons are
+    // decorations so their silence is not a gap.
+    final verdict = switch (state) {
+      _OptionState.correct => 'correct answer',
+      _OptionState.wrong => 'your answer, incorrect',
+      _ => null,
+    };
+    final letter = String.fromCharCode(65 + index);
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      inMutuallyExclusiveGroup: true,
+      // A radio-style list: `selected` while answering, and a checked/unchecked
+      // verdict once the answer is in. After submitting, the picked option is
+      // no longer "selected" - it is checked or not - so the two do not fight.
+      selected: state == _OptionState.selected,
+      checked: switch (state) {
+        _OptionState.correct => true,
+        _OptionState.wrong => false,
+        _ => null,
+      },
+      label: verdict == null
+          ? 'Option $letter: $label'
+          : 'Option $letter: $label, $verdict',
+      child: ExcludeSemantics(
+        child: Material(
+          color: background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.button),
+            side: BorderSide(color: border, width: 1.6),
+          ),
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            borderRadius: BorderRadius.circular(AppRadii.button),
+            // A minimum height, not a fixed one: at a large font scale a
+            // two-line answer needs to grow, and a 48 dp answer stays
+            // comfortably tappable at the default scale.
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AccessibleLayout.minTouchTarget,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md, vertical: 13),
+                child: Row(
+                  children: [
+                    // A/B/C/D marker: the list stops looking like four text
+                    // fields and starts looking like a quiz.
+                    Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: switch (state) {
+                          _OptionState.idle => AppColors.background,
+                          _OptionState.selected => AppColors.primary,
+                          _OptionState.correct => AppColors.success,
+                          _OptionState.wrong => AppColors.error,
+                        },
+                      ),
+                      child: Text(
+                        letter,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          color: state == _OptionState.idle
+                              ? AppColors.textSecondary
+                              : Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm + 4),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 16),
+                      ),
+                    ),
+                    if (state == _OptionState.correct)
+                      const Icon(Icons.check_circle_rounded,
+                          color: AppColors.success, size: 20),
+                    if (state == _OptionState.wrong)
+                      const Icon(Icons.cancel_rounded,
+                          color: AppColors.error, size: 20),
+                  ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm + 4),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 16),
-                ),
-              ),
-              if (state == _OptionState.correct)
-                const Icon(Icons.check_circle_rounded,
-                    color: AppColors.success, size: 20),
-              if (state == _OptionState.wrong)
-                const Icon(Icons.cancel_rounded,
-                    color: AppColors.error, size: 20),
-            ],
+            ),
           ),
         ),
       ),
@@ -407,40 +450,60 @@ class _FeedbackCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final color = isCorrect ? AppColors.success : AppColors.error;
     final soft = isCorrect ? AppColors.successSoft : AppColors.errorSoft;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: soft,
-        borderRadius: BorderRadius.circular(AppRadii.card),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    // Announced as one sentence. Read piecemeal, a reader visits "Correct!",
+    // then an answer string with no verb, then the explanation - with no clue
+    // which question they belong to.
+    final spoken = isCorrect
+        ? 'Correct. $explanation'
+        : "Incorrect. The correct answer is $correctAnswer. $explanation";
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      label: spoken,
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: soft,
+            borderRadius: BorderRadius.circular(AppRadii.card),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                color: color,
-                size: 28,
+              Row(
+                children: [
+                  Icon(
+                    isCorrect
+                        ? Icons.check_circle_rounded
+                        : Icons.cancel_rounded,
+                    color: color,
+                    size: 28,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  // The verdict word takes the rest of the line and wraps;
+                  // at 200% it is 224 px wider than the card, which is the
+                  // overflow this test caught after submitting.
+                  Flexible(
+                    child: Text(
+                      isCorrect ? 'Correct!' : 'Incorrect',
+                      style: text.titleLarge?.copyWith(color: color),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                isCorrect ? 'Correct!' : 'Incorrect',
-                style: text.titleLarge?.copyWith(color: color),
-              ),
+              if (!isCorrect) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  "The correct answer is: '$correctAnswer'",
+                  style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.sm),
+              Text(showTranslation ? explanation : englishExplanation,
+                  style: text.bodyMedium?.copyWith(height: 1.45)),
             ],
           ),
-          if (!isCorrect) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              "The correct answer is: '$correctAnswer'",
-              style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          Text(showTranslation ? explanation : englishExplanation,
-              style: text.bodyMedium?.copyWith(height: 1.45)),
-        ],
+        ),
       ),
     );
   }
