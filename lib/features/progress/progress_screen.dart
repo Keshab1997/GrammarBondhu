@@ -3,10 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
+import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
+import '../../data/models/chapter.dart';
 import '../../data/models/progress.dart';
+import '../quiz/quiz_screen.dart';
 
 /// Screen 14 — overview, per-chapter history and stats.
 class ProgressScreen extends StatefulWidget {
@@ -23,9 +26,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
     final content = context.watch<ContentController>();
     final progress = context.watch<ProgressController>();
+    final language = context.watch<SettingsController>().supportLanguage;
     final p = progress.progress;
+    final reviewCount = content.chapters.fold<int>(
+      0,
+      (count, chapter) =>
+          count +
+          chapter.quiz.where((question) {
+            return progress
+                .chapterProgress(chapter.id)
+                .missedQuestionIds
+                .contains(question.id);
+          }).length,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -56,6 +72,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       label: 'Stats',
                       selected: _tab == 2,
                       onTap: () => setState(() => _tab = 2)),
+                  const SizedBox(width: AppSpacing.sm),
+                  _TabChip(
+                      label: 'Review',
+                      selected: _tab == 3,
+                      onTap: () => setState(() => _tab = 3)),
                 ],
               ),
             ),
@@ -166,6 +187,40 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           ),
                         ),
                       ),
+                  ] else if (_tab == 3) ...[
+                    if (reviewCount == 0)
+                      AppCard(
+                        child: Column(
+                          children: [
+                            const Icon(Icons.check_circle_outline_rounded,
+                                color: AppColors.success, size: 40),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text('Nothing to review', style: text.titleMedium),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Questions you miss will be saved here so you can '
+                              'come back to them later.',
+                              textAlign: TextAlign.center,
+                              style: text.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      for (final chapter in content.chapters)
+                        _MistakeReviewCard(
+                          chapter: chapter,
+                          missedIds: progress
+                              .chapterProgress(chapter.id)
+                              .missedQuestionIds,
+                          language: language,
+                          onMarkReviewed: (questionId) => progress
+                              .clearQuestionForReview(chapter.id, questionId),
+                          onRetakeQuiz: () => Navigator.of(context).pushNamed(
+                            QuizScreen.routeName,
+                            arguments: chapter.id,
+                          ),
+                        ),
                   ] else ...[
                     AppCard(
                       child: Column(
@@ -190,6 +245,71 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ],
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MistakeReviewCard extends StatelessWidget {
+  const _MistakeReviewCard({
+    required this.chapter,
+    required this.missedIds,
+    required this.language,
+    required this.onMarkReviewed,
+    required this.onRetakeQuiz,
+  });
+
+  final Chapter chapter;
+  final Set<String> missedIds;
+  final String language;
+  final ValueChanged<String> onMarkReviewed;
+  final VoidCallback onRetakeQuiz;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final questions = chapter.quiz
+        .where((question) => missedIds.contains(question.id))
+        .toList();
+    if (questions.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(chapter.title.en, style: text.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            for (final question in questions) ...[
+              const Divider(height: AppSpacing.md),
+              Text(question.question,
+                  style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+              const SizedBox(height: AppSpacing.xs),
+              Text('Answer: ${question.correctAnswer}',
+                  style: text.bodyMedium?.copyWith(
+                    color: AppColors.successDark,
+                    fontWeight: FontWeight.w700,
+                  )),
+              const SizedBox(height: AppSpacing.xs),
+              Text(question.explanation.of(language), style: text.bodyMedium),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => onMarkReviewed(question.id),
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: const Text('Mark reviewed'),
+                ),
+              ),
+            ],
+            AppButton(
+              label: 'Retake chapter quiz',
+              icon: Icons.replay_rounded,
+              variant: AppButtonVariant.outline,
+              onPressed: onRetakeQuiz,
             ),
           ],
         ),

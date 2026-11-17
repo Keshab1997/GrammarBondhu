@@ -678,7 +678,7 @@ class _ProgressCard extends StatelessWidget {
                         style: text.titleSmall),
                     const SizedBox(height: 1),
                     Text(
-                      '${totalChapters} chapters, one story at a time',
+                      '$totalChapters chapters, one story at a time',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:

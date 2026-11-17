@@ -58,6 +58,9 @@ class UserProgress {
   int get totalQuizAnswered =>
       chapters.values.fold(0, (sum, c) => sum + c.attempts);
 
+  int get missedQuestionCount =>
+      chapters.values.fold(0, (sum, c) => sum + c.missedQuestionIds.length);
+
   /// Rolls the streak forward once per study day. Returns the new streak.
   int registerStudyDay(DateTime now) {
     final today = DateTime(now.year, now.month, now.day);
@@ -136,7 +139,8 @@ class ChapterProgress {
     this.attempts = 0,
     this.resumeSceneIndex,
     this.lastOpenedAt,
-  });
+    Set<String>? missedQuestionIds,
+  }) : missedQuestionIds = missedQuestionIds ?? <String>{};
 
   final String chapterId;
   bool completed;
@@ -146,6 +150,9 @@ class ChapterProgress {
   int bestScorePercent;
   int xpEarned;
   int attempts;
+
+  /// Quiz questions the learner has answered incorrectly and can review later.
+  final Set<String> missedQuestionIds;
 
   /// Scene index to resume an unfinished chapter; null when not started.
   int? resumeSceneIndex;
@@ -161,6 +168,10 @@ class ChapterProgress {
         bestScorePercent: (json['best_score_percent'] as num?)?.toInt() ?? 0,
         xpEarned: (json['xp_earned'] as num?)?.toInt() ?? 0,
         attempts: (json['attempts'] as num?)?.toInt() ?? 0,
+        missedQuestionIds: (json['missed_question_ids'] as List?)
+                ?.whereType<String>()
+                .toSet() ??
+            <String>{},
         resumeSceneIndex: (json['resume_scene_index'] as num?)?.toInt(),
         lastOpenedAt: json['last_opened_at'] == null
             ? null
@@ -174,6 +185,7 @@ class ChapterProgress {
         'best_score_percent': bestScorePercent,
         'xp_earned': xpEarned,
         'attempts': attempts,
+        'missed_question_ids': missedQuestionIds.toList()..sort(),
         'resume_scene_index': resumeSceneIndex,
         'last_opened_at': lastOpenedAt?.toIso8601String(),
       };

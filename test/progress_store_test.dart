@@ -63,6 +63,31 @@ void main() {
       expect(store2.loadSettings().supportLanguage, 'hi');
     });
 
+    test('missed quiz questions persist and can be cleared', () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final controller = ProgressController(store, store.loadProgress());
+
+      await controller.markQuestionForReview('ch01', 'q01');
+      expect(controller.progress.missedQuestionCount, 1);
+
+      final reopened = await LocalStore.open();
+      expect(
+        reopened.loadProgress().chapter('ch01').missedQuestionIds,
+        {'q01'},
+      );
+
+      await controller.clearQuestionForReview('ch01', 'q01');
+      expect(controller.progress.missedQuestionCount, 0);
+      expect(
+        (await LocalStore.open())
+            .loadProgress()
+            .chapter('ch01')
+            .missedQuestionIds,
+        isEmpty,
+      );
+    });
+
     test('corrupt records degrade to fresh state instead of crashing',
         () async {
       SharedPreferences.setMockInitialValues({

@@ -182,6 +182,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeShell), findsOneWidget);
-    expect(find.text('Explore the Story World'), findsNothing);
+    expect(find.text('Hello, Rahul!'), findsOneWidget);
+    expect(find.text('Welcome Back!'), findsNothing);
+    expect(find.text('Continue as Guest'), findsNothing);
   });
 }

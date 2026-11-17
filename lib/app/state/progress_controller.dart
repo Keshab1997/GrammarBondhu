@@ -98,6 +98,28 @@ class ProgressController extends ChangeNotifier {
     );
   }
 
+  /// Adds an incorrect quiz answer to the learner's local review list.
+  Future<void> markQuestionForReview(
+      String chapterId, String questionId) async {
+    final changed =
+        _progress.chapter(chapterId).missedQuestionIds.add(questionId);
+    if (!changed) return;
+    notifyListeners();
+    await _persist();
+  }
+
+  /// Removes a question after the learner marks it reviewed or answers it
+  /// correctly on a later attempt.
+  Future<void> clearQuestionForReview(
+      String chapterId, String questionId) async {
+    final chapter = _progress.chapters[chapterId];
+    if (chapter == null) return;
+    final changed = chapter.missedQuestionIds.remove(questionId);
+    if (!changed) return;
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> resetAll() async {
     _progress = UserProgress();
     notifyListeners();

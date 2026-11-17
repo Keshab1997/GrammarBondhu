@@ -25,15 +25,30 @@ class _QuizScreenState extends State<QuizScreen> {
   int _questionIndex = 0;
   int? _selected;
   bool _submitted = false;
+  bool _submitting = false;
   int _correctCount = 0;
 
   Future<void> _submit(Chapter chapter) async {
+    if (_selected == null || _submitted || _submitting) return;
     final question = chapter.quiz[_questionIndex];
     final correct = _selected == question.correctIndex;
-    setState(() {
-      _submitted = true;
-      if (correct) _correctCount += 1;
-    });
+    setState(() => _submitting = true);
+    try {
+      final progress = context.read<ProgressController>();
+      if (correct) {
+        await progress.clearQuestionForReview(chapter.id, question.id);
+      } else {
+        await progress.markQuestionForReview(chapter.id, question.id);
+      }
+      if (!mounted) return;
+      setState(() {
+        _submitted = true;
+        _submitting = false;
+        if (correct) _correctCount += 1;
+      });
+    } finally {
+      if (mounted && _submitting) setState(() => _submitting = false);
+    }
   }
 
   void _tryAgain() {
@@ -222,9 +237,10 @@ class _QuizScreenState extends State<QuizScreen> {
                                     AppButton(
                                       label: 'Submit',
                                       variant: AppButtonVariant.success,
-                                      onPressed: _selected == null
-                                          ? null
-                                          : () => _submit(chapter),
+                                      onPressed:
+                                          _selected == null || _submitting
+                                              ? null
+                                              : () => _submit(chapter),
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                     // A greyed-out button with no reason reads
