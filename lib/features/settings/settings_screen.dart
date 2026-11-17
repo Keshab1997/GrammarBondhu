@@ -6,7 +6,6 @@ import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import 'language_selection_screen.dart';
-import 'offline_download_screen.dart';
 
 /// Screen 15 — language, audio, notifications and app preferences.
 class SettingsScreen extends StatelessWidget {
@@ -62,41 +61,30 @@ class SettingsScreen extends StatelessWidget {
                     context.read<SettingsController>().setAudioEnabled(v),
               ),
             ),
-            _SettingsTile(
-              icon: Icons.notifications_rounded,
-              color: AppColors.accentDark,
-              label: 'Notifications',
-              trailing: Switch(
-                value: s.notificationsEnabled,
-                activeThumbColor: AppColors.success,
-                onChanged: (v) => context
-                    .read<SettingsController>()
-                    .setNotificationsEnabled(v),
+            const _GroupHeader('Offline learning'),
+            AppCard(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.offline_pin_rounded,
+                      color: AppColors.success, size: 22),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Ready to learn offline', style: text.titleMedium),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Stories, lessons and quizzes are included in the app. '
+                          'No chapter downloads or account are needed.',
+                          style: text.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const _GroupHeader('Storage'),
-            _SettingsTile(
-              icon: Icons.download_rounded,
-              color: AppColors.primaryDark,
-              label: 'Download Chapters',
-              trailing: const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary),
-              onTap: () => Navigator.of(context)
-                  .pushNamed(OfflineDownloadScreen.routeName),
-            ),
-            _SettingsTile(
-              icon: Icons.cleaning_services_rounded,
-              color: AppColors.textSecondary,
-              label: 'Clear Cache',
-              trailing: const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Cache cleared. Chapters stay bundled with the app.')),
-                );
-              },
             ),
             const _GroupHeader('Your data'),
             _SettingsTile(
