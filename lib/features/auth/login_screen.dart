@@ -6,9 +6,11 @@ import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/brand_logo.dart';
 import '../home/home_shell.dart';
+import 'google_auth.dart';
 
-/// Local profile setup — the app has no online accounts in v1.
-/// Learners can personalize a greeting, or skip straight into guest mode.
+/// Profile setup — guest or local name by default, with an optional Google
+/// sign-in for learners who want their progress on an account. Nothing here
+/// runs at launch: the account sheet only opens on a tap.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,6 +22,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _nameController = TextEditingController();
+
+  /// True while Google's account sheet or the credential exchange is running,
+  /// so a double tap cannot open two sheets.
+  bool _signingIn = false;
 
   @override
   void dispose() {
@@ -38,6 +44,44 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     Navigator.of(context)
         .pushNamedAndRemoveUntil(HomeShell.routeName, (_) => false);
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_signingIn) return;
+    setState(() => _signingIn = true);
+
+    // Captured before the first await: the widget may be gone by the time the
+    // account sheet closes.
+    final settings = context.read<SettingsController>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final credential = await GoogleAuth.instance.signIn();
+      final user = credential.user;
+      if (user == null) throw const SignInUnavailable();
+      final name = user.displayName?.trim();
+      await settings.signInWithGoogle(
+        (name == null || name.isEmpty) ? user.email ?? '' : name,
+      );
+      if (!mounted) return;
+      navigator.pushNamedAndRemoveUntil(HomeShell.routeName, (_) => false);
+    } on SignInCancelled {
+      // Closing the account sheet is a choice, not an error worth a message.
+    } on SignInUnavailable {
+      messenger.showSnackBar(const SnackBar(
+        content: Text(
+          'Google sign-in needs this build\'s Firebase setup. You can still '
+          'continue as a guest.',
+        ),
+      ));
+    } catch (_) {
+      messenger.showSnackBar(const SnackBar(
+        content: Text('Could not sign in with Google. Please try again.'),
+      ));
+    } finally {
+      if (mounted) setState(() => _signingIn = false);
+    }
   }
 
   @override
@@ -160,19 +204,45 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Continue',
                       icon: Icons.arrow_forward_rounded,
                       variant: AppButtonVariant.blue,
-                      onPressed: _continue,
+                      onPressed: _signingIn ? null : _continue,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
-                      onPressed: () {
-                        _nameController.clear();
-                        _continue();
-                      },
+                      onPressed: _signingIn
+                          ? null
+                          : () {
+                              _nameController.clear();
+                              _continue();
+                            },
                       child: const Text('Continue without a name'),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'or',
+                            style: text.bodySmall
+                                ?.copyWith(color: AppColors.textMuted),
+                          ),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
+                      label: _signingIn ? 'Signing in…' : 'Continue with Google',
+                      icon: Icons.account_circle_outlined,
+                      variant: AppButtonVariant.outline,
+                      onPressed: _signingIn ? null : _signInWithGoogle,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'This creates a local profile only — there is no online sign-in.',
+                      'Your profile stays on this device. Google sign-in is '
+                      'optional and never asked for at launch.',
                       textAlign: TextAlign.center,
                       style: text.bodySmall?.copyWith(color: AppColors.textMuted),
                     ),

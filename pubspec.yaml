@@ -21,6 +21,12 @@ dependencies:
   # iPhone with the ringer off plays to nobody, and on Android it fights the
   # learner's music instead of ducking it.
   audio_session: ^0.1.25
+  # Optional Google sign-in. Firebase is only initialised the moment a learner
+  # taps the button — a build without google-services.json stays a fully
+  # working guest app, which is why none of this sits in main().
+  firebase_core: ^5.2.0
+  firebase_auth: ^7.1.0
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   flutter_test:

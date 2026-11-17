@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase client config. CI writes it from the GOOGLE_SERVICES_JSON_BASE64
+# repository secret before a build; it must never be committed. A checkout
+# without it builds a guest-only app, which is supported on purpose.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

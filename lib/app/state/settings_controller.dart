@@ -55,6 +55,11 @@ class SettingsController extends ChangeNotifier {
     await _store.saveSettings(_settings);
   }
 
+  /// Account-backed profile. Firebase owns the account; this device only keeps
+  /// the greeting name so every screen still works offline.
+  Future<void> signInWithGoogle(String displayName) =>
+      signInLocally(displayName);
+
   Future<void> continueAsGuest() async {
     _settings
       ..displayName = null

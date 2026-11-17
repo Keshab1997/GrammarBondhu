@@ -7,6 +7,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase is optional: the app is guest-first and works with no account at all.
+// google-services.json is git-ignored and CI writes it from the
+// GOOGLE_SERVICES_JSON_BASE64 secret. Applying the plugin only when the file is
+// present keeps a plain checkout (and a `flutter run` on a fresh clone) building
+// instead of failing at configure time.
+if (project.file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // CI writes android/key.properties and android/app/upload-keystore.jks from
 // repository secrets before a signed build. Read it when present; a checkout
 // without it (a guest clone, or a plain `flutter run --release`) keeps working

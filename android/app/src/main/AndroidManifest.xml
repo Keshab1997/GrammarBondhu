@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Google sign-in is the only feature that reaches the network, and it is
+         opt-in. Flutter puts INTERNET in the debug/profile manifests only, so a
+         release build needs it here or Firebase Auth fails to connect. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="GrammarBondhu"
         android:name="${applicationName}"
