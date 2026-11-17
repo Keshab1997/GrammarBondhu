@@ -9,8 +9,6 @@ import 'package:grammar_bondhu/features/auth/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The login screen is the last gate before the app, so it has to work on the
-/// narrowest phone the app supports and stay guest-first.
 Future<void> _pump(WidgetTester tester, Size size) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -36,8 +34,6 @@ Future<void> _pump(WidgetTester tester, Size size) async {
       child: MaterialApp(
         home: const LoginScreen(),
         theme: ThemeData(useMaterial3: true),
-        // No route table in the test: the guest path can navigate on, we only
-        // care that it *does* navigate and does not throw on the way.
         onUnknownRoute: (settings) =>
             MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
       ),
@@ -50,60 +46,36 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   for (final size in const [Size(320, 640), Size(353, 784), Size(412, 915)]) {
-    testWidgets('login lays out cleanly at ${size.width.toInt()} dp wide',
+    testWidgets('profile setup lays out at ${size.width.toInt()} dp wide',
         (tester) async {
       await _pump(tester, size);
       expect(tester.takeException(), isNull);
-
-      // The form must be reachable without horizontal overflow.
-      expect(find.text('Welcome Back!'), findsOneWidget);
-      expect(find.text('Login'), findsOneWidget);
-      expect(find.text('Sign Up'), findsOneWidget);
-      expect(find.text('Continue as Guest'), findsOneWidget);
+      expect(find.text('Make it yours'), findsOneWidget);
+      expect(find.text('Your name (optional)'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('Continue without a name'), findsOneWidget);
+      expect(find.text('Password'), findsNothing);
+      expect(find.text('Login'), findsNothing);
+      expect(find.text('Sign Up'), findsNothing);
     });
   }
 
-  testWidgets('guest path is reachable on the smallest phone', (tester) async {
+  testWidgets('learner can continue without a name as a guest', (tester) async {
     await _pump(tester, const Size(320, 640));
-    // Scroll the form into view, then take the guest route — the whole point
-    // of the screen is that this never requires an account.
-    await tester.scrollUntilVisible(
-      find.text('Continue as Guest'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue as Guest'));
+    await tester.ensureVisible(find.text('Continue without a name'));
+    await tester.tap(find.text('Continue without a name'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    // Guest mode persisted: the app remembers we chose it.
-    expect(find.text('Continue as Guest'), findsNothing);
+    expect(find.text('Continue without a name'), findsNothing);
   });
 
-  testWidgets('empty submit shows validation instead of leaving the screen',
-      (tester) async {
+  testWidgets('optional name is saved as a local profile', (tester) async {
     await _pump(tester, const Size(353, 784));
-    await tester.tap(find.text('Login'));
+    await tester.enterText(find.byType(TextField), 'Mina');
+    await tester.ensureVisible(find.text('Continue'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
-    expect(find.text('Please enter your email or phone'), findsOneWidget);
-    expect(find.text('Password needs 4+ characters'), findsOneWidget);
-  });
-
-  testWidgets('password visibility toggle flips', (tester) async {
-    await _pump(tester, const Size(353, 784));
-    bool passwordObscured() => tester
-        .widgetList<EditableText>(find.byType(EditableText))
-        .last
-        .obscureText;
-
-    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
-    expect(passwordObscured(), isTrue);
-
-    await tester.tap(find.byIcon(Icons.visibility_outlined));
-    await tester.pumpAndSettle();
-
-    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
-    // The field really is revealed, not just the icon swapped.
-    expect(passwordObscured(), isFalse);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Make it yours'), findsNothing);
   });
 }
