@@ -168,7 +168,7 @@ class ProfileScreen extends StatelessWidget {
           _MenuTile(
             icon: Icons.translate_rounded,
             iconColor: AppColors.success,
-            label: 'Language',
+            label: 'Explanation language',
             trailing: settings.supportLanguage.toUpperCase(),
             onTap: () => Navigator.of(context)
                 .pushNamed(LanguageSelectionScreen.routeName),
