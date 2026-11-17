@@ -1,0 +1,204 @@
+{
+  "chapter_id": "ch05",
+  "title": {
+    "en": "The School Adventure",
+    "bn": "স্কুল অ্যাডভেঞ্চার",
+    "hi": "स्कूल का साहसिक किस्सा"
+  },
+  "description": {
+    "en": "The school fair is coming! Rahul and Priya build perfect English sentences to invite everyone.",
+    "bn": "স্কুল ফেয়ার আসছে! রাহুল আর প্রিয়া সবাইকে আমন্ত্রণ জানাতে নিখুঁত ইংরেজি বাক্য গড়ে।",
+    "hi": "स्कूल मेला आ रहा है! राहुल और प्रिया सबको न्योता देने के लिए शानदार अंग्रेज़ी वाक्य बनाते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Sentence Formation",
+    "bn": "বাক্য গঠন",
+    "hi": "वाक्य निर्माण"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_school_garden.webp",
+  "rewards": { "xp": 80, "coins": 16, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch05_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Our school fair is on Friday! We need an invitation in English.",
+            "bn": "শুক্রবার আমাদের স্কুল ফেয়ার! আমাদের ইংরেজিতে একটি আমন্ত্রণ প্রয়োজন।",
+            "hi": "शुक्रवार को हमारा स्कूल मेला है! हमें अंग्रेज़ी में एक निमंत्रण चाहिए।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "A sentence needs a subject and a verb. Then we add the details!",
+            "bn": "একটি বাক্যের জন্য subject আর verb দরকার। তারপর বিস্তারিত যোগ করি!",
+            "hi": "एक वाक्य में subject और verb होना चाहिए। फिर हम विवरण जोड़ते हैं!"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch05_s2",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Subject + Verb + Object — like this: We love our school.",
+            "bn": "Subject + Verb + Object — এভাবে: We love our school.",
+            "hi": "Subject + Verb + Object — इस तरह: We love our school."
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Perfect! Let us write: 'The fair starts at ten. Come and celebrate with us!'",
+            "bn": "পারফেক্ট! লিখি: 'The fair starts at ten. Come and celebrate with us!'",
+            "hi": "परफ़ेक्ट! लिखते हैं: 'The fair starts at ten. Come and celebrate with us!'"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch05_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Beautiful sentences, children! The whole town is coming to our fair.",
+            "bn": "সুন্দর বাক্য, বাচ্চারা! পুরো শহর আমাদের ফেয়ারে আসছে।",
+            "hi": "सुंदर वाक्य, बच्चों! पूरा शहर हमारे मेले में आ रहा है।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch05_c1",
+          "text": {
+            "en": "We will write more posters!",
+            "bn": "আমরা আরও পোস্টার লিখব!",
+            "hi": "हम और पोस्टर लिखेंगे!"
+          },
+          "response": {
+            "en": "Wonderful! Your English sentences are the best invitation.",
+            "bn": "চমৎকার! তোমাদের ইংরেজি বাক্যই সেরা আমন্ত্রণ।",
+            "hi": "शानदार! तुम्हारे अंग्रेज़ी वाक्य ही सबसे अच्छा निमंत्रण हैं।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Sentence Formation — Subject + Verb + Object",
+      "bn": "বাক্য গঠন — Subject + Verb + Object",
+      "hi": "वाक्य निर्माण — Subject + Verb + Object"
+    },
+    "explanation": {
+      "en": "A good English sentence starts with a subject (who or what), then a verb (the action), then more details like an object or a place. Keep this order and your sentences will always be clear.",
+      "bn": "একটি ভালো ইংরেজি বাক্য subject দিয়ে শুরু হয় (কে বা কী), তারপর verb (কাজ), তারপর object বা স্থানের মতো বিস্তারিত। এই ক্রম মেনে চললে তোমার বাক্য সবসময় স্পষ্ট হবে।",
+      "hi": "एक अच्छा अंग्रेज़ी वाक्य subject (कौन या क्या) से शुरू होता है, फिर verb (क्रिया), फिर object या जगह जैसे विवरण। इस क्रम को रखो और तुम्हारे वाक्य हमेशा साफ़ रहेंगे।"
+    },
+    "examples": [
+      {
+        "sentence": "Rahul writes a letter.",
+        "note": {
+          "en": "Subject (Rahul) + Verb (writes) + Object (a letter).",
+          "bn": "Subject (Rahul) + Verb (writes) + Object (a letter)।",
+          "hi": "Subject (Rahul) + Verb (writes) + Object (a letter)।"
+        }
+      },
+      {
+        "sentence": "The fair starts at ten.",
+        "note": {
+          "en": "Subject (The fair) + Verb (starts) + detail (at ten).",
+          "bn": "Subject (The fair) + Verb (starts) + বিস্তারিত (at ten)।",
+          "hi": "Subject (The fair) + Verb (starts) + विवरण (at ten)।"
+        }
+      },
+      {
+        "sentence": "We love our school.",
+        "note": {
+          "en": "Subject (We) + Verb (love) + Object (our school).",
+          "bn": "Subject (We) + Verb (love) + Object (our school)।",
+          "hi": "Subject (We) + Verb (love) + Object (our school)।"
+        }
+      },
+      {
+        "sentence": "Come and celebrate with us!",
+        "note": {
+          "en": "A command can start with the verb — the subject 'you' is understood.",
+          "bn": "নির্দেশবাচক বাক্য verb দিয়ে শুরু হতে পারে — subject 'you' বোঝাই যায়।",
+          "hi": "आज्ञार्थक वाक्य verb से शुरू हो सकता है — subject 'you' समझ में आता है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch05_q1",
+      "question": "Which is the correct sentence?",
+      "options": ["Rahul writes a letter.", "Writes Rahul a letter.", "A letter Rahul writes.", "Rahul a letter writes."],
+      "correct_index": 0,
+      "explanation": {
+        "en": "The order is Subject + Verb + Object: Rahul (subject) + writes (verb) + a letter (object).",
+        "bn": "ক্রমটা Subject + Verb + Object: Rahul (subject) + writes (verb) + a letter (object)।",
+        "hi": "क्रम Subject + Verb + Object है: Rahul (subject) + writes (verb) + a letter (object)।"
+      }
+    },
+    {
+      "question_id": "ch05_q2",
+      "question": "___ starts at ten.",
+      "options": ["The fair", "At ten", "Starts", "Us"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Every sentence needs a subject first — 'The fair' is the subject here.",
+        "bn": "প্রতিটি বাক্যের শুরুতে subject দরকার — এখানে 'The fair' হলো subject।",
+        "hi": "हर वाक्य की शुरुआत subject से होती है — यहाँ 'The fair' subject है।"
+      }
+    },
+    {
+      "question_id": "ch05_q3",
+      "question": "Choose the correct sentence:",
+      "options": ["We love our school.", "Love we our school.", "Our school we love.", "We our school love."],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Subject (We) comes first, then the verb (love), then the object (our school).",
+        "bn": "Subject (We) আগে আসে, তারপর verb (love), তারপর object (our school)।",
+        "hi": "Subject (We) पहले आता है, फिर verb (love), फिर object (our school)।"
+      }
+    },
+    {
+      "question_id": "ch05_q4",
+      "question": "In 'The children play in the park', the subject is:",
+      "options": ["The children", "play", "in the park", "the park"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "The subject is who does the action — 'The children' play.",
+        "bn": "Subject সেই যে কাজটা করে — 'The children' খেলে।",
+        "hi": "Subject वह है जो काम करता है — 'The children' खेलते हैं।"
+      }
+    },
+    {
+      "question_id": "ch05_q5",
+      "question": "Choose the correct sentence:",
+      "options": ["She sings a song.", "Sings she a song.", "A song she sings.", "She a song sings."],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Subject (She) + Verb (sings) + Object (a song) — the clear English order.",
+        "bn": "Subject (She) + Verb (sings) + Object (a song) — স্পষ্ট ইংরেজি ক্রম।",
+        "hi": "Subject (She) + Verb (sings) + Object (a song) — साफ़ अंग्रेज़ी क्रम।"
+      }
+    }
+  ]
+}

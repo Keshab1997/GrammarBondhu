@@ -1,0 +1,12 @@
+{
+  "app_name": "GrammarBondhu",
+  "version": 1,
+  "default_support_language": "bn",
+  "chapters": [
+    { "chapter_id": "ch01", "file": "chapters/chapter_01.json", "order": 1 },
+    { "chapter_id": "ch02", "file": "chapters/chapter_02.json", "order": 2 },
+    { "chapter_id": "ch03", "file": "chapters/chapter_03.json", "order": 3 },
+    { "chapter_id": "ch04", "file": "chapters/chapter_04.json", "order": 4 },
+    { "chapter_id": "ch05", "file": "chapters/chapter_05.json", "order": 5 }
+  ]
+}
