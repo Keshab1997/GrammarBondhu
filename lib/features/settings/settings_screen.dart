@@ -38,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
             _SettingsTile(
               icon: Icons.translate_rounded,
               color: AppColors.primary,
-              label: 'Language',
+              label: 'Explanation language',
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

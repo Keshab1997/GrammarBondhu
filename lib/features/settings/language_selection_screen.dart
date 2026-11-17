@@ -27,21 +27,21 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       flag: '🇬🇧',
       icon: 'flag_en',
       name: 'English',
-      detail: 'Main Language'
+      detail: 'English-only explanations'
     ),
     (
       code: 'bn',
       flag: '🇧🇩',
       icon: 'flag_bn',
       name: 'বাংলা',
-      detail: 'Translation'
+      detail: 'Bengali explanations and translations'
     ),
     (
       code: 'hi',
       flag: '🇮🇳',
       icon: 'flag_hi',
       name: 'हिन्दी',
-      detail: 'Translation'
+      detail: 'Hindi explanations and translations'
     ),
   ];
 
@@ -54,7 +54,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text('Select Language'),
+        title: const Text('Explanation language'),
       ),
       body: SafeArea(
         child: Column(
@@ -65,7 +65,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 children: [
                   Text(
-                    'Choose your preferred language for explanations and story text.',
+                    'English stays the main learning language. Choose whether supporting explanations and story translations appear in English, Bengali or Hindi.',
                     style: text.bodyLarge,
                   ),
                   const SizedBox(height: AppSpacing.lg),
