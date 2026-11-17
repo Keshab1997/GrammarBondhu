@@ -22,7 +22,9 @@ import '../story/story_screen.dart';
 /// narrow phones this app targets (320–360 dp) a fixed-width row overflows by
 /// a few pixels and the row turns into the black-and-yellow overflow stripes.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.now});
+
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class HomeScreen extends StatelessWidget {
             ),
           const SizedBox(height: AppSpacing.md),
           _DailyGoalCard(
-            done: progress.progress.questionsAnsweredToday,
+            done: progress.progress.questionsAnsweredOn(now ?? DateTime.now()),
             target: progress.progress.dailyGoalQuestions,
           ),
         ],

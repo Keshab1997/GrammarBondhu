@@ -14,8 +14,10 @@ class UserProgress {
     this.lastStudyDate,
     this.lastQuestionDate,
     DateTime? now,
-  }) : chapters = chapters ?? {};
+  })  : chapters = chapters ?? {},
+        _now = now;
 
+  final DateTime? _now;
   final Map<String, ChapterProgress> chapters;
   int totalXp;
   int coins;
@@ -81,18 +83,23 @@ class UserProgress {
     return streakDays;
   }
 
-  /// Counts one answered quiz question toward the daily goal.
-  void registerQuestionAnswered(DateTime now) {
-    final today = DateTime(now.year, now.month, now.day);
+  /// Reads the saved count only if it belongs to the local day of [now].
+  int questionsAnsweredOn(DateTime now) {
     final last = lastQuestionDate;
-    if (last == null || DateTime(last.year, last.month, last.day) != today) {
-      questionsAnsweredToday = 0;
-    }
-    questionsAnsweredToday += 1;
-    lastQuestionDate = today;
+    return last != null && _sameDay(last.toLocal(), now.toLocal())
+        ? questionsAnsweredToday
+        : 0;
   }
 
-  bool get dailyGoalReached => questionsAnsweredToday >= dailyGoalQuestions;
+  /// Counts one answered quiz question toward the daily goal.
+  void registerQuestionAnswered(DateTime now) {
+    final local = now.toLocal();
+    questionsAnsweredToday = questionsAnsweredOn(local) + 1;
+    lastQuestionDate = DateTime(local.year, local.month, local.day);
+  }
+
+  bool get dailyGoalReached =>
+      questionsAnsweredOn(_now ?? DateTime.now()) >= dailyGoalQuestions;
 
   /// The targets a learner can actually pick. A free-text goal invites "500",
   /// which is not a goal, it is a way to feel behind every day.
@@ -185,6 +192,7 @@ class UserProgress {
       chapters[entry.key] = ChapterProgress.fromJson(
           (entry.value as Map).cast<String, dynamic>());
     }
+    final questionDate = json['last_question_date'];
     return UserProgress(
       chapters: chapters,
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
@@ -199,9 +207,8 @@ class UserProgress {
       lastStudyDate: json['last_study_date'] == null
           ? null
           : DateTime.tryParse(json['last_study_date'] as String),
-      lastQuestionDate: json['last_question_date'] == null
-          ? null
-          : DateTime.tryParse(json['last_question_date'] as String),
+      lastQuestionDate:
+          questionDate is String ? DateTime.tryParse(questionDate) : null,
     );
   }
 
