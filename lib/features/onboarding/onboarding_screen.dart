@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
-import '../auth/login_screen.dart';
+import '../home/home_shell.dart';
 
 /// Screens 2–4 — the three onboarding pages with rich 3D illustrations.
 /// Smooth page-transform and animated dots, matching storyboard frames 2-4.
@@ -43,21 +43,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
-  void _next() {
+  Future<void> _next() async {
     if (_page < _pages.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutCubic,
       );
     } else {
-      context.read<SettingsController>().completeOnboarding();
-      Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+      await context.read<SettingsController>().completeOnboarding();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(HomeShell.routeName);
     }
   }
 
-  void _skip() {
-    context.read<SettingsController>().completeOnboarding();
-    Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+  Future<void> _skip() async {
+    await context.read<SettingsController>().completeOnboarding();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(HomeShell.routeName);
   }
 
   @override
