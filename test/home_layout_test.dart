@@ -6,6 +6,7 @@ import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
+import 'package:grammar_bondhu/data/models/progress.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The home screen is a dense dashboard, so it has to survive the narrowest
 /// phone it will meet. 320 dp is the floor Flutter supports; 353 dp is the
 /// Pixel-class device the design was drawn for. Both used to overflow.
-Future<void> _pumpHome(WidgetTester tester, Size size) async {
+Future<void> _pumpHome(
+  WidgetTester tester,
+  Size size, {
+  bool allChaptersComplete = false,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
@@ -24,6 +29,17 @@ Future<void> _pumpHome(WidgetTester tester, Size size) async {
   final store = await LocalStore.open();
   final content = ContentController(ContentRepository());
   await content.load();
+  final initialProgress = allChaptersComplete
+      ? UserProgress(
+          chapters: {
+            for (final chapter in content.chapters)
+              chapter.id: ChapterProgress(
+                chapterId: chapter.id,
+                completed: true,
+              ),
+          },
+        )
+      : store.loadProgress();
 
   await tester.pumpWidget(
     MultiProvider(
@@ -33,7 +49,7 @@ Future<void> _pumpHome(WidgetTester tester, Size size) async {
           create: (_) => SettingsController(store, store.loadSettings()),
         ),
         ChangeNotifierProvider(
-          create: (_) => ProgressController(store, store.loadProgress()),
+          create: (_) => ProgressController(store, initialProgress),
         ),
       ],
       child: MaterialApp(home: const HomeShell(), theme: ThemeData()),
@@ -60,6 +76,20 @@ void main() {
     expect(library.hasFlag(SemanticsFlag.isButton), isTrue);
     expect(library.hasFlag(SemanticsFlag.isSelected), isTrue);
     semantics.dispose();
+  });
+
+  testWidgets('completed course offers a clear chapter review path',
+      (tester) async {
+    await _pumpHome(
+      tester,
+      const Size(353, 784),
+      allChaptersComplete: true,
+    );
+
+    expect(find.text('Course complete!'), findsOneWidget);
+    expect(find.text('Review chapters'), findsOneWidget);
+    expect(find.text('Continue Your Journey'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   for (final size in const [Size(320, 640), Size(353, 784), Size(412, 915)]) {

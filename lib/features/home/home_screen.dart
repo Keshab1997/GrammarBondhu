@@ -33,6 +33,8 @@ class HomeScreen extends StatelessWidget {
     final chapters = content.chapters;
     final currentId = progress.recommendedChapterId(chapters);
     final current = content.byId(currentId);
+    final allChaptersComplete = chapters.isNotEmpty &&
+        progress.progress.completedChapterCount >= chapters.length;
 
     return SafeArea(
       child: ListView(
@@ -41,7 +43,9 @@ class HomeScreen extends StatelessWidget {
         children: [
           _Header(name: settings.greetingName),
           const SizedBox(height: AppSpacing.lg),
-          if (current != null)
+          if (allChaptersComplete)
+            _CourseCompleteCard(totalChapters: chapters.length)
+          else if (current != null)
             _ContinueCard(chapter: current, chapters: chapters),
           const SizedBox(height: AppSpacing.lg),
           _QuickActions(current: current),
@@ -230,6 +234,62 @@ class _ToolbarButton extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           child: Icon(icon, size: 21, color: AppColors.textSecondary),
         ),
+      ),
+    );
+  }
+}
+
+/// Course-finished state: celebrate completion and offer a clear replay path.
+class _CourseCompleteCard extends StatelessWidget {
+  const _CourseCompleteCard({required this.totalChapters});
+
+  final int totalChapters;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryDark, AppColors.primary, AppColors.skyTop],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppRadii.card + 2),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.emoji_events_rounded,
+                  color: AppColors.accent, size: 28),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Course complete!',
+                  style: text.headlineSmall?.copyWith(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'You finished all $totalChapters chapters. Celebrate your progress '
+            'or revisit a story to practise again.',
+            style: text.bodyMedium?.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppButton(
+            label: 'Review chapters',
+            icon: Icons.replay_rounded,
+            variant: AppButtonVariant.primary,
+            onPressed: () =>
+                Navigator.of(context).pushNamed(ChapterListScreen.routeName),
+          ),
+        ],
       ),
     );
   }
@@ -618,7 +678,7 @@ class _ProgressCard extends StatelessWidget {
                         style: text.titleSmall),
                     const SizedBox(height: 1),
                     Text(
-                      '5 chapters, one story at a time',
+                      '${totalChapters} chapters, one story at a time',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:
@@ -679,9 +739,11 @@ class _ProgressCard extends StatelessWidget {
               const Spacer(),
               Flexible(
                 child: Text(
-                  completedChapters == 0
-                      ? 'Chapter 1 next'
-                      : '$completedChapters of $totalChapters done',
+                  completedChapters >= totalChapters && totalChapters > 0
+                      ? 'Every chapter complete!'
+                      : completedChapters == 0
+                          ? 'Chapter 1 next'
+                          : '$completedChapters of $totalChapters done',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.end,
