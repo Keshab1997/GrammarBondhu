@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
@@ -42,6 +44,23 @@ Future<void> _pumpHome(WidgetTester tester, Size size) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('bottom navigation exposes button and selected semantics',
+      (tester) async {
+    await _pumpHome(tester, const Size(353, 784));
+    final semantics = tester.ensureSemantics();
+
+    final home = tester.getSemantics(find.bySemanticsLabel('Home'));
+    expect(home.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(home.hasFlag(SemanticsFlag.isSelected), isTrue);
+
+    await tester.tap(find.text('Library'));
+    await tester.pumpAndSettle();
+    final library = tester.getSemantics(find.bySemanticsLabel('Library'));
+    expect(library.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(library.hasFlag(SemanticsFlag.isSelected), isTrue);
+    semantics.dispose();
+  });
 
   for (final size in const [Size(320, 640), Size(353, 784), Size(412, 915)]) {
     testWidgets('home lays out cleanly at ${size.width.toInt()} dp wide',

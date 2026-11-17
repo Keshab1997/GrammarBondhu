@@ -128,59 +128,68 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return Semantics(
+      container: true,
+      button: true,
+      selected: selected,
+      label: label,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(28),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          gradient: selected
-              ? const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : null,
-          color: selected ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  )
-                ]
-              : null,
-        ),
-        // The bar has a fixed height, so a label that wraps — narrow phones,
-        // long labels, a raised system text scale — used to overflow the item
-        // by a dozen pixels. scaleDown keeps the lockup intact inside it.
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected ? activeIcon : icon,
-                color: selected ? Colors.white : AppColors.textMuted,
-                size: 24,
+      child: ExcludeSemantics(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              gradient: selected
+                  ? const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryDark],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )
+                  : null,
+              color: selected ? null : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      )
+                    ]
+                  : null,
+            ),
+            // The bar has a fixed height, so a label that wraps — narrow phones,
+            // long labels, a raised system text scale — used to overflow the item
+            // by a dozen pixels. scaleDown keeps the lockup intact inside it.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    selected ? activeIcon : icon,
+                    color: selected ? Colors.white : AppColors.textMuted,
+                    size: 24,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: selected ? Colors.white : AppColors.textMuted,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w800,
-                  color: selected ? Colors.white : AppColors.textMuted,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
