@@ -19,6 +19,11 @@ class ProgressController extends ChangeNotifier {
 
   ProgressCloudBackup? _cloudBackup;
   String? _cloudUserId;
+
+  /// Changes whenever the connected account session starts or ends. Every
+  /// in-flight sync captures it; a late result from a previous session is
+  /// discarded instead of touching the current local data or sync status.
+  int _cloudSession = 0;
   Future<void> _cloudQueue = Future<void>.value();
   bool _cloudSyncing = false;
   Object? _lastCloudSyncError;
@@ -46,25 +51,36 @@ class ProgressController extends ChangeNotifier {
       throw StateError('No cloud account is connected.');
     }
     await _cloudQueue;
+    final session = _cloudSession;
     _cloudSyncing = true;
     _lastCloudSyncError = null;
     notifyListeners();
     try {
-      final merged = await backup.synchronize(userId, _progress);
-      _progress = merged;
+      // Sync against the snapshot this sync started from: edits the learner
+      // earns while the network call is in flight stay in `_progress` and in
+      // the store, so a late result can never roll them back.
+      final snapshot = UserProgress.fromJson(_progress.toJson());
+      final merged = await backup.synchronize(userId, snapshot);
+      if (!_sessionIsCurrent(backup, userId, session)) return;
+      _progress = UserProgress.mergeForCloud(_progress, merged);
       await _store.saveProgress(_progress);
+      _lastCloudSyncError = null;
     } catch (error) {
+      if (!_sessionIsCurrent(backup, userId, session)) return;
       _lastCloudSyncError = error;
       rethrow;
     } finally {
+      if (!_sessionIsCurrent(backup, userId, session)) return;
       _cloudSyncing = false;
       notifyListeners();
     }
   }
 
   void disconnectCloudBackup() {
+    _cloudSession++;
     _cloudBackup = null;
     _cloudUserId = null;
+    _cloudSyncing = false;
     _lastCloudSyncError = null;
     notifyListeners();
   }
@@ -227,20 +243,38 @@ class ProgressController extends ChangeNotifier {
     final backup = _cloudBackup;
     final userId = _cloudUserId;
     if (backup == null || userId == null) return;
+    final session = _cloudSession;
     _cloudSyncing = true;
     notifyListeners();
     try {
-      final merged = await backup.synchronize(userId, _progress);
+      // Sync against the snapshot this sync started from, then fold the
+      // merge into the current object: local edits earned while this
+      // background sync was delayed are kept.
+      final snapshot = UserProgress.fromJson(_progress.toJson());
+      final merged = await backup.synchronize(userId, snapshot);
+      if (!_sessionIsCurrent(backup, userId, session)) return;
       _progress = UserProgress.mergeForCloud(_progress, merged);
       await _store.saveProgress(_progress);
       _lastCloudSyncError = null;
     } catch (error) {
+      if (!_sessionIsCurrent(backup, userId, session)) return;
       _lastCloudSyncError = error;
     } finally {
+      if (!_sessionIsCurrent(backup, userId, session)) return;
       _cloudSyncing = false;
       notifyListeners();
     }
   }
+
+  /// True only while this sync's account session is still the current one:
+  /// neither disconnected nor switched to another account while the network
+  /// call was in flight. A late result or error from a previous session must
+  /// not alter the current local data, the store, or the sync status.
+  bool _sessionIsCurrent(
+          ProgressCloudBackup? backup, String? userId, int session) =>
+      _cloudSession == session &&
+      _cloudBackup == backup &&
+      _cloudUserId == userId;
 }
 
 /// Result of one completed quiz run (used by the reward screen).
