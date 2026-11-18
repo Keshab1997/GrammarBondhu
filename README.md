@@ -61,7 +61,10 @@ provide translations and explanations.
   devices), with optional Firebase Auth/Firestore for account sign-in and
   progress backup
 - Toolchain pinned in `.fvmrc` (Flutter 3.50.0) and picked up by CI, so a
-  drifting `stable` channel cannot change the analyzer rules under us
+  drifting `stable` channel cannot change the analyzer rules under us.
+  `python3 tool/check_toolchain.py` proves the pin still matches the Android
+  side (AGP in `android/settings.gradle.kts`, Gradle in the wrapper, Kotlin
+  plugin) — the split that once failed the APK build before any Dart ran
 - **JSON-driven content**: `assets/data/manifest.json` +
   `assets/data/chapters/chapter_NN.json` — add a chapter by adding one JSON
   file and one manifest entry; no code changes
@@ -83,6 +86,7 @@ flutter pub get
 flutter run            # Android device/emulator
 flutter test           # automated tests
 flutter analyze --no-pub --fatal-infos   # what CI gates on
+python3 tool/check_toolchain.py          # Flutter pin vs AGP/Gradle/Kotlin
 ```
 
 ## Optional Google sign-in and cloud backup

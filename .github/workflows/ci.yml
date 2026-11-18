@@ -14,7 +14,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Cheap and first: a Flutter/AGP/Gradle split breaks the APK build minutes
+  # later, and the error names the Gradle side, not the pin that moved. This
+  # job fails in seconds with the numbers side by side.
+  toolchain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Flutter pins match the Android toolchain
+        run: python3 tool/check_toolchain.py
+      - name: The checker's own regression tests
+        run: python3 test/toolchain_test.py
+
   ci:
+    needs: toolchain
     uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.17.0
     with:
       # Pinned by .fvmrc: the app is verified on Flutter 3.50.0, and a stable
