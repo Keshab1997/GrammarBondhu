@@ -18,13 +18,20 @@
   "difficulty": "beginner",
   "estimated_duration_minutes": 10,
   "thumbnail_asset": "assets/illustrations/ch01_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch01.webp",
   "background_asset": "assets/backgrounds/bg_school_gate.webp",
-  "rewards": { "xp": 50, "coins": 10, "max_stars": 3 },
+  "rewards": {
+    "xp": 50,
+    "coins": 10,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch01_s1",
       "background_id": "bg_school_gate",
-      "character_ids": ["rahul"],
+      "character_ids": [
+        "rahul"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -39,7 +46,10 @@
     {
       "scene_id": "ch01_s2",
       "background_id": "bg_classroom",
-      "character_ids": ["rahul", "teacher"],
+      "character_ids": [
+        "rahul",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -62,7 +72,10 @@
     {
       "scene_id": "ch01_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -153,7 +166,12 @@
     {
       "question_id": "ch01_q1",
       "question": "I ___ a student.",
-      "options": ["is", "am", "are", "was"],
+      "options": [
+        "is",
+        "am",
+        "are",
+        "was"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "We use 'am' with 'I'. In this sentence, the subject is 'I', so we should use 'am'.",
@@ -164,7 +182,12 @@
     {
       "question_id": "ch01_q2",
       "question": "She ___ my teacher.",
-      "options": ["am", "are", "be", "is"],
+      "options": [
+        "am",
+        "are",
+        "be",
+        "is"
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Use 'is' with he, she and it. Here the subject is 'She', so 'is' is correct.",
@@ -175,7 +198,12 @@
     {
       "question_id": "ch01_q3",
       "question": "We ___ classmates.",
-      "options": ["are", "is", "am", "was"],
+      "options": [
+        "are",
+        "is",
+        "am",
+        "was"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "Use 'are' with you, we and they. The subject here is 'We'.",
@@ -186,7 +214,12 @@
     {
       "question_id": "ch01_q4",
       "question": "They ___ my friends.",
-      "options": ["is", "are", "am", "be"],
+      "options": [
+        "is",
+        "are",
+        "am",
+        "be"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "'They' is plural, so it takes 'are' — They are my friends.",
@@ -197,7 +230,12 @@
     {
       "question_id": "ch01_q5",
       "question": "Rahul and Priya ___ in the same class.",
-      "options": ["is", "am", "are", "was"],
+      "options": [
+        "is",
+        "am",
+        "are",
+        "was"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Two people together act like 'they', so we use 'are'.",

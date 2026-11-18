@@ -17,14 +17,22 @@
   },
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
-  "thumbnail_asset": "assets/illustrations/ch02_thumb.webp",
+  "thumbnail_asset": "assets/illustrations/ch08_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch08.webp",
   "background_asset": "assets/backgrounds/bg_school_garden.webp",
-  "rewards": { "xp": 90, "coins": 18, "max_stars": 3 },
+  "rewards": {
+    "xp": 90,
+    "coins": 18,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch08_s1",
       "background_id": "bg_school_garden",
-      "character_ids": ["priya", "rahul"],
+      "character_ids": [
+        "priya",
+        "rahul"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch08_s2",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "priya"],
+      "character_ids": [
+        "teacher",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -70,7 +81,10 @@
     {
       "scene_id": "ch08_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["rahul", "teacher"],
+      "character_ids": [
+        "rahul",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -156,7 +170,12 @@
     {
       "question_id": "ch08_q1",
       "question": "Which word describes the plant in “The bean plant is tall”?",
-      "options": ["plant", "tall", "is", "the"],
+      "options": [
+        "plant",
+        "tall",
+        "is",
+        "the"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Tall is the adjective: it tells us about the plant’s height.",
@@ -167,7 +186,12 @@
     {
       "question_id": "ch08_q2",
       "question": "The plant by the wall is ___ than the plant by the door.",
-      "options": ["tallest", "tall", "tallness", "taller"],
+      "options": [
+        "tallest",
+        "tall",
+        "tallness",
+        "taller"
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Taller is the comparative form of tall; use it before than.",
@@ -178,7 +202,12 @@
     {
       "question_id": "ch08_q3",
       "question": "At 30 cm, the plant by the tap is the ___ of the three. The others are 10 cm and 20 cm tall.",
-      "options": ["tallest", "more taller", "most tallness", "tall than"],
+      "options": [
+        "tallest",
+        "more taller",
+        "most tallness",
+        "tall than"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "Tallest picks the plant with the greatest height in the group.",
@@ -189,7 +218,12 @@
     {
       "question_id": "ch08_q4",
       "question": "Measuring a plant is ___ than reading the chart.",
-      "options": ["interestinger", "most interesting", "more interesting", "interestingest"],
+      "options": [
+        "interestinger",
+        "most interesting",
+        "more interesting",
+        "interestingest"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Put more before interesting to compare the two activities.",
@@ -200,7 +234,12 @@
     {
       "question_id": "ch08_q5",
       "question": "Choose the comparative form of “tall”.",
-      "options": ["tallest", "taller", "tallness", "talls"],
+      "options": [
+        "tallest",
+        "taller",
+        "tallness",
+        "talls"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Add -er to tall to get taller, the form for comparing two things.",

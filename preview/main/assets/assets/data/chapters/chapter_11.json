@@ -17,14 +17,22 @@
   },
   "difficulty": "intermediate",
   "estimated_duration_minutes": 14,
-  "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "thumbnail_asset": "assets/illustrations/ch11_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch11.webp",
   "background_asset": "assets/backgrounds/bg_classroom.webp",
-  "rewards": { "xp": 100, "coins": 20, "max_stars": 3 },
+  "rewards": {
+    "xp": 100,
+    "coins": 20,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch11_s1",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "priya"],
+      "character_ids": [
+        "teacher",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch11_s2",
       "background_id": "bg_school_garden",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -78,7 +89,10 @@
     {
       "scene_id": "ch11_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "priya"],
+      "character_ids": [
+        "teacher",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -164,7 +178,12 @@
     {
       "question_id": "ch11_q1",
       "question": "Friday’s picnic is already planned. Complete the going to sentence: “We ___ going to eat in the garden.”",
-      "options": ["are", "is", "am", "will"],
+      "options": [
+        "are",
+        "is",
+        "am",
+        "will"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "Use are with we in a going to plan.",
@@ -175,7 +194,12 @@
     {
       "question_id": "ch11_q2",
       "question": "The list is slipping! Which option correctly makes an immediate offer with will?",
-      "options": ["I will to catch it.", "I will catch it.", "I will caught it.", "I will catches it."],
+      "options": [
+        "I will to catch it.",
+        "I will catch it.",
+        "I will caught it.",
+        "I will catches it."
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Use the base verb catch right after will.",
@@ -186,7 +210,12 @@
     {
       "question_id": "ch11_q3",
       "question": "Priya decided yesterday. Complete the plan: “She is going to ___ a mat on Friday.”",
-      "options": ["brought", "brings", "bring", "bringing"],
+      "options": [
+        "brought",
+        "brings",
+        "bring",
+        "bringing"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "After is going to, use the base verb bring.",
@@ -197,7 +226,12 @@
     {
       "question_id": "ch11_q4",
       "question": "Which sentence uses the short form of I will?",
-      "options": ["I’m bringing the basket.", "I’ve brought the basket.", "I’d bring the basket.", "I’ll bring the basket."],
+      "options": [
+        "I’m bringing the basket.",
+        "I’ve brought the basket.",
+        "I’d bring the basket.",
+        "I’ll bring the basket."
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "I’ll is short for I will; it still takes the base verb bring.",
@@ -208,7 +242,12 @@
     {
       "question_id": "ch11_q5",
       "question": "Which reply directly offers to help when someone says, “This basket is too heavy”?",
-      "options": ["I carried it yesterday.", "I’ll carry it for you.", "I have a basket at home.", "I’m going to draw a sign."],
+      "options": [
+        "I carried it yesterday.",
+        "I’ll carry it for you.",
+        "I have a basket at home.",
+        "I’m going to draw a sign."
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "“I’ll carry it for you” responds to the problem with an offer right now.",

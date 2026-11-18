@@ -18,13 +18,21 @@
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
   "thumbnail_asset": "assets/illustrations/ch02_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch02.webp",
   "background_asset": "assets/backgrounds/bg_school_garden.webp",
-  "rewards": { "xp": 60, "coins": 12, "max_stars": 3 },
+  "rewards": {
+    "xp": 60,
+    "coins": 12,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch02_s1",
       "background_id": "bg_school_garden",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch02_s2",
       "background_id": "bg_school_garden",
-      "character_ids": ["priya", "rahul"],
+      "character_ids": [
+        "priya",
+        "rahul"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -70,7 +81,10 @@
     {
       "scene_id": "ch02_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -161,7 +175,12 @@
     {
       "question_id": "ch02_q1",
       "question": "She ___ English every day.",
-      "options": ["study", "studying", "studies", "studied"],
+      "options": [
+        "study",
+        "studying",
+        "studies",
+        "studied"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "With she, the verb takes -s (or -es). Study becomes studies.",
@@ -172,7 +191,12 @@
     {
       "question_id": "ch02_q2",
       "question": "They ___ to school by bus.",
-      "options": ["go", "goes", "going", "gone"],
+      "options": [
+        "go",
+        "goes",
+        "going",
+        "gone"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "With they, use the base verb: go. Only he/she/it takes -s.",
@@ -183,7 +207,12 @@
     {
       "question_id": "ch02_q3",
       "question": "Rahul ___ stories at night.",
-      "options": ["read", "reading", "is read", "reads"],
+      "options": [
+        "read",
+        "reading",
+        "is read",
+        "reads"
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Rahul is one boy, like 'he'. So the verb takes -s: reads.",
@@ -194,7 +223,12 @@
     {
       "question_id": "ch02_q4",
       "question": "I ___ breakfast at 7 o'clock.",
-      "options": ["eats", "eating", "eat", "eaten"],
+      "options": [
+        "eats",
+        "eating",
+        "eat",
+        "eaten"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "With I, use the base verb — eat, never eats.",
@@ -205,7 +239,12 @@
     {
       "question_id": "ch02_q5",
       "question": "We ___ games after school.",
-      "options": ["plays", "play", "playing", "played"],
+      "options": [
+        "plays",
+        "play",
+        "playing",
+        "played"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "With we, use the base verb: play.",

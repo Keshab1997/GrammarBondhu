@@ -17,14 +17,22 @@
   },
   "difficulty": "intermediate",
   "estimated_duration_minutes": 14,
-  "thumbnail_asset": "assets/illustrations/ch04_thumb.webp",
+  "thumbnail_asset": "assets/illustrations/ch14_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch14.webp",
   "background_asset": "assets/backgrounds/bg_classroom.webp",
-  "rewards": { "xp": 110, "coins": 22, "max_stars": 3 },
+  "rewards": {
+    "xp": 110,
+    "coins": 22,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch14_s1",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "priya"],
+      "character_ids": [
+        "teacher",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch14_s2",
       "background_id": "bg_library",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -70,7 +81,10 @@
     {
       "scene_id": "ch14_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["priya", "teacher"],
+      "character_ids": [
+        "priya",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -156,7 +170,12 @@
     {
       "question_id": "ch14_q1",
       "question": "Which word introduces the reason in “We stayed inside because it was raining”?",
-      "options": ["inside", "we", "because", "raining"],
+      "options": [
+        "inside",
+        "we",
+        "because",
+        "raining"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Because introduces “it was raining,” the reason the group stayed inside.",
@@ -167,7 +186,12 @@
     {
       "question_id": "ch14_q2",
       "question": "Join the ideas to show a contrast: “The butterfly wanted to fly, ___ its wings were wet.”",
-      "options": ["but", "because", "so", "and"],
+      "options": [
+        "but",
+        "because",
+        "so",
+        "and"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "But contrasts the butterfly’s wish to fly with the wet wings that stop it.",
@@ -178,7 +202,12 @@
     {
       "question_id": "ch14_q3",
       "question": "Which sentence uses so to introduce a result?",
-      "options": ["It rained, but we went outside.", "We stayed inside because it rained.", "It rained, and the windows got wet.", "It rained, so we performed inside."],
+      "options": [
+        "It rained, but we went outside.",
+        "We stayed inside because it rained.",
+        "It rained, and the windows got wet.",
+        "It rained, so we performed inside."
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Performing inside is the result of the rain, and so introduces it.",
@@ -189,7 +218,12 @@
     {
       "question_id": "ch14_q4",
       "question": "Simply add Priya’s task: “Rahul made a leaf, ___ Priya made a butterfly.”",
-      "options": ["but", "and", "because", "so"],
+      "options": [
+        "but",
+        "and",
+        "because",
+        "so"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "And adds another idea: “Rahul made a leaf, and Priya made a butterfly.”",
@@ -200,7 +234,12 @@
     {
       "question_id": "ch14_q5",
       "question": "Which sentence gives wet wings as the reason the butterfly waited?",
-      "options": ["The butterfly waited, so its wings got wet.", "The wings were wet, but the butterfly flew.", "The butterfly waited because its wings were wet.", "The butterfly waited because the sun was too bright."],
+      "options": [
+        "The butterfly waited, so its wings got wet.",
+        "The wings were wet, but the butterfly flew.",
+        "The butterfly waited because its wings were wet.",
+        "The butterfly waited because the sun was too bright."
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "The words after because give the reason: its wings were wet.",
