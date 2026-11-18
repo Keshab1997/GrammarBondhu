@@ -19,6 +19,7 @@ class Chapter {
     required this.quiz,
     this.thumbnailAsset,
     this.backgroundAsset,
+    this.topicIconAsset,
   });
 
   final String id;
@@ -38,6 +39,10 @@ class Chapter {
   /// Renderers must show a friendly fallback when the file is missing.
   final String? thumbnailAsset;
   final String? backgroundAsset;
+
+  /// Small square badge for the grammar topic on this chapter's own page,
+  /// e.g. `assets/icons/topic_ch01.webp`.
+  final String? topicIconAsset;
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
     final id = _reqString(json, 'chapter_id');
@@ -68,6 +73,7 @@ class Chapter {
       quiz: quiz,
       thumbnailAsset: json['thumbnail_asset'] as String?,
       backgroundAsset: json['background_asset'] as String?,
+      topicIconAsset: json['topic_icon_asset'] as String?,
     );
   }
 

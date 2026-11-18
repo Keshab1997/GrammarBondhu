@@ -18,13 +18,22 @@
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
   "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch05.webp",
   "background_asset": "assets/backgrounds/bg_school_garden.webp",
-  "rewards": { "xp": 80, "coins": 16, "max_stars": 3 },
+  "rewards": {
+    "xp": 80,
+    "coins": 16,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch05_s1",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "rahul", "priya"],
+      "character_ids": [
+        "teacher",
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -47,7 +56,10 @@
     {
       "scene_id": "ch05_s2",
       "background_id": "bg_school_garden",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -70,7 +82,11 @@
     {
       "scene_id": "ch05_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["rahul", "priya", "teacher"],
+      "character_ids": [
+        "rahul",
+        "priya",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -148,7 +164,12 @@
     {
       "question_id": "ch05_q1",
       "question": "Which is the correct sentence?",
-      "options": ["Writes Rahul a letter.", "A letter Rahul writes.", "Rahul writes a letter.", "Rahul a letter writes."],
+      "options": [
+        "Writes Rahul a letter.",
+        "A letter Rahul writes.",
+        "Rahul writes a letter.",
+        "Rahul a letter writes."
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "The order is Subject + Verb + Object: Rahul (subject) + writes (verb) + a letter (object).",
@@ -159,7 +180,12 @@
     {
       "question_id": "ch05_q2",
       "question": "___ starts at ten.",
-      "options": ["At ten", "The fair", "Starts", "Us"],
+      "options": [
+        "At ten",
+        "The fair",
+        "Starts",
+        "Us"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Every sentence needs a subject first — 'The fair' is the subject here.",
@@ -170,7 +196,12 @@
     {
       "question_id": "ch05_q3",
       "question": "Choose the correct sentence:",
-      "options": ["Love we our school.", "Our school we love.", "We our school love.", "We love our school."],
+      "options": [
+        "Love we our school.",
+        "Our school we love.",
+        "We our school love.",
+        "We love our school."
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Subject (We) comes first, then the verb (love), then the object (our school).",
@@ -181,7 +212,12 @@
     {
       "question_id": "ch05_q4",
       "question": "In 'The children play in the park', the subject is:",
-      "options": ["The children", "play", "in the park", "the park"],
+      "options": [
+        "The children",
+        "play",
+        "in the park",
+        "the park"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "The subject is who does the action — 'The children' play.",
@@ -192,7 +228,12 @@
     {
       "question_id": "ch05_q5",
       "question": "Choose the correct sentence:",
-      "options": ["Sings she a song.", "She sings a song.", "A song she sings.", "She a song sings."],
+      "options": [
+        "Sings she a song.",
+        "She sings a song.",
+        "A song she sings.",
+        "She a song sings."
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Subject (She) + Verb (sings) + Object (a song) — the clear English order.",

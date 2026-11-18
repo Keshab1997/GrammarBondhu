@@ -17,14 +17,22 @@
   },
   "difficulty": "intermediate",
   "estimated_duration_minutes": 14,
-  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "thumbnail_asset": "assets/illustrations/ch15_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch15.webp",
   "background_asset": "assets/backgrounds/bg_library.webp",
-  "rewards": { "xp": 120, "coins": 24, "max_stars": 3 },
+  "rewards": {
+    "xp": 120,
+    "coins": 24,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch15_s1",
       "background_id": "bg_library",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch15_s2",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "rahul"],
+      "character_ids": [
+        "teacher",
+        "rahul"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -70,7 +81,10 @@
     {
       "scene_id": "ch15_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["priya", "teacher"],
+      "character_ids": [
+        "priya",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -156,7 +170,12 @@
     {
       "question_id": "ch15_q1",
       "question": "The caption is ready now. Complete the present perfect: “Priya ___ written a caption.”",
-      "options": ["have", "is", "has", "was"],
+      "options": [
+        "have",
+        "is",
+        "has",
+        "was"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Use has with Priya, then the past participle written.",
@@ -167,7 +186,12 @@
     {
       "question_id": "ch15_q2",
       "question": "Complete the present perfect sentence: “Look how much the bean plants have ___!”",
-      "options": ["grown", "grew", "grow", "growing"],
+      "options": [
+        "grown",
+        "grew",
+        "grow",
+        "growing"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "Grown is the past participle of grow, so it goes after have.",
@@ -178,7 +202,12 @@
     {
       "question_id": "ch15_q3",
       "question": "Which sentence tells us about the scrapbook in the present perfect, without naming a finished time?",
-      "options": ["We make a scrapbook every year.", "We made a scrapbook last Friday.", "We will make a scrapbook next Friday.", "We have made a scrapbook."],
+      "options": [
+        "We make a scrapbook every year.",
+        "We made a scrapbook last Friday.",
+        "We will make a scrapbook next Friday.",
+        "We have made a scrapbook."
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "Have made is present perfect. It tells us the scrapbook is ready without saying when it was made.",
@@ -189,7 +218,12 @@
     {
       "question_id": "ch15_q4",
       "question": "Complete the caption about a finished time: “Last Friday, we ___ the plant chart.”",
-      "options": ["have made", "made", "have make", "has made"],
+      "options": [
+        "have made",
+        "made",
+        "have make",
+        "has made"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Last Friday names a finished time, so use the simple past made.",
@@ -200,7 +234,12 @@
     {
       "question_id": "ch15_q5",
       "question": "Which sentence uses have learned correctly to describe what we know now?",
-      "options": ["We has learned a lot together.", "We have learn a lot together.", "We have learned a lot together.", "We have learning a lot together."],
+      "options": [
+        "We has learned a lot together.",
+        "We have learn a lot together.",
+        "We have learned a lot together.",
+        "We have learning a lot together."
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Use have with we, followed by the past participle learned.",

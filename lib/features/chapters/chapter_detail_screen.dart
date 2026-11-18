@@ -316,6 +316,32 @@ class _CircleButton extends StatelessWidget {
   }
 }
 
+/// The chapter's own grammar-topic badge, or the shared school glyph when the
+/// per-chapter art has not been drawn yet.
+class _TopicBadge extends StatelessWidget {
+  const _TopicBadge({required this.assetPath});
+
+  final String? assetPath;
+
+  static const _fallback =
+      Icon(Icons.school_rounded, size: 20, color: AppColors.primary);
+
+  @override
+  Widget build(BuildContext context) {
+    final path = assetPath;
+    if (path == null) return _fallback;
+    return Image.asset(
+      path,
+      width: 26,
+      height: 26,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      excludeFromSemantics: true,
+      errorBuilder: (_, __, ___) => _fallback,
+    );
+  }
+}
+
 class _SheetBody extends StatelessWidget {
   const _SheetBody({
     required this.number,
@@ -418,8 +444,10 @@ class _SheetBody extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadii.sm),
                 ),
-                child: const Icon(Icons.school_rounded,
-                    size: 20, color: AppColors.primary),
+                // Each chapter carries its own topic badge. Until that chapter's
+                // art exists the tile falls back to the shared school glyph, so
+                // a missing file never leaves an empty white square.
+                child: _TopicBadge(assetPath: chapter.topicIconAsset),
               ),
               const SizedBox(width: AppSpacing.sm + 2),
               Expanded(

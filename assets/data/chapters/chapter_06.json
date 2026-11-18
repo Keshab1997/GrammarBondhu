@@ -17,14 +17,22 @@
   },
   "difficulty": "beginner",
   "estimated_duration_minutes": 12,
-  "thumbnail_asset": "assets/illustrations/ch01_thumb.webp",
+  "thumbnail_asset": "assets/illustrations/ch06_thumb.webp",
+  "topic_icon_asset": "assets/icons/topic_ch06.webp",
   "background_asset": "assets/backgrounds/bg_school_gate.webp",
-  "rewards": { "xp": 80, "coins": 16, "max_stars": 3 },
+  "rewards": {
+    "xp": 80,
+    "coins": 16,
+    "max_stars": 3
+  },
   "scenes": [
     {
       "scene_id": "ch06_s1",
       "background_id": "bg_school_gate",
-      "character_ids": ["rahul", "priya"],
+      "character_ids": [
+        "rahul",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "rahul",
@@ -47,7 +55,10 @@
     {
       "scene_id": "ch06_s2",
       "background_id": "bg_classroom",
-      "character_ids": ["teacher", "priya"],
+      "character_ids": [
+        "teacher",
+        "priya"
+      ],
       "dialogue": [
         {
           "character_id": "teacher",
@@ -70,7 +81,11 @@
     {
       "scene_id": "ch06_s3",
       "background_id": "bg_classroom",
-      "character_ids": ["priya", "rahul", "teacher"],
+      "character_ids": [
+        "priya",
+        "rahul",
+        "teacher"
+      ],
       "dialogue": [
         {
           "character_id": "priya",
@@ -164,7 +179,12 @@
     {
       "question_id": "ch06_q1",
       "question": "I ___ holding my umbrella right now.",
-      "options": ["am", "is", "are", "be"],
+      "options": [
+        "am",
+        "is",
+        "are",
+        "be"
+      ],
       "correct_index": 0,
       "explanation": {
         "en": "Use am with I before holding.",
@@ -175,7 +195,12 @@
     {
       "question_id": "ch06_q2",
       "question": "Right now, Priya ___ drawing raindrops.",
-      "options": ["are", "is", "am", "be"],
+      "options": [
+        "are",
+        "is",
+        "am",
+        "be"
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Priya is one person, so use is drawing.",
@@ -186,7 +211,12 @@
     {
       "question_id": "ch06_q3",
       "question": "The children ___ waiting inside right now.",
-      "options": ["is", "am", "are", "be"],
+      "options": [
+        "is",
+        "am",
+        "are",
+        "be"
+      ],
       "correct_index": 2,
       "explanation": {
         "en": "Children is plural, so use are waiting.",
@@ -197,7 +227,12 @@
     {
       "question_id": "ch06_q4",
       "question": "Look! The drops are ___ down the glass.",
-      "options": ["slide", "slides", "slided", "sliding"],
+      "options": [
+        "slide",
+        "slides",
+        "slided",
+        "sliding"
+      ],
       "correct_index": 3,
       "explanation": {
         "en": "After are, use the -ing form: slide becomes sliding.",
@@ -208,7 +243,12 @@
     {
       "question_id": "ch06_q5",
       "question": "Choose the present continuous sentence.",
-      "options": ["We write captions every week.", "We are writing captions now.", "We wrote captions yesterday.", "We will write captions tomorrow."],
+      "options": [
+        "We write captions every week.",
+        "We are writing captions now.",
+        "We wrote captions yesterday.",
+        "We will write captions tomorrow."
+      ],
       "correct_index": 1,
       "explanation": {
         "en": "Are writing shows an action in progress now.",
