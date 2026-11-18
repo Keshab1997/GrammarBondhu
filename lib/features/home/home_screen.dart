@@ -12,6 +12,7 @@ import '../chapters/chapter_list_screen.dart';
 import '../grammar/grammar_lesson_screen.dart';
 import '../progress/progress_screen.dart';
 import '../quiz/quiz_screen.dart';
+import '../quiz/review_practice_screen.dart';
 import '../settings/settings_screen.dart';
 import '../story/story_screen.dart';
 
@@ -35,8 +36,12 @@ class HomeScreen extends StatelessWidget {
     final chapters = content.chapters;
     final currentId = progress.recommendedChapterId(chapters);
     final current = content.byId(currentId);
-    final allChaptersComplete = chapters.isNotEmpty &&
-        progress.progress.completedChapterCount >= chapters.length;
+    final completedChapters = chapters
+        .where((chapter) => progress.chapterProgress(chapter.id).completed)
+        .length;
+    final allChaptersComplete =
+        chapters.isNotEmpty && completedChapters == chapters.length;
+    final reviewCount = countReviewableMistakes(chapters, progress.progress);
 
     return SafeArea(
       child: ListView(
@@ -54,9 +59,8 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           if (current != null)
             _ProgressCard(
-              step: progress.chapterProgress(current.id).resumeSceneIndex ?? 0,
-              steps: current.scenes.length + 1,
-              completedChapters: progress.progress.completedChapterCount,
+              chapter: current,
+              completedChapters: completedChapters,
               totalChapters: chapters.length,
             ),
           const SizedBox(height: AppSpacing.md),
@@ -64,6 +68,10 @@ class HomeScreen extends StatelessWidget {
             done: progress.progress.questionsAnsweredOn(now ?? DateTime.now()),
             target: progress.progress.dailyGoalQuestions,
           ),
+          if (reviewCount > 0) ...[
+            const SizedBox(height: AppSpacing.md),
+            _ReviewMistakesCard(reviewCount: reviewCount),
+          ],
         ],
       ),
     );
@@ -315,7 +323,8 @@ class _ContinueCard extends StatelessWidget {
     final record = progress.chapterProgress(chapter.id);
     final number = chapters.indexOf(chapter) + 1;
     final steps = chapter.scenes.length + 1;
-    final resume = record.resumeSceneIndex ?? 0;
+    final resume =
+        (record.resumeSceneIndex ?? 0).clamp(0, chapter.scenes.length);
 
     return Container(
       decoration: BoxDecoration(
@@ -460,10 +469,17 @@ class _ContinueCard extends StatelessWidget {
                     icon: Icons.play_arrow_rounded,
                     variant: AppButtonVariant.primary,
                     onPressed: () {
-                      Navigator.of(context).pushNamed(
-                        StoryScreen.routeName,
-                        arguments: StoryArgs(chapter.id, startScene: resume),
-                      );
+                      final navigator = Navigator.of(context);
+                      // The final step is after the story, not a scene index.
+                      if (resume == chapter.scenes.length) {
+                        navigator.pushNamed(GrammarLessonScreen.routeName,
+                            arguments: chapter.id);
+                      } else {
+                        navigator.pushNamed(
+                          StoryScreen.routeName,
+                          arguments: StoryArgs(chapter.id, startScene: resume),
+                        );
+                      }
                     },
                   ),
                 ],
@@ -635,22 +651,24 @@ class _ActionChip extends StatelessWidget {
 /// Chapter progress: what is in flight, how far along it is.
 class _ProgressCard extends StatelessWidget {
   const _ProgressCard({
-    required this.step,
-    required this.steps,
+    required this.chapter,
     required this.completedChapters,
     required this.totalChapters,
   });
 
-  final int step;
-  final int steps;
+  final Chapter chapter;
   final int completedChapters;
   final int totalChapters;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    // One scope per row: the card is about the course, so both the bar and the
-    // label count chapters. It used to mix "4 steps" with "0 of 5 chapters".
+    final record =
+        context.watch<ProgressController>().chapterProgress(chapter.id);
+    final step = (record.resumeSceneIndex ?? 0).clamp(0, chapter.scenes.length);
+    final steps = chapter.scenes.length + 1;
+    // The bar and its label count chapters. Keep any resume step separate so
+    // a learner doesn't mistake it for part of the course completion tally.
     final value = totalChapters == 0 ? 0.0 : completedChapters / totalChapters;
     final percent = (value * 100).round();
     return AppCard(
@@ -754,6 +772,12 @@ class _ProgressCard extends StatelessWidget {
               ),
             ],
           ),
+          if (step > 0 && completedChapters < totalChapters) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text('Current chapter · Step ${step + 1} of $steps',
+                style:
+                    text.bodySmall?.copyWith(color: AppColors.textSecondary)),
+          ],
         ],
       ),
     );
@@ -860,6 +884,64 @@ class _DailyGoalCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Only shown once the learner has a question to retry.
+class _ReviewMistakesCard extends StatelessWidget {
+  const _ReviewMistakesCard({required this.reviewCount});
+
+  final int reviewCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    const title = 'Review Mistakes';
+    final detail =
+        '$reviewCount ${reviewCount == 1 ? 'question' : 'questions'} waiting for another try';
+
+    void practise() {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const ReviewPracticeScreen()),
+      );
+    }
+
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      button: true,
+      label: '$title. $detail',
+      onTap: practise,
+      child: AppCard(
+        onTap: practise,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                borderRadius: BorderRadius.circular(AppRadii.sm),
+              ),
+              child: const Icon(Icons.replay_rounded, color: AppColors.primary),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: text.titleMedium),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(detail, style: text.bodyMedium),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+          ],
+        ),
       ),
     );
   }
