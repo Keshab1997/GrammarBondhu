@@ -157,6 +157,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(progress.progress.missedQuestionCount, 1);
 
+    // An in-quiz retry is practice: the first miss stays queued for review
+    // until the learner gets it right on a fresh attempt.
     await tester.ensureVisible(find.text('Try Again'));
     await tester.tap(find.text('Try Again'));
     await tester.pumpAndSettle();
@@ -165,6 +167,30 @@ void main() {
     await tester.tap(find.text(question.options[question.correctIndex]));
     await tester.pumpAndSettle();
     expect(find.text('Tap Submit when you are ready'), findsOneWidget);
+    await tester.ensureVisible(find.text('Submit'));
+    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+    expect(progress.progress.missedQuestionCount, 1);
+
+    // Starting a new quiz attempt and answering correctly on the first try
+    // clears the queued review item.
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: content),
+          ChangeNotifierProvider.value(value: progress),
+          ChangeNotifierProvider.value(value: settings),
+        ],
+        child: MaterialApp(
+          home: QuizScreen(key: UniqueKey(), chapterId: chapter.id),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester
+        .ensureVisible(find.text(question.options[question.correctIndex]));
+    await tester.tap(find.text(question.options[question.correctIndex]));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Submit'));
     await tester.tap(find.text('Submit'));
     await tester.pumpAndSettle();

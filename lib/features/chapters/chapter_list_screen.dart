@@ -354,7 +354,7 @@ class _ChapterCard extends StatelessWidget {
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Text(
-                              'Step ${(resumeStep ?? 0) + 1} of ${sceneCount + 1}',
+                              'Step ${(resumeStep ?? 0).clamp(0, sceneCount) + 1} of ${sceneCount + 1}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: text.bodySmall

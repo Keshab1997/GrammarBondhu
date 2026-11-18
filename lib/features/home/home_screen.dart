@@ -35,8 +35,11 @@ class HomeScreen extends StatelessWidget {
     final chapters = content.chapters;
     final currentId = progress.recommendedChapterId(chapters);
     final current = content.byId(currentId);
-    final allChaptersComplete = chapters.isNotEmpty &&
-        progress.progress.completedChapterCount >= chapters.length;
+    final completedChapters = chapters
+        .where((chapter) => progress.chapterProgress(chapter.id).completed)
+        .length;
+    final allChaptersComplete =
+        chapters.isNotEmpty && completedChapters >= chapters.length;
 
     return SafeArea(
       child: ListView(
@@ -54,9 +57,10 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           if (current != null)
             _ProgressCard(
-              step: progress.chapterProgress(current.id).resumeSceneIndex ?? 0,
+              step: (progress.chapterProgress(current.id).resumeSceneIndex ?? 0)
+                  .clamp(0, current.scenes.length),
               steps: current.scenes.length + 1,
-              completedChapters: progress.progress.completedChapterCount,
+              completedChapters: completedChapters,
               totalChapters: chapters.length,
             ),
           const SizedBox(height: AppSpacing.md),
@@ -315,7 +319,8 @@ class _ContinueCard extends StatelessWidget {
     final record = progress.chapterProgress(chapter.id);
     final number = chapters.indexOf(chapter) + 1;
     final steps = chapter.scenes.length + 1;
-    final resume = record.resumeSceneIndex ?? 0;
+    final resume =
+        (record.resumeSceneIndex ?? 0).clamp(0, chapter.scenes.length);
 
     return Container(
       decoration: BoxDecoration(

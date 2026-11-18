@@ -10,9 +10,15 @@ import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:grammar_bondhu/app/router.dart';
 import 'package:grammar_bondhu/core/widgets/brand_logo.dart';
+import 'package:grammar_bondhu/features/chapters/chapter_detail_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
+import 'package:grammar_bondhu/features/completion/chapter_completed_screen.dart';
+import 'package:grammar_bondhu/features/grammar/grammar_lesson_screen.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
+import 'package:grammar_bondhu/features/quiz/quiz_screen.dart';
+import 'package:grammar_bondhu/features/story/story_screen.dart';
 
 Future<void> _pumpApp(WidgetTester tester) async {
   SharedPreferences.setMockInitialValues({});
@@ -185,5 +191,61 @@ void main() {
     expect(find.text('Hello, Rahul!'), findsOneWidget);
     expect(find.text('Welcome Back!'), findsNothing);
     expect(find.text('Continue as Guest'), findsNothing);
+  });
+
+  testWidgets('router falls back safely when deep-link arguments are missing',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await LocalStore.open();
+    final content = ContentController(ContentRepository());
+    await content.load();
+
+    Widget buildRoute(String name, [Object? arguments]) {
+      final route = AppRouter.onGenerateRoute(
+        RouteSettings(name: name, arguments: arguments),
+      ) as MaterialPageRoute<dynamic>;
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: content),
+          ChangeNotifierProvider.value(
+            value: SettingsController(store, store.loadSettings()),
+          ),
+          ChangeNotifierProvider.value(
+            value: ProgressController(store, store.loadProgress()),
+          ),
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: MaterialApp(
+            home: Builder(builder: route.builder),
+          ),
+        ),
+      );
+    }
+
+    for (final name in [
+      ChapterDetailScreen.routeName,
+      StoryScreen.routeName,
+      GrammarLessonScreen.routeName,
+      QuizScreen.routeName,
+    ]) {
+      for (final badArg in [null, 42, '   ']) {
+        await tester.pumpWidget(buildRoute(name, badArg));
+        await tester.pumpAndSettle();
+        expect(find.byType(ChapterListScreen), findsOneWidget, reason: name);
+        expect(tester.takeException(), isNull, reason: name);
+      }
+    }
+
+    await tester.pumpWidget(buildRoute(ChapterCompletedScreen.routeName, 'x'));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeShell), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Shorthand string argument for /story resolves cleanly to scene 0.
+    await tester.pumpWidget(buildRoute(StoryScreen.routeName, 'ch06'));
+    await tester.pumpAndSettle();
+    expect(find.byType(StoryScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

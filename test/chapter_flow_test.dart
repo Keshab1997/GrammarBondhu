@@ -270,12 +270,24 @@ void main() {
   testWidgets('chapter list filters by real chapter state', (tester) async {
     await _pump(tester, const ChapterListScreen(), const Size(353, 784));
 
-    // All five chapters, four of them locked in a fresh profile.
-    expect(find.textContaining('to unlock'), findsNWidgets(4));
+    final list = tester.element(find.byType(ChapterListScreen));
+    final chapters = list.read<ContentController>().chapters;
+    final progress = list.read<ProgressController>();
+
+    // ch01 starts unlocked; the remaining chapters stay locked in a fresh run.
+    expect(find.text(chapters.first.title.en), findsOneWidget);
+    expect(find.textContaining('to unlock'), findsWidgets);
 
     await tester.tap(find.text('Locked'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('to unlock'), findsNWidgets(4));
+    expect(find.text(chapters.first.title.en), findsNothing);
+    expect(find.text(chapters[1].title.en), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text(chapters.last.title.en),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text(chapters.last.title.en), findsOneWidget);
 
     await tester.tap(find.text('Started'));
     await tester.pumpAndSettle();
@@ -286,9 +298,6 @@ void main() {
     expect(find.textContaining('to unlock'), findsNothing);
     expect(find.textContaining('No completed chapters'), findsOneWidget);
 
-    final list = tester.element(find.byType(ChapterListScreen));
-    final chapters = list.read<ContentController>().chapters;
-    final progress = list.read<ProgressController>();
     for (final chapter in chapters) {
       await progress.recordQuizRun(chapter: chapter, correct: 1, total: 1);
     }

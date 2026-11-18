@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -372,9 +373,11 @@ void main() {
         (tester) async {
       final content = ContentController(ContentRepository());
       await content.load();
+      const voicedChapters = {'ch01', 'ch02', 'ch03', 'ch04', 'ch05'};
       final missing = <String>[];
 
       for (final chapter in content.chapters) {
+        if (!voicedChapters.contains(chapter.id)) continue;
         for (var s = 0; s < chapter.scenes.length; s++) {
           final line = chapter.scenes[s].dialogue;
           for (var l = 0; l < line.length; l++) {
@@ -397,8 +400,40 @@ void main() {
           if (!AudioCatalog.has(id)) missing.add(id);
         }
       }
+      for (final id in AudioCatalog.ids) {
+        final file = File(AudioCatalog.assetFor(id));
+        if (!file.existsSync() || file.lengthSync() == 0) {
+          missing.add('$id (missing asset file)');
+        }
+      }
 
       expect(missing, isEmpty, reason: 'run python3 tool/tts/make_clips.py');
+    });
+
+    testWidgets('unvoiced chapters omit speaker buttons without errors',
+        (tester) async {
+      final port = FakeAudioPort();
+      final storyAudio = await _pumpScreen(
+        tester,
+        const StoryScreen(args: StoryArgs('ch06')),
+        const Size(353, 784),
+        port: port,
+      );
+      expect(tester.takeException(), isNull);
+      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+      storyAudio.dispose();
+
+      final lessonAudio = await _pumpScreen(
+        tester,
+        const GrammarLessonScreen(chapterId: 'ch06'),
+        const Size(353, 784),
+        port: port,
+      );
+      // Lesson keeps the shared teacher greeting clip (teach_1) while hiding
+      // the unbundled chapter-board speaker.
+      expect(tester.takeException(), isNull);
+      expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+      lessonAudio.dispose();
     });
 
     for (final size in const [Size(320, 640), Size(412, 915)]) {

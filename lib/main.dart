@@ -50,7 +50,14 @@ Future<void> _restoreCloudBackup(
   if (expectedUserId == null) return;
   try {
     final user = await GoogleAuth.instance.restoreUser();
-    if (user == null || user.uid != expectedUserId) return;
+    // Re-check local account state after the async restore in case the learner
+    // disconnected or switched accounts on Profile while startup was in flight.
+    if (user == null ||
+        user.uid != expectedUserId ||
+        settings.settings.cloudAccountId != expectedUserId ||
+        progress.cloudConnected) {
+      return;
+    }
     await progress.connectCloudBackup(userId: user.uid);
   } catch (error) {
     // Firebase may be temporarily unavailable or not configured in this build;

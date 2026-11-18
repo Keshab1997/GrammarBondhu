@@ -33,23 +33,49 @@ class AppRouter {
       case ChapterListScreen.routeName:
         return _page(const ChapterListScreen(), settings);
       case ChapterDetailScreen.routeName:
+        final chapterId = _chapterIdArg(settings.arguments);
         return _page(
-            ChapterDetailScreen(chapterId: settings.arguments! as String),
-            settings);
+          chapterId == null
+              ? const ChapterListScreen()
+              : ChapterDetailScreen(chapterId: chapterId),
+          settings,
+        );
       case StoryScreen.routeName:
+        final args = settings.arguments;
+        if (args is StoryArgs && args.chapterId.isNotEmpty) {
+          return _page(StoryScreen(args: args), settings);
+        }
+        final chapterId = _chapterIdArg(args);
         return _page(
-            StoryScreen(args: settings.arguments! as StoryArgs), settings);
+          chapterId == null
+              ? const ChapterListScreen()
+              : StoryScreen(args: StoryArgs(chapterId)),
+          settings,
+        );
       case GrammarLessonScreen.routeName:
+        final chapterId = _chapterIdArg(settings.arguments);
         return _page(
-            GrammarLessonScreen(chapterId: settings.arguments! as String),
-            settings);
+          chapterId == null
+              ? const ChapterListScreen()
+              : GrammarLessonScreen(chapterId: chapterId),
+          settings,
+        );
       case QuizScreen.routeName:
+        final chapterId = _chapterIdArg(settings.arguments);
         return _page(
-            QuizScreen(chapterId: settings.arguments! as String), settings);
+          chapterId == null
+              ? const ChapterListScreen()
+              : QuizScreen(chapterId: chapterId),
+          settings,
+        );
       case ChapterCompletedScreen.routeName:
+        final args = settings.arguments;
         return _page(
-            ChapterCompletedScreen(args: settings.arguments! as CompletedArgs),
-            settings);
+          args is CompletedArgs
+              ? ChapterCompletedScreen(args: args)
+              : const HomeShell(),
+          settings,
+        );
       case ProgressScreen.routeName:
         return _page(const ProgressScreen(), settings);
       case SettingsScreen.routeName:
@@ -61,6 +87,12 @@ class AppRouter {
       default:
         return _page(const SplashScreen(), settings);
     }
+  }
+
+  static String? _chapterIdArg(Object? raw) {
+    if (raw is! String) return null;
+    final trimmed = raw.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   static MaterialPageRoute<dynamic> _page(

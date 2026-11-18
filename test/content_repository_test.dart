@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grammar_bondhu/core/utils/asset_lookup.dart';
 import 'package:grammar_bondhu/data/models/chapter.dart';
 import 'package:grammar_bondhu/data/models/localized_text.dart';
+import 'package:grammar_bondhu/data/models/progress.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 
 void _expectTrilingual(LocalizedText text, String field) {
@@ -155,7 +156,10 @@ void main() {
         0,
         (total, chapter) => total + chapter.rewards.xp,
       );
-      expect(totalXp, greaterThanOrEqualTo(700));
+      expect(totalXp, 760);
+      final champion = UserProgress(totalXp: totalXp);
+      expect(champion.level, greaterThanOrEqualTo(5));
+      expect(champion.levelTitle, 'English Champion');
     });
   });
 }

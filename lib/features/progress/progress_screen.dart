@@ -129,7 +129,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               color: AppColors.accentDark,
                               label: 'Streak',
                               value:
-                                  '${activeStreak} ${activeStreak == 1 ? 'day' : 'days'}',
+                                  '$activeStreak ${activeStreak == 1 ? 'day' : 'days'}',
                             ),
                             _StatTile(
                               icon: Icons.military_tech_rounded,
@@ -245,7 +245,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           _StatRow(label: 'Coins', value: '${p.coins}'),
                           _StatRow(
                               label: 'Current streak',
-                              value: '${activeStreak} days'),
+                              value: '$activeStreak days'),
                           _StatRow(
                               label: 'Questions today',
                               value: '${p.questionsAnsweredOn(now)}'),
