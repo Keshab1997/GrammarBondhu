@@ -37,6 +37,18 @@ class _ControlledAudioPort implements AudioPort {
     stops += 1;
   }
 
+  /// Real hardware playhead as far as the test is concerned: a fake that
+  /// reports a position proves the mouth follows the *voice*, and leaving it
+  /// null proves the mouth waits (buffering) instead of miming ahead.
+  Duration? playhead;
+  bool reportsPosition = false;
+
+  @override
+  Duration? get position => reportsPosition ? playhead : null;
+
+  @override
+  bool get supportsPosition => reportsPosition;
+
   void finishCurrentClip() => _done.add(null);
 
   @override
@@ -223,6 +235,80 @@ void main() {
       await tester.pump(const Duration(milliseconds: 80));
       expect(find.text(scene.dialogue[1].text.en), findsOneWidget);
       expect(h.port.played.last, 'assets/audio/clips/story_ch01_1_1_en.mp3');
+    });
+
+    testWidgets(
+        'mouth stays shut while the clip buffers, then follows the real playhead',
+        (tester) async {
+      final h = await _pumpLiveStory(tester, chapterId: 'ch01', startScene: 1);
+      final speaker = h.content.byId('ch01')!.scenes[1].dialogue[0].characterId;
+
+      // The platform has a playhead but has not produced a sample yet.
+      h.port.reportsPosition = true;
+      h.port.playhead = null;
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(
+        _visibleCharacterAssets(tester).where((a) => a.contains('_talk_')),
+        isEmpty,
+        reason: 'no sound yet, so no mouth movement',
+      );
+
+      // Sound starts mid-phrase: the mouth takes the shape the *recording* has
+      // at that instant (a half-open transition at 500 ms), not the shape the
+      // on-screen clock would have produced.
+      h.port.playhead = const Duration(milliseconds: 500);
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(
+        _visibleCharacterAssets(tester),
+        contains('assets/characters/${speaker}_talk_half.webp'),
+      );
+
+      // The recorded pause after "Rahul!" closes the mouth even though more
+      // words are on screen.
+      h.port.playhead = const Duration(milliseconds: 2150);
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(
+        _visibleCharacterAssets(tester).where((a) => a.contains('_talk_')),
+        isEmpty,
+      );
+
+      // And it opens again on the next recorded vowel.
+      h.port.playhead = const Duration(milliseconds: 1200);
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(
+        _visibleCharacterAssets(tester),
+        contains('assets/characters/${speaker}_talk_open.webp'),
+      );
+    });
+
+    testWidgets('a blink never snaps the talking jaw shut', (tester) async {
+      final h = await _pumpLiveStory(tester, chapterId: 'ch01', startScene: 1);
+      final speaker = h.content.byId('ch01')!.scenes[1].dialogue[0].characterId;
+      h.port.reportsPosition = true;
+
+      // Hold the playhead on a wide vowel for longer than a whole blink cycle.
+      var sawOpenAndLids = false;
+      for (var step = 0; step < 240; step++) {
+        h.port.playhead = const Duration(milliseconds: 400);
+        await tester.pump(const Duration(milliseconds: 20));
+        final assets = _visibleCharacterAssets(tester);
+        final hasEyeBand =
+            assets.contains('assets/characters/${speaker}_blink.webp');
+        final talking = assets.any(
+          (a) =>
+              a == 'assets/characters/${speaker}_talk_open.webp' ||
+              a == 'assets/characters/${speaker}_talk_half.webp',
+        );
+        if (hasEyeBand && talking) sawOpenAndLids = true;
+        // The jaw is never swapped out for the closed-mouth blink pose.
+        expect(
+          assets.contains('assets/characters/${speaker}_blink.webp') &&
+              assets.length == 1,
+          isFalse,
+        );
+      }
+      expect(sawOpenAndLids, isTrue,
+          reason: 'blinking eyelids and an open jaw must coexist');
     });
 
     testWidgets('characters blink naturally while waiting on stage',

@@ -18,6 +18,21 @@ abstract class AudioPort {
   /// Fires once each time a clip plays to its end (or fails).
   Stream<void> get completions;
 
+  /// The real hardware playhead inside the clip that is sounding right now, or
+  /// null when nothing has started moving yet (still decoding/buffering, or
+  /// stopped). Lip-sync reads this so a mouth waits politely through a slow
+  /// first load instead of flapping ahead of a silent phone.
+  ///
+  /// A fake port may leave this at null; the controller then falls back to its
+  /// own stopwatch, so animation never freezes in tests or on a stubborn
+  /// platform.
+  Duration? get position => null;
+
+  /// Whether this port can report a real playhead at all. A fake in a test says
+  /// no (so animation is driven by the test clock instead of a hardware
+  /// number), and so does a platform that cannot answer.
+  bool get supportsPosition => false;
+
   Future<void> dispose();
 }
 
@@ -48,6 +63,27 @@ class JustAudioPort implements AudioPort {
   @override
   Stream<void> get completions => _completions.stream;
 
+  /// Set once the current source has finished loading; before that the player
+  /// still reports the previous clip's offset, which must never drive a mouth.
+  bool _loaded = false;
+
+  @override
+  Duration? get position {
+    if (_player.processingState == ProcessingState.idle ||
+        _player.processingState == ProcessingState.loading) {
+      return null;
+    }
+    // `AudioPlayer.position` before the first playback event is still the
+    // previous clip's (or zero) offset; the controller treats a missing
+    // playhead as "buffering" and keeps the mouth closed until it moves.
+    if (!_loaded) return null;
+    final pos = _player.position;
+    return pos > Duration.zero ? pos : null;
+  }
+
+  @override
+  bool get supportsPosition => true;
+
   /// Tell the OS what kind of sound this is.
   ///
   /// Two things go wrong without it: an iPhone with the ringer switch off
@@ -70,7 +106,9 @@ class JustAudioPort implements AudioPort {
   Future<void> playAsset(String assetPath) async {
     await _ensureSession();
     debugPrint('GrammarBondhu audio: loading $assetPath');
+    _loaded = false;
     await _player.setAsset(assetPath);
+    _loaded = true;
     // Not awaited: play() only completes when the clip ends, and the caller
     // (a tap) must not be held open for the length of the sentence.
     unawaited(_player.play());

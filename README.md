@@ -35,8 +35,10 @@ provide translations and explanations.
 
 - 🎬 **Animated auto-play stories** — Rahul, Priya and Mrs. Sen speak their
   lines out loud in Indian English and Bengali across all 15 chapters, with
-  pixel-locked lip-sync frames, natural eye blinks, and automatic line-by-line
-  playback that pauses at interactive choices (with an on-stage `Auto` switch)
+  mouth shapes measured from each recording's own waveform (pauses, breaths and
+  syllable peaks included), natural eye blinks that never cut a word short, and
+  automatic line-by-line playback that pauses at interactive choices (with an
+  on-stage `Auto` switch)
 - 🌐 **Three languages** — English + Bengali + Hindi translations, interactive
   onboarding language picker, live explanation preview in Settings, and
   in-story / in-lesson / in-quiz language toggles (EN / বাংলা / हिन्दी)
@@ -61,6 +63,11 @@ provide translations and explanations.
   `assets/data/chapters/chapter_NN.json` — add a chapter by adding one JSON
   file and one manifest entry; no code changes
 - Feature-based structure under `lib/features/`, models under `lib/data/`
+- **Measured lip-sync**: `tool/build_audio_lipsync.py` reads every narration MP3,
+  extracts a 20 Hz mouth timeline (vocal energy, open-vowel formant, sibilants,
+  real pauses) and writes `lib/features/audio/audio_lipsync.g.dart`. Characters
+  then follow the *actual playhead* of the clip that is sounding; re-run
+  `python3 tool/build_audio_lipsync.py` whenever narration is regenerated
 
 ## Getting started
 

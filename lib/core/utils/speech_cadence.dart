@@ -17,16 +17,23 @@ class _Span {
   final MouthFrame frame;
 }
 
-/// Turns a dialogue line (English, Bengali or Hindi) into a rhythmic mouth
-/// animation timeline.
+/// Turns a dialogue line (English, Bengali or Hindi) into a calm, human-paced
+/// mouth animation timeline.
 ///
-/// Exact phoneme timestamps would require shipping sidecar alignment files for
-/// every audio clip. For warm 3D cartoon dialogue, pacing syllables from vowel
-/// nuclei and holding brief closures on commas and sentence breaks gives the
-/// eye a natural talking rhythm at zero bundle cost — both while a neural voice
-/// clip is playing and when voice narration is switched off.
+/// Real narration is lip-synced from the actual waveform (see `AudioLipSync`).
+/// This class is the fallback for the two cases where no waveform exists: the
+/// learner has narration switched off, and Hindi lines that ship no clip. Both
+/// must still read as natural speech, so the pacing here is deliberately
+/// *slow* — one comfortable syllable beat at a time with real punctuation
+/// pauses — instead of a rapid, television-cartoon flapping.
 class SpeechCadence {
   SpeechCadence._(this._spans, this.totalMs);
+
+  /// Comfortable adult narration beat: roughly 3.7 syllables per second, the
+  /// measured rate of the bundled neural voices (they read 45 narration lines in
+  /// 5.6 s of audio per 20 words). Fast enough to feel
+  /// alive, slow enough that a human eye can follow each shape.
+  static const int syllableMs = 270;
 
   factory SpeechCadence.fromText(String raw) {
     final trimmed = raw.trim();
@@ -48,32 +55,47 @@ class SpeechCadence {
     }
 
     final tokens = trimmed.split(RegExp(r'\s+'));
-    var syllableCounter = 0;
+    var syllableIndex = 0;
 
     for (var i = 0; i < tokens.length; i++) {
       final token = tokens[i];
       final syllables = _estimateSyllables(token);
-      final openHeavy = _hasOpenVowel(token);
-
-      for (var s = 0; s < syllables; s++) {
-        // Vary peak openness across syllables so a long word reads as lively
-        // speech rather than a mechanical metronome.
-        final wide = (openHeavy && s == 0) ||
-            (syllableCounter % 3 != 1 && syllables > 1) ||
-            (syllables == 1 && syllableCounter.isEven);
-        if (wide) {
-          push(52, MouthFrame.half);
-          push(92, MouthFrame.open);
-          push(48, MouthFrame.half);
-        } else {
-          push(118, MouthFrame.half);
-          push(36, MouthFrame.closed);
-        }
-        syllableCounter += 1;
+      if (syllables == 0) {
+        // Punctuation-only token ("—", "…"): just let the pause stand.
+        push(_trailingPauseMs(token, isLast: i == tokens.length - 1),
+            MouthFrame.closed);
+        continue;
       }
 
-      final pause = _trailingPauseMs(token, isLast: i == tokens.length - 1);
-      push(pause, MouthFrame.closed);
+      final openHeavy = _hasOpenVowel(token);
+      for (var s = 0; s < syllables; s++) {
+        // One wide, clearly open vowel every third beat (and always on the
+        // stressed first syllable of an open-vowel word). A steady every-third
+        // rhythm would look mechanical, so the pattern is offset per word.
+        final wide = (openHeavy && s == 0) ||
+            (syllables > 1 && (syllableIndex + syllableIndex ~/ 5) % 3 == 0);
+        if (wide) {
+          // Split the beat so the openness lands centred on the vowel nucleus
+          // rather than at the very start of the syllable.
+          final openMs = (syllableMs * 0.46).round();
+          final halfMs = syllableMs - openMs;
+          push(halfMs ~/ 2, MouthFrame.half);
+          push(openMs, MouthFrame.open);
+          push(halfMs - halfMs ~/ 2, MouthFrame.half);
+        } else {
+          push((syllableMs * 0.60).round(), MouthFrame.half);
+          push((syllableMs * 0.24).round(), MouthFrame.closed);
+          push(
+              syllableMs -
+                  (syllableMs * 0.60).round() -
+                  (syllableMs * 0.24).round(),
+              MouthFrame.half);
+        }
+        syllableIndex += 1;
+      }
+
+      push(_trailingPauseMs(token, isLast: i == tokens.length - 1),
+          MouthFrame.closed);
     }
 
     if (spans.isEmpty) {
@@ -87,14 +109,17 @@ class SpeechCadence {
   /// Unclamped timeline length in milliseconds.
   final int totalMs;
 
-  /// Comfortable speaking window when playing silently (no audio clip).
-  Duration get silentDuration =>
-      Duration(milliseconds: totalMs.clamp(1200, 5600));
+  /// How long silent narration lingers before handing the scene back.
+  ///
+  /// Matches the real clip lengths instead of a fixed short window, so a
+  /// silently delivered sentence occupies the screen for as long as it would
+  /// take to say out loud.
+  Duration get silentDuration => Duration(milliseconds: totalMs);
 
   /// Mouth shape at [elapsed] into the utterance.
   ///
-  /// When [loop] is true (live audio is still playing), the timeline wraps so
-  /// a slightly slower neural voice read keeps moving naturally until the exact
+  /// When [loop] is true (live audio is still playing) the timeline wraps so a
+  /// slightly slower neural voice read keeps moving naturally until the exact
   /// moment playback finishes. When false, the speaker settles into a closed
   /// smile once the timeline ends.
   MouthFrame frameAt(Duration elapsed, {bool loop = false}) {
@@ -148,23 +173,29 @@ class SpeechCadence {
   static bool _hasOpenVowel(String token) => _openVowel.hasMatch(token);
 
   static int _trailingPauseMs(String token, {required bool isLast}) {
-    final stripped = token.replaceAll(RegExp('["\'”’)\\]]+\$'), '');
-    if (stripped.isEmpty) return isLast ? 220 : 45;
+    var stripped = token;
+    const closers = '"”’)]';
+    while (stripped.isNotEmpty &&
+        closers.contains(stripped[stripped.length - 1])) {
+      stripped = stripped.substring(0, stripped.length - 1);
+    }
+    if (stripped.isEmpty) return isLast ? 260 : 90;
     final last = stripped[stripped.length - 1];
+    // A full stop is the one place a narrator really breathes.
     if (last == '.' ||
         last == '!' ||
         last == '?' ||
         last == '।' ||
         last == '॥') {
-      return isLast ? 240 : 280;
+      return isLast ? 300 : 340;
     }
     if (last == ',' ||
         last == ';' ||
         last == ':' ||
         last == '—' ||
         last == '–') {
-      return 190;
+      return 230;
     }
-    return isLast ? 200 : 44;
+    return isLast ? 200 : 70;
   }
 }

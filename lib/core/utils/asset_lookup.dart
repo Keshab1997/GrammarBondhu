@@ -17,6 +17,22 @@ class CharacterFrames {
   /// All frame asset paths, in warm-up order so the resting pose decodes first.
   List<String> get all => [closed, talkHalf, talkOpen, blink];
 
+  /// Body frame carrying the jaw shape only.
+  ///
+  /// Eyelids are drawn separately (a clipped band lifted from [blink]) so a
+  /// blink can land *during* a word: the mouth keeps its vowel shape while the
+  /// eyes close, which is what a real face does.
+  String baseFor(MouthFrame mouth) {
+    switch (mouth) {
+      case MouthFrame.open:
+        return talkOpen;
+      case MouthFrame.half:
+        return talkHalf;
+      case MouthFrame.closed:
+        return closed;
+    }
+  }
+
   /// Selects the frame for the current mouth shape and blink state.
   ///
   /// Open-mouth speech takes priority over a blink unless the mouth is closed
@@ -115,6 +131,23 @@ class AssetLookup {
     'flag_bn': 'assets/icons/flag_bn.webp',
     'flag_hi': 'assets/icons/flag_hi.webp',
   };
+
+  /// Fractional height of the band that contains only hair, brow and eyelids,
+  /// measured from each shipped sprite (the diff between `*_full` and `*_blink`
+  /// stops before the mouth on every character, so a blink band never eats a
+  /// vowel). Used to overlay a blink while the jaw keeps talking.
+  static double eyeBandFraction(String characterId) {
+    switch (characterId) {
+      case 'rahul':
+        return 0.173;
+      case 'priya':
+        return 0.135;
+      case 'teacher':
+        return 0.115;
+      default:
+        return 0.14;
+    }
+  }
 
   static String? characterPath(String characterId) => characters[characterId];
 

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,13 @@ import 'idle_motion.dart';
 /// All four frames per character share the exact pixel geometry of the resting
 /// full-body sprite, so swapping [Image.asset] with `gaplessPlayback: true`
 /// animates only the mouth and eyelids without shifting the clothing or shoes.
+///
+/// The mouth is paced from [spokenText] by [SpeechCadence] at a calm human rate
+/// (roughly three syllables a second with real punctuation pauses), and eyelid
+/// and posture polish ride on top. When the caller has a *measured* mouth shape
+/// for the exact audio frame it can pass one through `mouthFor`, which wins over
+/// the text cadence for that frame — that is how live narration lip-syncs.
+///
 /// Honours [MediaQuery.maybeDisableAnimationsOf] by resting on the closed smile
 /// with no running ticker, keeping reduced-motion devices and `pumpAndSettle`
 /// tests completely calm.
@@ -27,6 +35,8 @@ class TalkingCharacter extends StatefulWidget {
     this.spokenText = '',
     this.utteranceKey = 0,
     this.loopSpeech = false,
+    this.energy = 0.0,
+    this.mouthFor,
   });
 
   final String characterId;
@@ -48,9 +58,17 @@ class TalkingCharacter extends StatefulWidget {
   /// playback completes.
   final bool loopSpeech;
 
-  /// Current resolved frame asset on [TalkingCharacter], exposed as a [ValueKey]
-  /// on the rendered [Image] so widget tests can verify real lip-sync and blink
-  /// transitions without reaching into private state.
+  /// Smoothed phrase-level vocal energy (0..1) used for breathing, head
+  /// emphasis and shoulder lift — slow by construction, so it never jitters.
+  final double energy;
+
+  /// Optional per-frame mouth override supplied by an owner that knows the real
+  /// audio playhead (see `AudioSpeakingMouth`). Returning null keeps the calm
+  /// text cadence for that frame.
+  final MouthFrame? Function(Duration elapsed)? mouthFor;
+
+  /// How long a single eye-closure lasts. Fast enough to read as a blink rather
+  /// than a nap, slow enough to be visible on a 20 ms animation grid.
   static const blinkDurationMs = 155;
 
   @override
@@ -68,6 +86,11 @@ class _TalkingCharacterState extends State<TalkingCharacter>
   bool _blinking = false;
   bool _reduceMotion = false;
   String? _warmedCharacter;
+
+  /// Wall-clock moments of a double-blink: eyes sometimes flick twice in quick
+  /// succession the way real faces do. Deterministic, so tests stay calm.
+  int _blinkCount = 0;
+  int _lastBlinkCycle = -1;
 
   /// Deterministic per-character blink cycle so two actors standing together
   /// never blink in lockstep.
@@ -162,14 +185,25 @@ class _TalkingCharacterState extends State<TalkingCharacter>
     _lastElapsed = elapsed;
 
     final nextMouth = widget.isTalking
-        ? _cadence.frameAt(
-            elapsed - _speechOrigin,
-            loop: widget.loopSpeech,
-          )
+        ? widget.mouthFor?.call(elapsed) ??
+            _cadence.frameAt(
+              elapsed - _speechOrigin,
+              loop: widget.loopSpeech,
+            )
         : MouthFrame.closed;
 
+    final cycle = (elapsed.inMilliseconds + _blinkOffsetMs) ~/ _blinkPeriodMs;
     final cyclePos = (elapsed.inMilliseconds + _blinkOffsetMs) % _blinkPeriodMs;
-    final nextBlink = cyclePos < TalkingCharacter.blinkDurationMs;
+    if (cycle != _lastBlinkCycle) {
+      _lastBlinkCycle = cycle;
+      _blinkCount = cycle % 4 == 1 ? 1 : 0;
+    }
+    // Occasionally the second lid-flick of a double blink, ~230 ms later.
+    final doubleFlick = _blinkCount > 0 &&
+        cyclePos >= TalkingCharacter.blinkDurationMs + 230 &&
+        cyclePos < TalkingCharacter.blinkDurationMs + 230 + 90;
+    final nextBlink =
+        cyclePos < TalkingCharacter.blinkDurationMs || doubleFlick;
 
     if (nextMouth != _mouth || nextBlink != _blinking) {
       setState(() {
@@ -182,43 +216,55 @@ class _TalkingCharacterState extends State<TalkingCharacter>
   @override
   Widget build(BuildContext context) {
     final frames = AssetLookup.framesFor(widget.characterId);
-    final activeMouth =
+    final mouth =
         (_reduceMotion || !widget.isTalking) ? MouthFrame.closed : _mouth;
-    final activeBlink = !_reduceMotion && _blinking;
-    final path = frames?.resolve(mouth: activeMouth, blinking: activeBlink) ??
-        AssetLookup.fullBodyPath(widget.characterId);
+    final blinking = !_reduceMotion && _blinking;
     final name = AssetLookup.characterDisplayName(widget.characterId);
 
-    Widget art = path == null
-        ? _FallbackBody(name: name, height: widget.height)
-        : Image.asset(
-            path,
-            key: ValueKey<String>(path),
-            height: widget.height,
-            fit: BoxFit.contain,
-            alignment: Alignment.bottomCenter,
-            gaplessPlayback: true,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (_, __, ___) =>
-                _FallbackBody(name: name, height: widget.height),
-          );
+    // A blink is drawn as an eyelid band lifted from the blink frame, so the
+    // jaw keeps talking through a blink instead of snapping shut for 155 ms.
+    final image = _CharacterImage(
+      characterId: widget.characterId,
+      frames: frames,
+      mouth: mouth,
+      blinking: blinking,
+      height: widget.height,
+      fallbackName: name,
+    );
 
-    // Subtle vocal emphasis: an open vowel lifts the torso by ~0.5% anchored at
-    // the shoes so the character feels physically engaged in the sentence, not
-    // like a mannequin with a flapping mouth.
-    final speechLift = activeMouth == MouthFrame.open
-        ? 1.007
-        : activeMouth == MouthFrame.half
-            ? 1.003
-            : 1.0;
-    if (!_reduceMotion && widget.isSpeaker) {
+    // Vocal emphasis: on an open vowel the torso lifts a hair and the head
+    // follows the phrase energy. Tiny numbers, anchored at the shoes.
+    final energy = widget.isTalking ? widget.energy.clamp(0.0, 1.0) : 0.0;
+    final mouthWeight = switch (mouth) {
+      MouthFrame.open => 1.0,
+      MouthFrame.half => 0.45,
+      MouthFrame.closed => 0.0,
+    };
+    final emphasis = (mouthWeight * 0.55 + energy * 0.45).clamp(0.0, 1.0);
+
+    Widget art = image;
+    if (!_reduceMotion) {
       art = AnimatedScale(
-        duration: const Duration(milliseconds: 90),
-        curve: Curves.easeOut,
-        scale: speechLift,
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOutCubic,
+        scale: 1 + 0.0055 * emphasis,
         alignment: Alignment.bottomCenter,
         child: art,
       );
+      // Phrase-level head/torso sway: a slow drift that reads as breath and
+      // emphasis. Sine of a 2.4 s cycle keeps it under 1% and never stutters.
+      final swayMs = _lastElapsed.inMilliseconds +
+          (widget.characterId.isEmpty
+              ? 0
+              : widget.characterId.codeUnitAt(0) * 40);
+      final sway = emphasis * 0.9 * math.sin(swayMs / 2400.0 * 2 * math.pi);
+      if (sway.abs() > 0.001) {
+        art = Transform.rotate(
+          angle: sway * 0.006,
+          alignment: Alignment.bottomCenter,
+          child: art,
+        );
+      }
     }
 
     // Focus by lighting, NEVER by lowering opacity: semi-transparency lets
@@ -247,9 +293,10 @@ class _TalkingCharacterState extends State<TalkingCharacter>
       scale: widget.isSpeaker ? 1.0 : 0.96,
       alignment: Alignment.bottomCenter,
       child: IdleBob(
-        period: widget.isSpeaker ? 3600 : 4600,
+        // Breathing quickens very slightly under speech, like a real chest.
+        period: widget.isTalking ? 3100 : (widget.isSpeaker ? 3600 : 4600),
         phase: phase,
-        amplitude: widget.isTalking ? 0.004 : 0.005,
+        amplitude: widget.isTalking ? 0.0055 : 0.0045,
         child: Stack(
           alignment: Alignment.bottomCenter,
           clipBehavior: Clip.none,
@@ -295,6 +342,7 @@ class _TalkingCharacterState extends State<TalkingCharacter>
                           fit: BoxFit.contain,
                           alignment: Alignment.bottomCenter,
                           gaplessPlayback: true,
+                          excludeFromSemantics: true,
                           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                         ),
                       ),
@@ -306,6 +354,78 @@ class _TalkingCharacterState extends State<TalkingCharacter>
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The body plus, while speaking, a clipped eye-band so a blink and an open
+/// jaw can happen at the same instant without ever dropping to the closed
+/// smile mid-word.
+class _CharacterImage extends StatelessWidget {
+  const _CharacterImage({
+    required this.characterId,
+    required this.frames,
+    required this.mouth,
+    required this.blinking,
+    required this.height,
+    required this.fallbackName,
+  });
+
+  final String characterId;
+  final CharacterFrames? frames;
+  final MouthFrame mouth;
+  final bool blinking;
+  final double height;
+  final String fallbackName;
+
+  @override
+  Widget build(BuildContext context) {
+    final body =
+        frames?.baseFor(mouth) ?? AssetLookup.fullBodyPath(characterId);
+    if (body == null) {
+      return _FallbackBody(name: fallbackName, height: height);
+    }
+
+    final base = Image.asset(
+      body,
+      key: ValueKey<String>(body),
+      height: height,
+      fit: BoxFit.contain,
+      alignment: Alignment.bottomCenter,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) =>
+          _FallbackBody(name: fallbackName, height: height),
+    );
+
+    final blinkPath = frames?.blink;
+    if (!blinking || blinkPath == null) return base;
+
+    // Only the hair/brow/lid band is copied from the blink frame (its height is
+    // measured per sprite), so the lids close while the jaw keeps working and no
+    // vowel is ever clipped off mid-word.
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        base,
+        ClipRect(
+          child: Align(
+            alignment: Alignment.topCenter,
+            heightFactor: AssetLookup.eyeBandFraction(characterId),
+            child: Image.asset(
+              blinkPath,
+              key: ValueKey<String>(blinkPath),
+              height: height,
+              fit: BoxFit.contain,
+              alignment: Alignment.topCenter,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.high,
+              excludeFromSemantics: true,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

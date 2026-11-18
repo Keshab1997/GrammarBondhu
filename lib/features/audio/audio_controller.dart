@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../app/state/settings_controller.dart';
 import 'audio_catalog.g.dart';
+import 'audio_lipsync.g.dart';
 import 'audio_port.dart';
 
 /// One clip at a time, app-wide.
@@ -49,6 +50,34 @@ class AudioController extends ChangeNotifier {
   bool get enabled => _settings.audioEnabled;
 
   bool isPlaying(String clipId) => _playing == clipId;
+
+  /// The hardware playhead inside [clipId], or null when the platform does not
+  /// report one (or has not started producing sound yet).
+  ///
+  /// Null is meaningful: it is how a caller learns to hold the mouth closed
+  /// while a clip decodes or buffers instead of miming over silence. Callers
+  /// that need a value between reports anchor on this and extrapolate with
+  /// their own frame clock.
+  Duration? playheadOf(String clipId) {
+    if (_playing != clipId) return null;
+    if (!_port.supportsPosition) return null;
+    final reported = _port.position;
+    if (reported == null) return null;
+    final duration = AudioLipSync.durationMsOf(clipId);
+    if (duration != null && reported.inMilliseconds > duration) {
+      return Duration(milliseconds: duration);
+    }
+    return reported;
+  }
+
+  /// True while the clip is loaded but no sound has come out yet — a cold
+  /// decode, a slow asset, or the first frames after a tap. The speaker keeps
+  /// their mouth politely closed instead of miming over silence.
+  bool isBuffering(String clipId) {
+    if (_playing != clipId) return false;
+    if (!_port.supportsPosition) return false;
+    return _port.position == null;
+  }
 
   /// True when this clip can be offered at all: narration is on and the clip
   /// really shipped in the bundle.

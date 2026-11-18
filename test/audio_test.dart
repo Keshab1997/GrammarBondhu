@@ -56,6 +56,17 @@ class FakeAudioPort implements AudioPort {
     if (pending != null) await pending.future;
   }
 
+  /// Tests that care about lip-sync can make the fake report a real playhead;
+  /// by default it stays hardware-free.
+  Duration? playhead;
+  bool reportsPosition = false;
+
+  @override
+  Duration? get position => reportsPosition ? playhead : null;
+
+  @override
+  bool get supportsPosition => reportsPosition;
+
   /// Pretends the clip reached its end.
   void finish() => _completions.add(null);
 

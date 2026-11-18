@@ -10,6 +10,7 @@ import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/accessible_layout.dart';
 import '../../core/utils/asset_lookup.dart';
+import '../../core/utils/audio_speaking_mouth.dart';
 import '../../core/utils/speech_cadence.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
@@ -17,6 +18,7 @@ import '../../core/widgets/listen_button.dart';
 import '../../core/widgets/talking_character.dart';
 import '../../data/models/chapter.dart';
 import '../audio/audio_controller.dart';
+import '../audio/audio_lipsync.g.dart';
 import '../grammar/grammar_lesson_screen.dart';
 
 /// Navigation arguments for the story player.
@@ -64,6 +66,11 @@ class _StoryScreenState extends State<StoryScreen> {
   Timer? _silentSpeechTimer;
   Timer? _autoAdvanceTimer;
   bool _silentTalking = false;
+
+  /// Lip-sync driver: reads the real playhead (or the silent sentence clock)
+  /// and hands back an exact mouth shape plus phrase energy.
+  AudioSpeakingMouth? _mouthDriver;
+
   bool _reduceMotion = false;
   bool _localAutoPlay = true;
   bool _initialCueScheduled = false;
@@ -112,7 +119,9 @@ class _StoryScreenState extends State<StoryScreen> {
 
   @override
   void dispose() {
-    _cancelLineTimers();
+    _silentSpeechTimer?.cancel();
+    _autoAdvanceTimer?.cancel();
+    _mouthDriver?.dispose();
     _audio?.removeListener(_onAudioChanged);
     // A line that keeps talking after the learner has moved on sounds broken.
     _audio?.stop();
@@ -149,10 +158,58 @@ class _StoryScreenState extends State<StoryScreen> {
     _autoAdvanceTimer?.cancel();
     _autoAdvanceTimer = null;
     _autoQueuedClipId = null;
+    _stopLipSync();
     if (_silentTalking) {
       _silentTalking = false;
       if (updateState && mounted) setState(() {});
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Lip-sync driving
+  //
+  // While a clip is sounding, the mouth is read straight off the real playhead
+  // and matched against the clip's measured waveform timeline. Before the first
+  // sample actually plays the mouth stays politely shut through the load or
+  // buffer window, so a slow phone never mimes ahead of a silent speaker.
+  // -------------------------------------------------------------------------
+
+  AudioSpeakingMouth _driver() =>
+      _mouthDriver ??= AudioSpeakingMouth(audio: _audio);
+
+  /// Measured mouth shape for the character's current animation frame. This is
+  /// called from inside [TalkingCharacter]'s own ticker, so the jaw, the blinking
+  /// eyelids and the posture all advance on the very same frame.
+  MouthFrame? _mouthAt(Duration elapsed) {
+    final driver = _driver();
+    driver.sample(elapsed);
+    return driver.mouth;
+  }
+
+  bool get _voiceIsLoading {
+    final audio = _audio;
+    final playing = audio?.playingId;
+    if (audio == null || playing == null) return false;
+    return audio.isBuffering(playing);
+  }
+
+  void _startLipSync() {
+    if (_reduceMotion) return;
+    final playing = _audio?.playingId;
+    if (playing != null && AudioLipSync.has(playing)) {
+      _driver().followClip(playing);
+    }
+  }
+
+  void _startSilentClock(SpeechCadence cadence) {
+    // Reduced motion: no per-frame mouth at all, just the pose.
+    if (_reduceMotion) return;
+    _driver().startSilent(cadence);
+  }
+
+  void _stopLipSync({bool rebuild = true}) {
+    _mouthDriver?.stop();
+    if (rebuild && mounted) setState(() {});
   }
 
   void _onAudioChanged() {
@@ -181,6 +238,9 @@ class _StoryScreenState extends State<StoryScreen> {
       if (playing != _autoQueuedClipId) {
         _autoQueuedClipId = null;
       }
+      // A waveform exists for this clip: follow the real playhead instead of
+      // pacing the text, so every syllable lands where the voice says it.
+      _startLipSync();
     }
 
     final queued = _autoQueuedClipId;
@@ -191,6 +251,8 @@ class _StoryScreenState extends State<StoryScreen> {
 
     _observedPlayingId = playing;
     _observedCompletedCount = completed;
+
+    if (playing == null) _stopLipSync(rebuild: false);
 
     if (finishedAutoClip) {
       _autoQueuedClipId = null;
@@ -218,6 +280,7 @@ class _StoryScreenState extends State<StoryScreen> {
       setState(() => _utteranceKey += 1);
       final started = await audio.play(enClip);
       if (!mounted || token != _lineToken) return;
+      if (started) _startLipSync();
       if (!started) {
         // Never leave auto-story stuck when an audio device refuses to open:
         // fall back to text-paced lip-sync so the character still delivers it.
@@ -231,11 +294,13 @@ class _StoryScreenState extends State<StoryScreen> {
   }
 
   void _startSilentSpeech(String text, {required int token}) {
-    final duration = SpeechCadence.fromText(text).silentDuration;
+    final cadence = SpeechCadence.fromText(text);
+    final duration = cadence.silentDuration;
     setState(() {
       _silentTalking = true;
       _utteranceKey += 1;
     });
+    _startSilentClock(cadence);
     _silentSpeechTimer = Timer(duration, () {
       if (!mounted || token != _lineToken) return;
       setState(() => _silentTalking = false);
@@ -359,7 +424,11 @@ class _StoryScreenState extends State<StoryScreen> {
     final playingEn = playingId == '${clipPrefix}_en';
     final playingBn = playingId == '${clipPrefix}_bn';
     final audioTalking = playingEn || playingBn;
-    final isSpeakerTalking = line != null && (audioTalking || _silentTalking);
+    // Hold the mouth shut until the decoder actually produces sound, and while
+    // the story is paused by the learner — never mime over silence.
+    final loadingVoice = _voiceIsLoading;
+    final isSpeakerTalking =
+        line != null && ((audioTalking && !loadingVoice) || _silentTalking);
     final spokenText = line == null
         ? ''
         : playingBn
@@ -368,7 +437,7 @@ class _StoryScreenState extends State<StoryScreen> {
     final showChoices = _lineIndex >= scene.dialogue.length - 1 &&
         scene.choices.isNotEmpty &&
         _chosenChoice == null;
-    final hintLabel = isSpeakerTalking
+    final hintLabel = isSpeakerTalking || loadingVoice
         ? 'Speaking · Tap to skip'
         : autoPlay && !_reduceMotion
             ? 'Auto on · Tap to continue'
@@ -423,6 +492,8 @@ class _StoryScreenState extends State<StoryScreen> {
                 spokenText: spokenText,
                 utteranceKey: _utteranceKey,
                 loopSpeech: audioTalking,
+                mouthFor: isSpeakerTalking ? _mouthAt : null,
+                energy: _mouthDriver?.energy ?? 0,
                 backgroundId: scene.backgroundId,
                 bubble: _DialogueBubble(
                   characterId: line.characterId,
@@ -623,6 +694,8 @@ class _Stage extends StatelessWidget {
     required this.spokenText,
     required this.utteranceKey,
     required this.loopSpeech,
+    required this.mouthFor,
+    required this.energy,
     required this.backgroundId,
     required this.bubble,
   });
@@ -633,6 +706,14 @@ class _Stage extends StatelessWidget {
   final String spokenText;
   final int utteranceKey;
   final bool loopSpeech;
+
+  /// Measured mouth shape for an animation frame (null keeps the calm text
+  /// cadence inside the character widget).
+  final MouthFrame? Function(Duration elapsed)? mouthFor;
+
+  /// Smoothed vocal energy for posture and breathing emphasis.
+  final double energy;
+
   final String? backgroundId;
   final Widget bubble;
 
@@ -710,6 +791,8 @@ class _Stage extends StatelessWidget {
                   spokenText: p.isSpeaker ? spokenText : '',
                   utteranceKey: p.isSpeaker ? utteranceKey : 0,
                   loopSpeech: p.isSpeaker && loopSpeech,
+                  mouthFor: p.isSpeaker ? mouthFor : null,
+                  energy: p.isSpeaker ? energy : 0,
                 ),
               ),
             // Low out-of-focus foreground framing along the bottom edge.
