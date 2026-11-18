@@ -45,7 +45,7 @@
     },
     {
       "scene_id": "ch01_s2",
-      "background_id": "bg_classroom",
+      "background_id": "ch01_classroom",
       "character_ids": [
         "rahul",
         "teacher"
@@ -71,7 +71,7 @@
     },
     {
       "scene_id": "ch01_s3",
-      "background_id": "bg_classroom",
+      "background_id": "ch01_classroom",
       "character_ids": [
         "rahul",
         "priya"

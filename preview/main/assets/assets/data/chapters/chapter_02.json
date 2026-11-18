@@ -80,7 +80,7 @@
     },
     {
       "scene_id": "ch02_s3",
-      "background_id": "bg_classroom",
+      "background_id": "ch02_classroom",
       "character_ids": [
         "rahul",
         "priya"

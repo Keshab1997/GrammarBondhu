@@ -54,7 +54,7 @@
     },
     {
       "scene_id": "ch09_s2",
-      "background_id": "bg_classroom",
+      "background_id": "ch09_classroom",
       "character_ids": [
         "priya",
         "teacher",
