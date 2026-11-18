@@ -5,7 +5,10 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
+import '../../core/utils/accessible_layout.dart';
+import '../../core/utils/asset_lookup.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../core/widgets/asset_images.dart';
 import '../../data/models/chapter.dart';
 import '../grammar/grammar_lesson_screen.dart';
 import '../story/story_screen.dart';
@@ -63,12 +66,20 @@ class ChapterDetailScreen extends StatelessWidget {
       // hero, which would otherwise leave a pale strip along the bottom edge.
       backgroundColor: AppColors.surface,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Hero(
-            title: chapter.title.en,
-            number: number,
-            stars: record.stars,
-            completed: record.completed,
+          ConstrainedBox(
+            // On a landscape/tablet viewport the hero still leaves room for
+            // both the chapter sheet and its pinned action.
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.38),
+            child: _Hero(
+              backgroundId: chapter.scenes.isNotEmpty
+                  ? chapter.scenes.first.backgroundId
+                  : null,
+              stars: record.stars,
+              completed: record.completed,
+            ),
           ),
           Expanded(
             child: Transform.translate(
@@ -135,60 +146,67 @@ class ChapterDetailScreen extends StatelessWidget {
 
 class _Hero extends StatelessWidget {
   const _Hero({
-    required this.title,
-    required this.number,
+    required this.backgroundId,
     required this.stars,
     required this.completed,
   });
 
-  final String title;
-  final int number;
+  final String? backgroundId;
   final int stars;
   final bool completed;
 
-  /// The artwork is 1376 × 768; laying it out at its own ratio means nothing
-  /// is cropped away.
+  /// The landscape frame matches the bundled chapter hero fallback.
   static const _aspect = 1376 / 768;
 
   @override
   Widget build(BuildContext context) {
+    final id = backgroundId;
+    final sceneAsset = id == null ? null : AssetLookup.backgroundPath(id);
+    Widget fallback() => Image.asset(
+          'assets/illustrations/chapter_detail_hero.webp',
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          excludeFromSemantics: true,
+          errorBuilder: (_, __, ___) =>
+              const ColoredBox(color: AppColors.skyTop),
+        );
     return AspectRatio(
       aspectRatio: _aspect,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/illustrations/chapter_detail_hero.webp',
-            fit: BoxFit.cover,
-            alignment: Alignment.center,
-            errorBuilder: (_, __, ___) => const ColoredBox(
-              color: AppColors.skyTop,
+          if (sceneAsset == null)
+            fallback()
+          else
+            Image.asset(
+              sceneAsset,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              excludeFromSemantics: true,
+              errorBuilder: (_, __, ___) => fallback(),
             ),
-          ),
-          // Scrim under the caption. It starts higher than the text does:
-          // white type over a sunlit roof and a white shirt needs real depth,
-          // not a 25 % wash.
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0, 0.10),
+                begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
+                  Color(0x520B1B3A),
                   Color(0x00000000),
-                  Color(0x73000000),
-                  Color(0xCC000000),
+                  Color(0x470B1B3A),
                 ],
-                stops: [0.0, 0.55, 1.0],
+                stops: [0.0, 0.45, 1.0],
               ),
             ),
           ),
-          // Chapter identity lives in the top row, with the back button. It used
-          // to sit at the bottom of the artwork, on top of a face.
+          // Leave the middle of the scene unobstructed; the chapter identity
+          // and translations have their own space in the sheet.
           SafeArea(
             bottom: false,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _CircleButton(
                     icon: Icons.arrow_back_rounded,
@@ -197,7 +215,21 @@ class _Hero extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (completed && stars > 0)
-                    StarsDisplay(count: stars, size: 18),
+                    DecoratedBox(
+                      decoration: ShapeDecoration(
+                        color: Colors.black.withValues(alpha: 0.38),
+                        shape: StadiumBorder(
+                            side: BorderSide(
+                                color: Colors.white.withValues(alpha: 0.36))),
+                      ),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          child: Semantics(
+                              label: '$stars of 3 stars',
+                              excludeSemantics: true,
+                              child: StarsDisplay(count: stars, size: 18))),
+                    ),
                 ],
               ),
             ),
@@ -211,44 +243,36 @@ class _Hero extends StatelessWidget {
 class _Pill extends StatelessWidget {
   const _Pill({
     required this.label,
-    this.color = Colors.white,
-    this.onLight = false,
+    this.color = AppColors.primaryDark,
     this.icon,
   });
 
   final String label;
   final Color color;
 
-  /// True when the pill sits on the sheet rather than on artwork: dark type on
-  /// a tinted fill instead of white on a translucent one.
-  final bool onLight;
   final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
-    final fg = onLight ? color : Colors.white;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: onLight
-            ? color.withValues(alpha: 0.12)
-            : color.withValues(alpha: 0.22),
+        color: color.withValues(alpha: 0.09),
         borderRadius: BorderRadius.circular(999),
-        border:
-            Border.all(color: color.withValues(alpha: onLight ? 0.3 : 0.45)),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
+            Icon(icon, size: 13, color: color),
             const SizedBox(width: 4),
           ],
           Flexible(
             child: Text(
               label,
               style: TextStyle(
-                color: fg,
+                color: color,
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.8,
@@ -274,21 +298,19 @@ class _CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withValues(alpha: 0.92),
-      shape: const CircleBorder(),
-      elevation: 2,
-      shadowColor: const Color(0x33000000),
-      child: Tooltip(
-        message: tooltip,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(9),
-            child: Icon(icon, size: 20, color: AppColors.textPrimary),
-          ),
-        ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+          minWidth: AccessibleLayout.minTouchTarget,
+          minHeight: AccessibleLayout.minTouchTarget),
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onTap,
+        icon: Icon(icon, size: 20),
+        style: IconButton.styleFrom(
+            minimumSize: const Size.square(AccessibleLayout.minTouchTarget),
+            visualDensity: VisualDensity.standard,
+            backgroundColor: AppColors.surface,
+            foregroundColor: AppColors.textPrimary),
       ),
     );
   }
@@ -320,7 +342,14 @@ class _SheetBody extends StatelessWidget {
     final secondary = text.bodyMedium?.copyWith(color: AppColors.textSecondary);
     final level = chapter.difficultyLabel;
     final resume = resumeIndex;
-    final readyForLesson = resume == sceneCount;
+    final readyForLesson = sceneCount == 0 || resume == sceneCount;
+    final cast = <String>{
+      for (final scene in chapter.scenes) ...[
+        ...scene.characterIds,
+        for (final line in scene.dialogue) line.characterId,
+      ],
+    }..removeWhere((id) => id.trim().isEmpty);
+
     final progressNote = completed
         ? 'Finished — replay the story or beat your best score.'
         : readyForLesson
@@ -338,18 +367,12 @@ class _SheetBody extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            _Pill(
-              label: 'CHAPTER $number',
-              color: AppColors.primary,
-              onLight: true,
-            ),
-            if (level.isNotEmpty)
-              _Pill(label: level, color: AppColors.primary, onLight: true),
+            _Pill(label: 'CHAPTER $number'),
+            if (level.isNotEmpty) _Pill(label: level),
             if (completed)
-              _Pill(
+              const _Pill(
                 label: 'COMPLETED',
-                color: AppColors.success,
-                onLight: true,
+                color: Color(0xFF065F46),
                 icon: Icons.check_rounded,
               ),
           ],
@@ -372,9 +395,13 @@ class _SheetBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(progressNote, style: secondary),
         ],
+        if (cast.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
+            for (final id in cast) _CastChip(id: id),
+          ]),
+        ],
         const SizedBox(height: AppSpacing.lg),
-        // What the learner is about to practise, in their own language of
-        // progress: one grammar point, not a description of the app.
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -424,25 +451,35 @@ class _SheetBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _StepRow(
           icon: Icons.auto_stories_rounded,
-          color: AppColors.primary,
+          phase: completed || readyForLesson
+              ? _StepPhase.finished
+              : _StepPhase.active,
           title: 'Story',
           detail: '$sceneCount scenes',
-          status: readyForLesson
+          status: completed || readyForLesson
               ? 'Finished'
               : resume != null
                   ? 'Scene ${resume + 1}'
-                  : null,
+                  : 'Up next',
         ),
         _StepRow(
           icon: Icons.school_rounded,
-          color: AppColors.success,
+          phase: completed
+              ? _StepPhase.finished
+              : readyForLesson
+                  ? _StepPhase.active
+                  : _StepPhase.upcoming,
           title: 'Grammar lesson',
           detail: 'Rules & examples',
-          status: readyForLesson ? 'Up next' : null,
+          status: completed
+              ? 'Finished'
+              : readyForLesson
+                  ? 'Up next'
+                  : null,
         ),
         _StepRow(
           icon: Icons.quiz_rounded,
-          color: AppColors.accentDark,
+          phase: completed ? _StepPhase.finished : _StepPhase.upcoming,
           title: 'Quiz',
           detail: '${chapter.quiz.length} questions',
           status: completed
@@ -450,60 +487,97 @@ class _SheetBody extends StatelessWidget {
               : resume != null
                   ? 'Unlocks at the end'
                   : null,
-          trailingStars: completed ? 3 : 0,
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            Icon(Icons.info_outline_rounded,
-                size: 14, color: AppColors.textMuted),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                'Rahul and Priya practise this grammar point as the chapter '
-                'unfolds — read the story, then answer the quiz.',
-                style: text.bodySmall?.copyWith(color: AppColors.textMuted),
-              ),
-            ),
-          ],
-        ),
+        Text('Maximum rewards', style: text.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
+          _Pill(label: '${chapter.rewards.xp} XP', icon: Icons.bolt_rounded),
+          _Pill(
+              label: '${chapter.rewards.coins} coins',
+              color: const Color(0xFF854D0E),
+              icon: Icons.monetization_on_rounded),
+        ]),
         const SizedBox(height: AppSpacing.lg),
       ],
     );
   }
 }
 
+class _CastChip extends StatelessWidget {
+  const _CastChip({required this.id});
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, 4, 10, 4),
+      decoration: ShapeDecoration(
+        color: AppColors.primarySoft,
+        shape: StadiumBorder(
+            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.14))),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        ExcludeSemantics(child: CharacterAvatar(characterId: id, size: 24)),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+            child: Text(AssetLookup.characterDisplayName(id),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w700))),
+      ]),
+    );
+  }
+}
+
+enum _StepPhase { finished, active, upcoming }
+
 class _StepRow extends StatelessWidget {
   const _StepRow({
     required this.icon,
-    required this.color,
+    required this.phase,
     required this.title,
     required this.detail,
     this.status,
-    this.trailingStars = 0,
   });
 
   final IconData icon;
-  final Color color;
+  final _StepPhase phase;
   final String title;
   final String detail;
   final String? status;
-  final int trailingStars;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    final (color, fill) = switch (phase) {
+      _StepPhase.finished => (AppColors.successDark, AppColors.successSoft),
+      _StepPhase.active => (AppColors.primary, AppColors.primarySoft),
+      _StepPhase.upcoming => (AppColors.textSecondary, AppColors.background),
+    };
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadii.sm),
+          color: phase == _StepPhase.active ? fill : AppColors.surface,
+          border: Border.all(
+              color: color.withValues(
+                  alpha: phase == _StepPhase.active ? 0.52 : 0.23))),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadii.sm),
+              color: fill,
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: color, width: phase == _StepPhase.active ? 2 : 1),
             ),
-            child: Icon(icon, size: 18, color: color),
+            child: Icon(
+                phase == _StepPhase.finished ? Icons.check_rounded : icon,
+                size: 18,
+                color: color),
           ),
           const SizedBox(width: AppSpacing.sm + 2),
           Expanded(
@@ -523,11 +597,9 @@ class _StepRow extends StatelessWidget {
                         )),
                     Text(detail,
                         style: text.bodySmall
-                            ?.copyWith(color: AppColors.textMuted)),
+                            ?.copyWith(color: AppColors.textSecondary)),
                   ],
                 ),
-                if (trailingStars > 0)
-                  StarsDisplay(count: trailingStars, size: 15),
                 if (status != null)
                   Container(
                     padding:
