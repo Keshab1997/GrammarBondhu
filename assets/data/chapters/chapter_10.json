@@ -1,0 +1,212 @@
+{
+  "chapter_id": "ch10",
+  "title": {
+    "en": "Ready for Sports Day",
+    "bn": "ক্রীড়া দিবসের প্রস্তুতি",
+    "hi": "खेल दिवस की तैयारी"
+  },
+  "description": {
+    "en": "On Sports Day, Rahul and Priya turn their newspaper notes into a checklist that helps every runner feel ready.",
+    "bn": "ক্রীড়া দিবসে রাহুল আর প্রিয়া খবরের কাগজের জন্য নেওয়া নোট দিয়ে একটা তালিকা বানায়, যাতে সব দৌড়বিদ প্রস্তুত হতে পারে।",
+    "hi": "खेल दिवस पर राहुल और प्रिया अख़बार के लिए जुटाई जानकारी से एक सूची बनाते हैं, ताकि हर धावक तैयार हो सके।"
+  },
+  "grammar_topic": {
+    "en": "Helpful Modals (can / should / must)",
+    "bn": "ভাবসূচক সহায়ক ক্রিয়া (can / should / must)",
+    "hi": "सहायक क्रियाएँ (can / should / must)"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_classroom.webp",
+  "rewards": { "xp": 100, "coins": 20, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch10_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "We know where the teams meet now. I can draw a map for the runners.",
+            "bn": "দলগুলো কোথায় জড়ো হয়, এখন আমরা জানি। আমি দৌড়বিদদের জন্য একটা মানচিত্র আঁকতে পারি।",
+            "hi": "अब हमें पता है कि टीमें कहाँ मिलती हैं। मैं धावकों के लिए एक नक्शा बना सकती हूँ।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I can put the map next to our Sports Day checklist.",
+            "bn": "আমি মানচিত্রটা আমাদের ক্রীড়া দিবসের তালিকার পাশে লাগাতে পারি।",
+            "hi": "मैं नक्शा खेल दिवस की हमारी सूची के पास लगा सकता हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch10_s2",
+      "background_id": "bg_school_gate",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Everyone must wait behind the starting line until the whistle. That’s a race rule.",
+            "bn": "বাঁশি বাজা পর্যন্ত সবাইকে শুরুর দাগের পেছনে অপেক্ষা করতেই হবে। এটা দৌড়ের নিয়ম।",
+            "hi": "सीटी बजने तक सभी को शुरुआती रेखा के पीछे इंतज़ार करना होगा। यह दौड़ का नियम है।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "You should warm up before the race, too. I’ll put that under “Helpful Tips.”",
+            "bn": "দৌড়ের আগে শরীরটাও একটু গরম করে নেওয়া ভালো। এটা “কাজের পরামর্শ” অংশে লিখে দিই।",
+            "hi": "दौड़ से पहले हल्का व्यायाम कर लेना भी अच्छा रहेगा। मैं इसे “काम के सुझाव” में लिख देती हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch10_s3",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I was nervous, but I can show the younger runners where to go now.",
+            "bn": "আগে একটু ঘাবড়ে গিয়েছিলাম, কিন্তু এখন ছোট দৌড়বিদদের দেখিয়ে দিতে পারি কোথায় যেতে হবে।",
+            "hi": "मैं घबरा रहा था, लेकिन अब मैं छोटे धावकों को बता सकता हूँ कि उन्हें कहाँ जाना है।"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Your checklist helped them find their teams. You made room for everyone to join in.",
+            "bn": "তোমাদের তালিকা দেখে ওরা নিজের নিজের দল খুঁজে পেয়েছে। তোমরা এমন ব্যবস্থা করেছ যাতে সবাই যোগ দিতে পারে।",
+            "hi": "तुम्हारी सूची से उन्हें अपनी टीमें ढूँढ़ने में मदद मिली। तुमने ऐसा इंतज़ाम किया कि सब हिस्सा ले सकें।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch10_c1",
+          "text": {
+            "en": "Tell a nervous runner, “You can practise with me.”",
+            "bn": "ঘাবড়ে যাওয়া একজন দৌড়বিদকে বলি, “তুমি আমার সঙ্গে অনুশীলন করতে পারো।”",
+            "hi": "किसी घबराए हुए धावक से कहें, “तुम मेरे साथ अभ्यास कर सकते हो।”"
+          },
+          "response": {
+            "en": "That’s kind! A practice run together can help a new runner feel at home.",
+            "bn": "কী সুন্দর কথা! একসঙ্গে একটু দৌড়ের অনুশীলন করলে নতুন দৌড়বিদের জড়তা কাটতে পারে।",
+            "hi": "कितनी अच्छी बात है! साथ में दौड़ का अभ्यास करने से नए धावक की झिझक कम हो सकती है।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Ability, Advice and Rules",
+      "bn": "সামর্থ্য, পরামর্শ আর নিয়ম",
+      "hi": "क्षमता, सलाह और नियम"
+    },
+    "explanation": {
+      "en": "Use can for something someone is able to do, should for advice, and must for a rule or something necessary. After can, should or must, use the base verb without to: “She can run,” not “She can runs” or “She can to run.” The modal stays the same when the subject changes.",
+      "bn": "কারও কিছু করার সামর্থ্য থাকলে can, পরামর্শ দিতে should, আর নিয়ম বা বাধ্যবাধকতা বোঝাতে must ব্যবহার করো। can, should বা must-এর পরে to ছাড়া ক্রিয়ার মূল রূপ বসে: “She can run,” “She can runs” বা “She can to run” নয়। কর্তা বদলালেও এই সহায়ক ক্রিয়াগুলোর রূপ বদলায় না।",
+      "hi": "किसी की क्षमता बताने के लिए can, सलाह देने के लिए should, और नियम या ज़रूरी काम के लिए must लगाओ। can, should या must के बाद बिना to के क्रिया का मूल रूप लगाओ: “She can run,” न कि “She can runs” या “She can to run.” कर्ता बदलने पर भी इन सहायक क्रियाओं का रूप नहीं बदलता।"
+    },
+    "examples": [
+      {
+        "sentence": "Priya can draw a map.",
+        "note": {
+          "en": "Can tells us what Priya is able to do.",
+          "bn": "can দিয়ে বোঝায় প্রিয়া কী করতে পারে।",
+          "hi": "Can बताता है कि प्रिया क्या कर सकती है।"
+        }
+      },
+      {
+        "sentence": "You should warm up before the race.",
+        "note": {
+          "en": "Should makes this advice rather than a rule.",
+          "bn": "should দিয়ে পরামর্শ দেওয়া হচ্ছে, নিয়ম চাপানো হচ্ছে না।",
+          "hi": "Should बताता है कि यह सलाह है, नियम नहीं।"
+        }
+      },
+      {
+        "sentence": "Runners must wait for the whistle.",
+        "note": {
+          "en": "Must shows something the race rules require.",
+          "bn": "must দিয়ে বোঝায়, দৌড়ের নিয়ম অনুযায়ী এটা করতেই হবে।",
+          "hi": "Must बताता है कि दौड़ के नियम के अनुसार यह करना ज़रूरी है।"
+        }
+      },
+      {
+        "sentence": "Rahul can help the younger runners.",
+        "note": {
+          "en": "Use the base verb help, even with one person as the subject.",
+          "bn": "কর্তা একজন হলেও help-এর মূল রূপটাই বসবে।",
+          "hi": "कर्ता एक व्यक्ति हो, तब भी help का मूल रूप ही लगेगा।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch10_q1",
+      "question": "Which sentence says Rahul is able to draw a map?",
+      "options": ["Rahul should draw a map.", "Rahul must draw a map.", "Rahul can draw a map.", "Rahul did draw a map."],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Can tells us Rahul has the ability to draw a map.",
+        "bn": "can বলে যে রাহুলের মানচিত্র আঁকার সামর্থ্য আছে।",
+        "hi": "Can बताता है कि राहुल नक्शा बना सकता है।"
+      }
+    },
+    {
+      "question_id": "ch10_q2",
+      "question": "Which sentence means “It’s a good idea to warm up,” rather than stating a rule or giving permission?",
+      "options": ["You can warm up.", "You warm up on Mondays.", "You must warm up.", "You should warm up."],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Should recommends a warm-up without saying it is required.",
+        "bn": "should দিয়ে শরীর গরম করে নেওয়ার পরামর্শ দেওয়া হয়; এটা বাধ্যতামূলক বলা হয় না।",
+        "hi": "Should हल्का व्यायाम करने की सलाह देता है, इसे अनिवार्य नहीं बनाता।"
+      }
+    },
+    {
+      "question_id": "ch10_q3",
+      "question": "The race rules require runners to wait for the whistle. Which sentence makes that requirement clear?",
+      "options": ["Runners must wait for the whistle.", "Runners can wait for the whistle.", "Runners should wait for the whistle.", "Runners waited for the whistle."],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Must makes it clear that waiting is required, not just a good idea.",
+        "bn": "must দিয়ে বোঝায় অপেক্ষা করতেই হবে; এটা শুধু পরামর্শ নয়।",
+        "hi": "Must साफ़ करता है कि इंतज़ार करना ज़रूरी है, यह सिर्फ़ सलाह नहीं है।"
+      }
+    },
+    {
+      "question_id": "ch10_q4",
+      "question": "Priya can ___ the younger runners.",
+      "options": ["helps", "help", "to help", "helped"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "After can, use the base verb help without to.",
+        "bn": "can-এর পরে to ছাড়া help-এর মূল রূপ বসে।",
+        "hi": "Can के बाद बिना to के help का मूल रूप लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch10_q5",
+      "question": "Choose the standard English sentence.",
+      "options": ["She should waits for her team.", "She should to wait for her team.", "She should wait for her team.", "She should waited for her team."],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Even with she, keep should and the base form wait.",
+        "bn": "কর্তা she হলেও should-এর পরে wait-এর মূল রূপই বসবে।",
+        "hi": "She के साथ भी should के बाद wait का मूल रूप ही लगता है।"
+      }
+    }
+  ]
+}

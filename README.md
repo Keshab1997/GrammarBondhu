@@ -4,14 +4,23 @@
 teaches English grammar through interactive stories featuring Rahul, a young
 Indian student, and his friends.
 
-English is the primary learning language; Bengali (বাংলা) and Hindi (हिन्दী)
+English is the primary learning language; Bengali (বাংলা) and Hindi (हिन्दी)
 provide translations and explanations.
 
 ## Features
 
-- 📖 **Story-driven chapters** — 5 chapters (am/is/are, simple present, articles
-  & prepositions, past tense, sentence formation) with scenes, dialogue and
-  optional interactive choices
+- 📖 **Story-driven chapters** — 10 chapters follow Rahul, Priya and Mrs. Sen
+  through school adventures, with dialogue and optional interactive choices:
+  1. **The New Student** — am / is / are
+  2. **A New Friend** — simple present
+  3. **The Mystery of the Library** — articles and prepositions
+  4. **The Lost Map** — past tense (was / were / -ed)
+  5. **The School Adventure** — sentence formation
+  6. **Rainy Day at School** — present continuous (am / is / are + -ing)
+  7. **Whose Notebook Is This?** — pronouns and possessives
+  8. **The Science Exhibition** — adjectives and comparisons
+  9. **The School Newspaper** — asking questions (Do / Does / Did and Wh- words)
+  10. **Ready for Sports Day** — helpful modals (can / should / must)
 - 🌐 **Three languages** — English + Bengali + Hindi translations, in-story
   language toggle (EN / বাং / हि)
 - 📝 **Grammar lessons** — rules, examples, character illustrations

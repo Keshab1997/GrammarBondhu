@@ -1,0 +1,212 @@
+{
+  "chapter_id": "ch07",
+  "title": {
+    "en": "Whose Notebook Is This?",
+    "bn": "এটা কার খাতা?",
+    "hi": "यह किसकी कॉपी है?"
+  },
+  "description": {
+    "en": "A notebook turns up in the library. Priya and Mrs. Sen help Rahul discover who it belongs to.",
+    "bn": "লাইব্রেরিতে একটা খাতা পাওয়া গেল। খাতাটা কার, তা খুঁজে বের করতে প্রিয়া আর মিসেস সেন রাহুলকে সাহায্য করেন।",
+    "hi": "पुस्तकालय में एक कॉपी मिलती है। प्रिया और सेन मैम राहुल की मदद करती हैं यह पता लगाने में कि वह किसकी है।"
+  },
+  "grammar_topic": {
+    "en": "Pronouns & Possessives",
+    "bn": "সর্বনাম ও মালিকানা বোঝানোর শব্দ",
+    "hi": "सर्वनाम और संबंधसूचक शब्द"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_library.webp",
+  "rewards": { "xp": 80, "coins": 16, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch07_s1",
+      "background_id": "bg_library",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I found a green notebook. Rahul, is it yours?",
+            "bn": "আমি একটা সবুজ খাতা পেয়েছি। রাহুল, এটা কি তোমার?",
+            "hi": "मुझे एक हरी कॉपी मिली। राहुल, क्या यह तुम्हारी है?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "No, mine is blue. My notebook has a drawing of raindrops on the cover.",
+            "bn": "না, আমারটা নীল। আমার খাতার মলাটে বৃষ্টির ফোঁটার ছবি আছে।",
+            "hi": "नहीं, मेरी वाली नीली है। मेरी कॉपी के कवर पर बूँदों का चित्र है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch07_s2",
+      "background_id": "bg_library",
+      "character_ids": ["teacher", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Please show it to me. Look, it says “Aman” on the label. It’s his notebook.",
+            "bn": "আমাকে একটু দেখাও তো। দেখো, লেবেলে “আমান” লেখা। এটা ওর খাতা।",
+            "hi": "ज़रा मुझे दिखाओ। देखो, लेबल पर “अमन” लिखा है। यह उसकी कॉपी है।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "He is in the science club. I can give it back to him.",
+            "bn": "ও বিজ্ঞান ক্লাবের সদস্য। আমি ওকে খাতাটা ফেরত দিতে পারি।",
+            "hi": "वह विज्ञान क्लब में है। मैं उसे कॉपी लौटा सकता हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch07_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The science club members are setting up in our classroom. They need their notes for the exhibition.",
+            "bn": "বিজ্ঞান ক্লাবের সদস্যরা আমাদের ক্লাসঘরে জিনিসপত্র সাজাচ্ছে। প্রদর্শনীর জন্য ওদের নোট লাগবে।",
+            "hi": "विज्ञान क्लब के बच्चे हमारी कक्षा में अपना सामान लगा रहे हैं। प्रदर्शनी के लिए उन्हें अपने नोट्स चाहिए।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "There’s Aman! I’ll return his notebook before the club starts.",
+            "bn": "ওই তো আমান! ক্লাবের কাজ শুরু হওয়ার আগেই ওর খাতাটা ফেরত দেব।",
+            "hi": "वह रहा अमन! क्लब का काम शुरू होने से पहले मैं उसकी कॉपी लौटा दूँगा।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch07_c1",
+          "text": {
+            "en": "Write “Aman, this notebook is yours!” on a sticky note.",
+            "bn": "একটা স্টিকি নোটে লিখি, “আমান, এই খাতাটা তোমার!”",
+            "hi": "एक चिपकने वाली पर्ची पर लिखें, “अमन, यह कॉपी तुम्हारी है!”"
+          },
+          "response": {
+            "en": "That will make him smile. It’s good to get a lost notebook back!",
+            "bn": "এটা দেখে ওর মুখে হাসি ফুটবে। হারানো খাতা ফিরে পেলে কার না ভালো লাগে!",
+            "hi": "यह पढ़कर वह मुस्कुराएगा। खोई हुई कॉपी वापस मिले तो अच्छा लगता है!"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Who Does It, and Whose Is It?",
+      "bn": "কে কাজটা করে, আর জিনিসটা কার?",
+      "hi": "कौन करता है, और चीज़ किसकी है?"
+    },
+    "explanation": {
+      "en": "Use I, he or they as the subject: “He found it.” Use me or him as the object of a verb or after a word like to: “Give it to him.” Put my, his or their before a noun to say who it belongs to: “my notebook.” To avoid repeating the noun, use mine or his on its own: “It is mine.” Notice that his works both ways.",
+      "bn": "বাক্যের কর্তা হিসেবে I, he বা they বসে: “He found it.” কাজটি যার ওপর হয় বা to-এর মতো শব্দের পরে me বা him বসে: “Give it to him.” জিনিসটা কার তা বলতে নামের আগে my, his বা their বসাও: “my notebook.” নামটা আবার না বলে আলাদাভাবে mine বা his বসাতে পারো: “It is mine.” খেয়াল করো, his দু’ভাবেই চলে।",
+      "hi": "कर्ता के तौर पर I, he या they लगाओ: “He found it.” क्रिया का असर जिस पर हो, उसके लिए या to जैसे शब्द के बाद me या him लगाओ: “Give it to him.” चीज़ किसकी है, यह बताने के लिए संज्ञा से पहले my, his या their लगाओ: “my notebook.” संज्ञा दोहरानी न हो तो अकेले mine या his लगाओ: “It is mine.” ध्यान दो, his दोनों तरह से चलता है।"
+    },
+    "examples": [
+      {
+        "sentence": "I found a notebook.",
+        "note": {
+          "en": "I is the subject: I did the finding.",
+          "bn": "I হলো কর্তা: আমিই খাতাটা পেয়েছি।",
+          "hi": "I कर्ता है: कॉपी मुझे मिली।"
+        }
+      },
+      {
+        "sentence": "Please show the notebook to me.",
+        "note": {
+          "en": "Use me, not I, after to.",
+          "bn": "to-এর পরে I নয়, me বসে।",
+          "hi": "To के बाद I नहीं, me लगता है।"
+        }
+      },
+      {
+        "sentence": "My notebook is blue. The green one is his.",
+        "note": {
+          "en": "My goes before notebook; his can stand alone.",
+          "bn": "my-এর পরে notebook বসে; his একাই বসতে পারে।",
+          "hi": "My के बाद notebook है; his अकेले भी आ सकता है।"
+        }
+      },
+      {
+        "sentence": "They brought their notes.",
+        "note": {
+          "en": "They did the action; their tells us whose notes these are.",
+          "bn": "they দিয়ে বোঝায় কারা এনেছে, আর their দিয়ে বোঝায় নোটগুলো কাদের।",
+          "hi": "They बताता है कि नोट्स कौन लाया; their बताता है कि नोट्स किसके हैं।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch07_q1",
+      "question": "Rahul says: “___ am looking for Aman.”",
+      "options": ["Me", "My", "Mine", "I"],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Use I as the subject before am.",
+        "bn": "am-এর আগে কর্তা হিসেবে I বসে।",
+        "hi": "Am से पहले कर्ता के रूप में I लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch07_q2",
+      "question": "Priya says to Rahul: “Give the notebook to ___.” She means herself.",
+      "options": ["me", "I", "my", "mine"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Me is the object form after to when Priya is talking about herself.",
+        "bn": "প্রিয়া নিজের কথা বলছে, তাই to-এর পরে me বসবে।",
+        "hi": "प्रिया अपने बारे में कह रही है, इसलिए to के बाद me लगेगा।"
+      }
+    },
+    {
+      "question_id": "ch07_q3",
+      "question": "I own this notebook. It is ___.",
+      "options": ["me", "mine", "my", "I"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Mine means “my notebook” here, without repeating notebook.",
+        "bn": "এখানে mine মানে “my notebook”; notebook আবার বলতে হয় না।",
+        "hi": "यहाँ mine का मतलब “my notebook” है; notebook दोहराने की ज़रूरत नहीं है।"
+      }
+    },
+    {
+      "question_id": "ch07_q4",
+      "question": "Which pronoun replaces Aman in “Let’s return the notebook to Aman”?",
+      "options": ["he", "his", "him", "himself"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Use him after to when you mean Aman himself.",
+        "bn": "আমানকেই বোঝাতে to-এর পরে him বসাও।",
+        "hi": "अमन की ही बात हो रही है, इसलिए to के बाद him लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch07_q5",
+      "question": "The science club members packed ___ own notes.",
+      "options": ["they", "their", "theirs", "them"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Put their before own notes to show who the notes belong to.",
+        "bn": "নোটগুলো কাদের, তা বোঝাতে own notes-এর আগে their বসাও।",
+        "hi": "नोट्स किसके हैं, यह बताने के लिए own notes से पहले their लगाओ।"
+      }
+    }
+  ]
+}
