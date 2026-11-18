@@ -1,0 +1,21 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "A",
+  "task": "cloud-progress-safety",
+  "allowed": [
+    "lib/app/state/progress_controller.dart",
+    "lib/data/models/progress.dart",
+    "lib/features/settings/settings_screen.dart",
+    "test/cloud_progress_backup_test.dart"
+  ],
+  "commit": "fix(progress): keep stale cloud sync from undoing local progress actions",
+  "check": {
+    "kind": "flutter",
+    "version": "3.50.0",
+    "test": "test/cloud_progress_backup_test.dart"
+  },
+  "arena": {
+    "branch": "auto",
+    "base_sha": "332fa73e66159c73d861d1a825403bff05ed544d"
+  }
+}
