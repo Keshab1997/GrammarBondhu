@@ -5,6 +5,7 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../grammar/grammar_lesson_screen.dart';
 import '../story/story_screen.dart';
 
 /// Screen 17 — chapter intro: what it is, what you will learn, and one way in.
@@ -35,9 +36,11 @@ class ChapterDetailScreen extends StatelessWidget {
     }
 
     final record = progress.chapterProgress(chapterId);
-    final resume = record.resumeSceneIndex ?? 0;
     final number = content.chapters.indexOf(chapter) + 1;
     final started = record.started && !record.completed;
+    final resume = started
+        ? (record.resumeSceneIndex ?? 0).clamp(0, chapter.scenes.length)
+        : null;
 
     return Scaffold(
       // Surface, not background: the sheet is nudged up 24 dp to overlap the
@@ -82,8 +85,7 @@ class ChapterDetailScreen extends StatelessWidget {
                           quizCount: chapter.quiz.length,
                           bestScore: record.bestScorePercent,
                           completed: record.completed,
-                          inProgress: started,
-                          resumeStep: resume + 1,
+                          resumeIndex: resume,
                         ),
                       ),
                     ),
@@ -93,10 +95,18 @@ class ChapterDetailScreen extends StatelessWidget {
                           : record.completed
                               ? 'Play again'
                               : 'Start',
-                      onPressed: () => Navigator.of(context).pushNamed(
-                        StoryScreen.routeName,
-                        arguments: StoryArgs(chapterId, startScene: resume),
-                      ),
+                      onPressed: () {
+                        final nav = Navigator.of(context);
+                        if (chapter.scenes.isEmpty ||
+                            resume == chapter.scenes.length) {
+                          nav.pushNamed(GrammarLessonScreen.routeName,
+                              arguments: chapterId);
+                        } else {
+                          nav.pushNamed(StoryScreen.routeName,
+                              arguments: StoryArgs(chapterId,
+                                  startScene: resume ?? 0));
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -277,8 +287,7 @@ class _SheetBody extends StatelessWidget {
     required this.quizCount,
     required this.bestScore,
     required this.completed,
-    required this.inProgress,
-    required this.resumeStep,
+    required this.resumeIndex,
   });
 
   final int number;
@@ -288,12 +297,13 @@ class _SheetBody extends StatelessWidget {
   final int quizCount;
   final int bestScore;
   final bool completed;
-  final bool inProgress;
-  final int resumeStep;
+  final int? resumeIndex;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final resume = resumeIndex;
+    final readyForLesson = resume == sceneCount;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -327,9 +337,11 @@ class _SheetBody extends StatelessWidget {
         Text(
           completed
               ? 'Finished — replay the story or beat your best score.'
-              : inProgress
-                  ? 'You are on step $resumeStep. Pick up where you left off.'
-                  : 'A short story, one grammar point, and five questions.',
+              : readyForLesson
+                  ? 'Story complete. Ready for the grammar lesson.'
+                  : resume != null
+                      ? 'Scene ${resume + 1} of $sceneCount. Pick up where you left off.'
+                      : 'A short story, one grammar point, and five questions.',
           style: text.bodyMedium,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -389,14 +401,18 @@ class _SheetBody extends StatelessWidget {
           color: AppColors.primary,
           title: 'Story',
           detail: '$sceneCount scenes',
-          status: inProgress ? 'Step $resumeStep' : null,
+          status: readyForLesson
+              ? 'Finished'
+              : resume != null
+                  ? 'Scene ${resume + 1}'
+                  : null,
         ),
         _StepRow(
           icon: Icons.school_rounded,
           color: AppColors.success,
           title: 'Grammar lesson',
           detail: 'Rules & examples',
-          status: null,
+          status: readyForLesson ? 'Up next' : null,
         ),
         _StepRow(
           icon: Icons.quiz_rounded,
@@ -405,7 +421,7 @@ class _SheetBody extends StatelessWidget {
           detail: '$quizCount questions',
           status: completed
               ? 'Best $bestScore%'
-              : inProgress
+              : resume != null
                   ? 'Unlocks at the end'
                   : null,
           trailingStars: completed ? 3 : 0,

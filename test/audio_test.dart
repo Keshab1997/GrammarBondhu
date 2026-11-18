@@ -25,6 +25,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FakeAudioPort implements AudioPort {
   final List<String> played = <String>[];
   int stops = 0;
+  Completer<void>? nextPlay;
+  Completer<void>? nextStop;
 
   /// Set to make playback fail, the way a broken/undecodable clip would.
   bool failOnPlay = false;
@@ -38,10 +40,18 @@ class FakeAudioPort implements AudioPort {
   Future<void> playAsset(String assetPath) async {
     if (failOnPlay) throw Exception('decoder said no');
     played.add(assetPath);
+    final pending = nextPlay;
+    nextPlay = null;
+    if (pending != null) await pending.future;
   }
 
   @override
-  Future<void> stop() async => stops++;
+  Future<void> stop() async {
+    stops++;
+    final pending = nextStop;
+    nextStop = null;
+    if (pending != null) await pending.future;
+  }
 
   /// Pretends the clip reached its end.
   void finish() => _completions.add(null);
@@ -134,8 +144,54 @@ void main() {
     test('one clip at a time: a new tap replaces the old one', () async {
       await audio.toggle('teach_1_bn');
       await audio.toggle('board_ch01_explain_bn');
+      expect(port.stops, 1);
       expect(audio.playingId, 'board_ch01_explain_bn');
       expect(port.played.last, 'assets/audio/clips/board_ch01_explain_bn.mp3');
+    });
+
+    test('queued A completions cannot clear B while switching clips', () async {
+      await audio.toggle('teach_1_bn');
+      port.finish(); // Emitted for A but not yet delivered.
+      final stopping = port.nextStop = Completer<void>();
+      final playingB = audio.toggle('teach_2_en');
+      port.finish(); // A can still finish while its stop is pending.
+      await Future<void>.delayed(Duration.zero);
+      expect(port.played, hasLength(1));
+      expect(audio.playingId, 'teach_2_en');
+      stopping.complete();
+      await playingB;
+      expect(port.stops, 1);
+      expect(audio.playingId, 'teach_2_en');
+
+      port.finish(); // B's own completion still works.
+      await Future<void>.delayed(Duration.zero);
+      expect(audio.playingId, isNull);
+    });
+
+    test('a late load failure belongs to the request, not the clip id',
+        () async {
+      final loadingA = port.nextPlay = Completer<void>();
+      final firstA = audio.toggle('teach_1_bn');
+      await audio.toggle('teach_2_en');
+      await audio.toggle('teach_1_bn'); // Same id as the old, interrupted load.
+      loadingA.completeError(StateError('old load interrupted'));
+      await firstA;
+      expect(port.stops, 2);
+      expect(audio.playingId, 'teach_1_bn');
+      expect(audio.lastError, isNull);
+    });
+
+    test('stopping during a switch cancels the pending start', () async {
+      await audio.toggle('teach_1_bn');
+      final stopping = port.nextStop = Completer<void>();
+      final switching = audio.toggle('teach_2_en');
+      final stopped = audio.stop();
+      stopping.complete();
+      await switching;
+      await stopped;
+      expect(port.played, ['assets/audio/clips/teach_1_bn.mp3']);
+      expect(port.stops, 1);
+      expect(audio.playingId, isNull);
     });
 
     test('a finished clip clears the playing state', () async {

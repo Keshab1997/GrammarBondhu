@@ -16,11 +16,6 @@ class AudioController extends ChangeNotifier {
       {required AudioPort port, required SettingsController settings})
       : _port = port,
         _settings = settings {
-    _completion = _port.completions.listen((_) {
-      if (_playing == null) return;
-      _playing = null;
-      notifyListeners();
-    });
     // The Audio switch in Settings changes whether speakers are offered at
     // all; mirror that change to every listening button.
     _settings.addListener(_onSettingsChanged);
@@ -28,7 +23,9 @@ class AudioController extends ChangeNotifier {
 
   final AudioPort _port;
   final SettingsController _settings;
-  late final StreamSubscription<void> _completion;
+  StreamSubscription<void>? _completion;
+  int _request = 0;
+  Future<void>? _stopping;
 
   String? _playing;
 
@@ -60,32 +57,61 @@ class AudioController extends ChangeNotifier {
       return true;
     }
     if (!canPlay(clipId)) return false;
+    final request = _newRequest();
+    final switching = _playing != null;
     _playing = clipId;
     _lastError = null;
-    notifyListeners();
     try {
+      final stopping = switching ? _stopPort() : _stopping;
+      notifyListeners();
+      if (stopping != null) await stopping;
+      if (request != _request) return true;
       await _port.playAsset(AudioCatalog.assetFor(clipId));
+      if (request != _request) return true;
+
+      // The port broadcasts unlabelled end events. Retire A's listener before
+      // stopping it and only arm B's once its source has finished loading.
+      _completion = _port.completions.listen((_) {
+        if (request != _request || _playing == null) return;
+        _playing = null;
+        notifyListeners();
+      });
       return true;
     } catch (error, stack) {
-      // A clip that will not decode must not leave a button stuck in
-      // "playing" forever — and the reason must be visible in the log.
+      // Superseding a play request can interrupt its decoder. That is not a
+      // failure of the *current* tap, even when it asked for the same clip.
+      if (request != _request) return true;
       debugPrint(
           'GrammarBondhu audio: could not play $clipId — $error\n$stack');
       _lastError = error;
-      if (_playing == clipId) {
-        _playing = null;
-        notifyListeners();
-      }
+      _playing = null;
+      notifyListeners();
       return false;
     }
   }
 
+  int _newRequest() {
+    final request = ++_request;
+    unawaited(_completion?.cancel());
+    _completion = null;
+    return request;
+  }
+
+  // An explicit stop (or a rapid A → B → C switch) can still be in flight
+  // when the next tap arrives. Wait for that same stop before playing.
+  Future<void> _stopPort() =>
+      _stopping ??= Future<void>.sync(_port.stop).whenComplete(() {
+        _stopping = null;
+      });
+
   Future<void> stop() async {
+    _newRequest();
     if (_playing == null) return;
     _playing = null;
+    final stopping = _stopPort();
     notifyListeners();
     try {
-      await _port.stop();
+      await stopping;
     } catch (_) {
       // Nothing to recover: the UI is already back to "not playing".
     }
@@ -102,7 +128,8 @@ class AudioController extends ChangeNotifier {
   @override
   void dispose() {
     _settings.removeListener(_onSettingsChanged);
-    _completion.cancel();
+    _newRequest();
+    _playing = null;
     _port.dispose();
     super.dispose();
   }

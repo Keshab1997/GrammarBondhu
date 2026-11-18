@@ -69,13 +69,13 @@ class ChapterCompletedScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
+            child: _CelebrationLayout(
+              header: Column(
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
+                      tooltip: 'Close',
                       onPressed: () =>
                           Navigator.of(context).pushNamedAndRemoveUntil(
                         HomeShell.routeName,
@@ -87,25 +87,33 @@ class ChapterCompletedScreen extends StatelessWidget {
                   ),
                   Text(
                     'Chapter Completed!',
+                    textAlign: TextAlign.center,
                     style: text.headlineMedium?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   StarsDisplay(count: result.stars, size: 52),
-                  const Spacer(),
+                ],
+              ),
+              summary: Column(
+                children: [
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
-                    "You did an ${result.percent >= 90 ? 'amazing' : 'great'} job!",
+                    result.percent >= 90
+                        ? 'You did an amazing job!'
+                        : 'You did a great job!',
                     textAlign: TextAlign.center,
                     style: text.headlineMedium
                         ?.copyWith(color: Colors.white, fontSize: 28),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.sm,
                     children: [
                       _RewardChip(
                           icon: Icons.star_rounded,
                           label: '+${result.xpEarned} XP'),
-                      const SizedBox(width: AppSpacing.md),
                       _RewardChip(
                           icon: Icons.monetization_on_rounded,
                           label: '+${result.coinsEarned} Coins'),
@@ -168,6 +176,33 @@ class ChapterCompletedScreen extends StatelessWidget {
   }
 }
 
+/// Keep the celebration at the foot of a tall screen, but let it scroll
+/// below the stars when larger text needs more than a screenful.
+class _CelebrationLayout extends StatelessWidget {
+  const _CelebrationLayout({required this.header, required this.summary});
+
+  final Widget header;
+  final Widget summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, viewport) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: viewport.maxHeight),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [header, summary],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _RewardChip extends StatelessWidget {
   const _RewardChip({required this.icon, required this.label});
 
@@ -184,13 +219,16 @@ class _RewardChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadii.chip),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 18, color: AppColors.textPrimary),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            ),
           ),
         ],
       ),

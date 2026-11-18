@@ -13,6 +13,15 @@ class HomeShell extends StatefulWidget {
 
   static const routeName = '/home';
 
+  /// Select a tab in place, preserving the shell and its navigation history.
+  /// Returns false when the caller is on a standalone route.
+  static bool selectTab(BuildContext context, int index) {
+    final shell = context.findAncestorStateOfType<_HomeShellState>();
+    if (shell == null) return false;
+    shell._selectTab(index);
+    return true;
+  }
+
   final int initialTab;
 
   @override
@@ -20,7 +29,12 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
-  late int _tab = widget.initialTab;
+  late int _tab = widget.initialTab.clamp(0, _destinations.length - 1);
+
+  void _selectTab(int index) {
+    final tab = index.clamp(0, _destinations.length - 1);
+    if (_tab != tab) setState(() => _tab = tab);
+  }
 
   static const _destinations = [
     (icon: Icons.home_outlined, active: Icons.home_rounded, label: 'Home'),
@@ -100,7 +114,7 @@ class _HomeShellState extends State<HomeShell> {
                     activeIcon: _destinations[i].active,
                     label: _destinations[i].label,
                     selected: _tab == i,
-                    onTap: () => setState(() => _tab = i),
+                    onTap: () => _selectTab(i),
                   ),
                 ),
             ],

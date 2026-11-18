@@ -46,7 +46,7 @@ class StoryScreen extends StatefulWidget {
 }
 
 class _StoryScreenState extends State<StoryScreen> {
-  late int _sceneIndex = widget.args.startScene.clamp(0, 999);
+  late int _sceneIndex = math.max(0, widget.args.startScene);
   int _lineIndex = 0;
   StoryChoice? _chosenChoice;
 
@@ -75,20 +75,24 @@ class _StoryScreenState extends State<StoryScreen> {
 
   void _advance() {
     final chapter = _chapter;
-    if (chapter == null) return;
+    if (chapter == null || _sceneIndex >= chapter.scenes.length) return;
     _audio?.stop();
     final scene = chapter.scenes[_sceneIndex];
-    setState(() => _chosenChoice = null);
 
     if (_lineIndex < scene.dialogue.length - 1) {
-      setState(() => _lineIndex += 1);
+      setState(() {
+        _chosenChoice = null;
+        _lineIndex += 1;
+      });
       return;
     }
-    // Scene finished → save resume point and move on.
-    context.read<ProgressController>().openChapter(chapter.id, _sceneIndex);
-    if (_sceneIndex < chapter.scenes.length - 1) {
+    // The length itself is a valid bookmark: the grammar lesson is next.
+    final nextScene = _sceneIndex + 1;
+    context.read<ProgressController>().openChapter(chapter.id, nextScene);
+    if (nextScene < chapter.scenes.length) {
       setState(() {
-        _sceneIndex += 1;
+        _chosenChoice = null;
+        _sceneIndex = nextScene;
         _lineIndex = 0;
       });
     } else {
@@ -105,19 +109,22 @@ class _StoryScreenState extends State<StoryScreen> {
     if (chapter == null) {
       return const Scaffold(body: Center(child: Text('Chapter not found')));
     }
+    // A direct story link (e.g. Home) can also carry the lesson bookmark.
+    if (_sceneIndex >= chapter.scenes.length) {
+      return GrammarLessonScreen(chapterId: chapter.id);
+    }
     // Deliberately NOT seeded from the support language: opening a scene with
     // the translation already rendered means the learner reads the answer
     // before trying the English, which is the one thing this screen teaches.
-    final scene =
-        chapter.scenes[_sceneIndex.clamp(0, chapter.scenes.length - 1)];
-    final line = scene.dialogue[_lineIndex.clamp(0, scene.dialogue.length - 1)];
+    final scene = chapter.scenes[_sceneIndex];
+    final line = scene.dialogue.isEmpty ? null : scene.dialogue[_lineIndex];
     final text = Theme.of(context).textTheme;
 
     // The cast for this scene: whoever is listed, plus the current speaker if
     // the data forgot to list them (never leave the speaker off stage).
     final cast = <String>{
       ...scene.characterIds,
-      line.characterId,
+      if (line != null) line.characterId,
     }.toList();
 
     return Scaffold(
@@ -154,18 +161,18 @@ class _StoryScreenState extends State<StoryScreen> {
                 ),
               ),
             ),
-            _Stage(
-              cast: cast,
-              speakerId: line.characterId,
-              backgroundId: scene.backgroundId,
-              bubble: _DialogueBubble(
-                characterId: line.characterId,
-                line: line,
-                translationLang: _translationLang,
-                clipPrefix: 'story_${chapter.id}_$_sceneIndex'
-                    '_${_lineIndex.clamp(0, scene.dialogue.length - 1)}',
+            if (line != null)
+              _Stage(
+                cast: cast,
+                speakerId: line.characterId,
+                backgroundId: scene.backgroundId,
+                bubble: _DialogueBubble(
+                  characterId: line.characterId,
+                  line: line,
+                  translationLang: _translationLang,
+                  clipPrefix: 'story_${chapter.id}_${_sceneIndex}_$_lineIndex',
+                ),
               ),
-            ),
             // Bottom interaction zone: choices, then the advance hint.
             Positioned(
               left: 0,

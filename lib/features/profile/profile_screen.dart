@@ -9,6 +9,7 @@ import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
 import '../../data/models/progress.dart';
+import '../home/home_shell.dart';
 import '../progress/progress_screen.dart';
 import '../settings/language_selection_screen.dart';
 import '../settings/settings_screen.dart';
@@ -220,8 +221,12 @@ class ProfileScreen extends StatelessWidget {
             icon: Icons.emoji_events_rounded,
             iconColor: AppColors.accentDark,
             label: 'Achievements',
-            onTap: () =>
-                Navigator.of(context).pushNamed(ProgressScreen.routeName),
+            onTap: () {
+              if (!HomeShell.selectTab(context, 2)) {
+                Navigator.of(context)
+                    .pushNamed(HomeShell.routeName, arguments: 2);
+              }
+            },
           ),
           _MenuTile(
             icon: Icons.settings_outlined,
