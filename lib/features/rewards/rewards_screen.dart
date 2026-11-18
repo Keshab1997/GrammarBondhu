@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
@@ -16,6 +17,11 @@ class RewardsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final p = context.watch<ProgressController>().progress;
+    final chapters = Provider.of<ContentController?>(context)?.chapters ?? [];
+    final totalStars =
+        p.chapters.values.fold<int>(0, (sum, c) => sum + c.stars);
+    final xpIntoLevel = p.xpIntoLevel;
+    final xpForNextLevel = xpIntoLevel + p.xpToNextLevel;
 
     final achievements = [
       (
@@ -23,6 +29,13 @@ class RewardsScreen extends StatelessWidget {
         title: 'First Chapter',
         detail: 'Complete your first chapter',
         earned: p.completedChapterCount >= 1,
+      ),
+      (
+        icon: Icons.task_alt_rounded,
+        title: 'Perfect Quiz',
+        detail: 'Score 100% on any chapter quiz',
+        earned: p.chapters.values
+            .any((c) => c.completed && c.bestScorePercent >= 100),
       ),
       (
         icon: Icons.local_fire_department_rounded,
@@ -34,7 +47,7 @@ class RewardsScreen extends StatelessWidget {
         icon: Icons.star_rounded,
         title: 'Star Collector',
         detail: 'Earn 6 stars in total',
-        earned: p.chapters.values.fold<int>(0, (s, c) => s + c.stars) >= 6,
+        earned: totalStars >= 6,
       ),
       (
         icon: Icons.emoji_events_rounded,
@@ -42,7 +55,22 @@ class RewardsScreen extends StatelessWidget {
         detail: 'Reach level 3',
         earned: p.level >= 3,
       ),
+      (
+        icon: Icons.workspace_premium_rounded,
+        title: 'English Champion',
+        detail: 'Reach level 5',
+        earned: p.level >= 5,
+      ),
+      (
+        icon: Icons.flag_rounded,
+        title: 'Story Finisher',
+        detail: 'Complete every chapter in the course',
+        earned: chapters.isNotEmpty &&
+            chapters
+                .every((chapter) => p.chapters[chapter.id]?.completed ?? false),
+      ),
     ];
+    final earnedCount = achievements.where((a) => a.earned).length;
 
     return SafeArea(
       child: ListView(
@@ -113,8 +141,45 @@ class RewardsScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.md),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Level progress',
+                    style: text.labelLarge?.copyWith(color: AppColors.primary)),
+                const SizedBox(height: AppSpacing.xs),
+                Text('Level ${p.level} · ${p.levelTitle}',
+                    style: text.titleLarge),
+                const SizedBox(height: AppSpacing.sm),
+                LinearProgressIndicator(
+                  value: xpForNextLevel > 0
+                      ? (xpIntoLevel / xpForNextLevel).clamp(0.0, 1.0)
+                      : 0.0,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                  backgroundColor: AppColors.primarySoft,
+                  color: AppColors.primary,
+                  semanticsLabel: 'Level progress',
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text('$xpIntoLevel / $xpForNextLevel XP to next level',
+                    style: text.bodyMedium),
+              ],
+            ),
+          ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Achievements', style: text.titleMedium),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('Achievements', style: text.titleMedium),
+              Text('$earnedCount of ${achievements.length} unlocked',
+                  style: text.bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary)),
+            ],
+          ),
           const SizedBox(height: AppSpacing.sm),
           for (final a in achievements)
             Padding(
@@ -154,6 +219,7 @@ class RewardsScreen extends StatelessWidget {
                       color: a.earned
                           ? AppColors.success
                           : AppColors.textSecondary,
+                      semanticLabel: a.earned ? 'Unlocked' : 'Locked',
                     ),
                   ],
                 ),

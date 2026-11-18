@@ -10,21 +10,23 @@ import '../../core/widgets/asset_images.dart';
 import '../../data/models/chapter.dart';
 import '../../data/models/progress.dart';
 import '../quiz/quiz_screen.dart';
+import '../quiz/review_practice_screen.dart';
 
 /// Screen 14 — overview, per-chapter history and stats.
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key, this.now});
+  const ProgressScreen({super.key, this.now, this.initialTab = 0});
 
   static const routeName = '/progress';
 
   final DateTime? now;
+  final int initialTab;
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  int _tab = 0;
+  late int _tab = widget.initialTab.clamp(0, 3);
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +37,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final p = progress.progress;
     final now = (widget.now ?? DateTime.now()).toLocal();
     final activeStreak = p.activeStreakOn(now);
-    final reviewCount = content.chapters.fold<int>(
-      0,
-      (count, chapter) =>
-          count +
-          chapter.quiz.where((question) {
-            return progress
-                .chapterProgress(chapter.id)
-                .missedQuestionIds
-                .contains(question.id);
-          }).length,
-    );
+    final reviewCount = countReviewableMistakes(content.chapters, p);
 
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +78,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md, 0, AppSpacing.md, 108),
                 children: [
                   if (_tab == 0) ...[
                     _LevelCard(
@@ -222,7 +215,29 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           ],
                         ),
                       )
-                    else
+                    else ...[
+                      AppCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              '$reviewCount ${reviewCount == 1 ? 'question' : 'questions'} ready to practise',
+                              style: text.titleMedium,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            AppButton(
+                              label: 'Practise Mistakes',
+                              icon: Icons.replay_rounded,
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const ReviewPracticeScreen(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
                       for (final chapter in content.chapters)
                         _MistakeReviewCard(
                           chapter: chapter,
@@ -237,6 +252,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             arguments: chapter.id,
                           ),
                         ),
+                    ],
                   ] else ...[
                     AppCard(
                       child: Column(
@@ -245,7 +261,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           _StatRow(label: 'Coins', value: '${p.coins}'),
                           _StatRow(
                               label: 'Current streak',
-                              value: '$activeStreak days'),
+                              value:
+                                  '$activeStreak ${activeStreak == 1 ? 'day' : 'days'}'),
+                          _StatRow(
+                            label: 'Best streak',
+                            value:
+                                '${p.bestStreakDays} ${p.bestStreakDays == 1 ? 'day' : 'days'}',
+                          ),
                           _StatRow(
                               label: 'Questions today',
                               value: '${p.questionsAnsweredOn(now)}'),
