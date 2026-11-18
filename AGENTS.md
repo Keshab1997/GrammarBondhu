@@ -1,10 +1,33 @@
 # AGENTS.md — GrammarBondhu
 
-<!-- flutter-builder:agent-pack:start v1.15.2 -->
+<!-- flutter-builder:agent-pack:start v1.17.0 -->
+## Captain task or independent work?
+
+**Captain A/B/C assignment:** attach this **app repo** in Arena Agent Mode,
+not `flutter-builder`. Read the pinned GitHub `BRIEF.md` and `task.json` from
+this app repo, then follow [Captain Fast Lane](https://github.com/Keshab1997/agent-bootstrap/blob/main/captain/FASTLANE.md).
+If the correct repo is not attached, report `BLOCKED` before editing; don't
+use a separate clone or new pairing.
+
+- Use the installed `tool/preflight.py` and the exact gate in `task.json`.
+  For Dart, use the assigned SDK pin, lockfile and targeted test. Keep the
+  app's existing `flutter-builder` pin; don't install or upgrade the pack
+  just to follow a brief.
+- Stay on the actual `arena/*` branch. Use Fast Lane to check and publish
+  the checkpoint. Do not push `main`, run `tool/agent_loop.py`, dispatch CI
+  (including via `tool/see_screen.py`), or open, merge or close a PR.
+- After verifying the remote checkpoint, mention `@Keshab1997` in the
+  approved tracking issue. If commenting is unavailable, report
+  `MENTION PENDING` and the verified checkpoint in Arena.
+
+The direct-to-`main` and one-command push examples below are only for
+**independent work explicitly authorized to push to `main`**.
+
 ## Rule #1 — CI is manual; preflight is your check
 
 This repository runs CI **only when the human dispatches it** (Actions → *Flutter
-CI* → Run workflow). Nothing runs on a push. So:
+CI* → Run workflow). A push can still start configured previews or checks,
+but it does not queue this manual CI. So:
 
 > **Name things as the project actually has them.** The workflow names in this
 > file are the pack's defaults; a project may hand-roll its gates instead of
@@ -12,9 +35,10 @@ CI* → Run workflow). Nothing runs on a push. So:
 > real names — dispatching a workflow that does not exist wastes the human's
 > turn, and assuming one covers your change is how a batch ships unchecked.
 
-- Work lands on `main` **directly** — no feature branch, no pull request.
-- Do **not** wait for a run after pushing. Nothing started; waiting only wastes
-  time.
+- For explicitly authorized independent work, push directly to `main`. A
+  Captain worker only checkpoints its `arena/*` branch as above.
+- Do **not** wait for manual CI after pushing. The human dispatches it when
+  ready.
 - `tool/preflight.py` is your only automatic check. Run it before every push —
   it is seconds, not minutes, and catches the mistakes that would otherwise
   surface in the next manual CI run.
@@ -31,7 +55,7 @@ CI* → Run workflow). Nothing runs on a push. So:
 
 ```bash
 python3 tool/preflight.py     # before every push: dead code / unused params / unused imports
-python3 tool/agent_loop.py -m "fix(scope): what changed"   # preflight + commit + push, one call
+python3 tool/agent_loop.py -m "fix(scope): what changed"   # independent work explicitly authorized for main only
 ```
 
 ### What a check costs
@@ -41,6 +65,7 @@ python3 tool/agent_loop.py -m "fix(scope): what changed"   # preflight + commit 
 | `python3 tool/preflight.py` | ~1 s | every change, before every push |
 | `flutter test test/<file>_test.dart` (via flutter-bootstrap) | 40 s once per session, then seconds | the Dart change that file covers |
 | `flutter analyze` or the full `flutter test` | ~20 s / 1–3 min | shared surfaces, risky diffs, or when the human asks |
+| `python3 tool/local_screenshots.py --shot <name>` | one `flutter test` run, ~1 s per screen, no CI | every widget change you want to see |
 | `python3 tool/see_screen.py` | one CI run | before and after a UI change |
 | The human's CI run | the human's attention + a runner | once per finished batch — never per edit |
 
@@ -73,11 +98,11 @@ cd <app-dir> && flutter pub get && flutter analyze && flutter test
   workflow needs to produce, and the signing secrets live in CI anyway.
 - Re-running that one-liner later in the same session is safe and instant (~0.2 s
   when the SDK is already there).
-- Need a GitHub token in this session (to dispatch a run, read logs, push)? The
-  companion repo `agent-bootstrap` pairs one with three browser clicks; pushing
-  with `git` over HTTPS may already work, in which case skip it.
+- For authorized independent work, the companion repo `agent-bootstrap` can
+  restore an approved GitHub session if existing access is insufficient. A
+  Captain worker uses the attached repo’s native Arena access and does not pair.
 
-## The batch loop — many small changes, one push, one CI run
+## Independent work: the batch loop for an authorized `main` push
 
 Small edits are cheap; CI runs are not. So batch them instead of running CI per
 change:
@@ -87,7 +112,7 @@ change:
 3. **Commit and push to `main`.** `python3 tool/agent_loop.py -m "…"` does
    preflight, the secret guard, the commit and the push in one call. Repeat for
    each small change; every commit goes straight to `main`.
-4. **Do not wait for CI.** Nothing started. Keep working.
+4. **Do not wait for manual CI.** Keep working.
 5. **When the batch is ready, tell the human** to run CI once (Actions → *Flutter
    CI* → Run workflow). If a run is already in flight, `python3 tool/ci_watch.py`
    prints the conclusion of every workflow plus the interesting lines of the
@@ -97,10 +122,10 @@ Rules of thumb: a CI run per push wastes the most time; push freely, run CI once
 per batch. When a red run does arrive, read the log before editing — guessing at
 a red build doubles the rounds.
 
-### The same loop as one command
+### The same independent loop as one command
 
-`tool/agent_loop.py` performs preflight, the secret guard, the commit and the
-push in a single call:
+Never use this shortcut on a Captain assignment. `tool/agent_loop.py` performs
+preflight, the secret guard, the commit and the push in a single call:
 
 ```bash
 python3 tool/agent_loop.py -m "fix(profile): guard a null avatar"
@@ -124,10 +149,32 @@ no pull request. Exit codes: `0` committed/pushed, `1` the push failed,
 
 ## Seeing a screen — look, do not guess
 
-You cannot run the app, but you can *see* it. `tool/see_screen.py` asks CI to
-build the app for web and photograph the routes you name, waits for the run,
-downloads the images and prints their paths. Then open them — with your image
-tool, not your imagination:
+You cannot run the app, but you can *see* it, and the fast way costs nothing on
+GitHub: `tool/local_screenshots.py` renders the screens listed in
+`tool/screenshots/shot_registry.dart` to PNGs with `flutter test`, offline.
+
+```bash
+python3 tool/local_screenshots.py --list               # the shots this project has
+python3 tool/local_screenshots.py --shot home          # one
+python3 tool/local_screenshots.py --shot home,settings # several, one run
+python3 tool/local_screenshots.py                      # all of them
+```
+
+* `shot_registry.dart` is **your** file: it says which screens to photograph and
+  how to dress them (the app's theme, its fonts, its native channel answered as
+  "nothing granted yet", any local store initialised). Add a shot when you add a
+  screen; keep it small and honest. The framework and the runner next to it are
+  the pack's and are replaced when the pack updates — a fix belongs upstream.
+* The pictures land in `.agent-screens/` (git-ignored). They are **evidence, not
+  fixtures**: never read one back as a test input, never commit one, and never
+  let CI pay for rendering.
+* A shot that renders as a red error page is telling you the truth: a missing
+  mock, a missing font, a missing `setUp`. Fix the shot, not the screenshot tool.
+
+For independent work with the human's CI approval, `tool/see_screen.py` can
+photograph the pushed web build instead of a local test. It dispatches CI,
+waits for the run, downloads the images and prints their paths. Then open
+those images to verify the screen:
 
 ```bash
 python3 tool/see_screen.py --route /settings           # one screen
@@ -138,8 +185,9 @@ python3 tool/see_screen.py --route /settings --wait-ms 12000   # slow first fram
 * **Use it before and after a UI change.** Before: see what the screen looks
   like now. After: see what your change did. A green CI says the code compiles;
   only the picture says the layout is right.
-* This is the one thing that does start a run — it dispatches the UI-screenshots
-  workflow itself, so use it deliberately, not on every edit.
+* This starts the UI-screenshots workflow. It is not a Captain worker check.
+  For a screen you can render in a test, use `tool/local_screenshots.py`
+  without starting CI.
 * The routes are the app's own (`/settings`, `/profile`) — the same names the
   app navigates to. A screen behind a login or several taps cannot be reached
   this way; ask the human for a screenshot of that one instead.
@@ -153,8 +201,8 @@ python3 tool/see_screen.py --route /settings --wait-ms 12000   # slow first fram
 
 ## Four things that cost an hour here (do not do them)
 
-1. **Waiting for CI after a push.** Nothing was queued — see the manual-only
-   table below. Waiting is pure loss.
+1. **Waiting for manual CI after a push.** That run was not queued; see the
+   table below.
 2. **Running a full build to check a Dart edit.** `flutter build apk|aab|web`
    takes minutes and proves nothing `analyze` + `test` did not already prove.
 3. **Asking the human for a CI run before preflight is green and the tests you
@@ -172,6 +220,7 @@ python3 tool/see_screen.py --route /settings --wait-ms 12000   # slow first fram
 | Docs/Markdown/release-note/`.github/`-only push | nothing |
 | You ask the human to run CI | CI once, for the whole batch |
 | `flutter analyze` / `flutter test` (via flutter-bootstrap) | nothing on GitHub — 40 s to install once per session, then seconds to minutes |
+| `local_screenshots.py` | nothing on GitHub — local `flutter test` only |
 | `see_screen.py` | the UI-screenshots workflow, once per call |
 | a workflow with a `paths:` filter that your change misses | **nothing** — see below |
 
@@ -231,7 +280,8 @@ rejects a request that still carries the `Authorization` header
 
 - **Small, focused diffs.** One concern per commit; conventional commit
   messages (`fix(profile): …`, `feat(cv): …`, `chore(ci): …`).
-- **Push straight to `main`.** No feature branch, no pull request. Batch small
+- **Use the authorized lane.** Captain workers checkpoint only `arena/*`.
+  Independent work can push to `main` when explicitly authorized. Batch small
   changes and let the human run CI once at the end.
 - **Secrets never enter git:** `google-services.json`, `android/key.properties`,
   `*.jks` / `*.keystore`, `.pem`, tokens. CI receives them from repository
@@ -256,9 +306,10 @@ rejects a request that still carries the `Authorization` header
   (~১ সেকেন্ড); Dart বদলালে সংশ্লিষ্ট একটা test ফাইল
   (`flutter test test/<name>_test.dart`) — পুরো `analyze` + `test` শুধু shared
   কিছু বদলালে বা আপনি বললে। প্রতিটা ছোট edit-এর পিছনে পুরো suite চালানো লাগে না।
-- **সরাসরি `main`-এ push** — branch নেই, PR নেই। push করলে CI নিজে থেকে চলে না।
+- **Captain brief হলে** app repo Arena-তে attach করে শুধু `arena/*` branch-এ
+  checkpoint দিন। আলাদা অনুমোদিত কাজেই সরাসরি `main`-এ push।
 - **CI চালানোর বোতাম আপনারই** — একটা batch শেষ হলে একবার চালালেই যথেষ্ট।
-- **UI বদলালে ছবি দেখে যাচাই** — `python3 tool/see_screen.py`।
+- **UI বদলালে ছবি দেখে যাচাই** — আগে `python3 tool/local_screenshots.py --shot <নাম>` (ফ্রি, সেকেন্ডে), দরকার হলে `python3 tool/see_screen.py`।
 - **agent আগে অনুমতি নেবে** — tag/release, secrets, store metadata, বা যা
   ফিরিয়ে আনা যায় না এমন কিছুর আগে।
 - এই ব্লকটা `install-agent-pack.sh` চালালে নিজে থেকেই update হয়; নিচের
@@ -309,10 +360,14 @@ Bengali and Hindi explanations. Its current core promises are:
 - **Guest-first.** Learners can start without an account; onboarding must not
   require sign-in.
 - **On-device by default.** Progress and preferences are stored locally, and
-  the learning content is bundled with the app.
-- **Cloud backup is optional and user-initiated.** Google sign-in and backing
-  up progress are planned; do not imply cloud backup is available until it is
-  implemented and configured.
+  all 10 trilingual chapters (`ch01`–`ch10`, 760 XP total) are bundled with the
+  app. Bundled English and Bengali narration covers `ch01`–`ch05` plus shared
+  teacher cues; chapters or languages without a bundled clip hide the speaker
+  button cleanly instead of failing.
+- **Cloud backup is optional and user-initiated.** Optional Google sign-in and
+  Firestore progress backup live in Profile (when Firebase is configured for the
+  build), merge snapshots without losing local progress, and leave device-only
+  settings such as the daily goal and Reset Progress strictly local.
 
 ## Repository layout
 
@@ -341,10 +396,11 @@ android/                    # Android application project
    silently at launch.
 2. **Guest mode is first-class.** Every chapter, lesson and quiz must work
    without Firebase configuration or an account.
-3. **Local progress is authoritative until opt-in backup exists.** Keep learner
-   progress on-device by default. When optional Google sign-in/cloud backup is
-   implemented, it must start only after an explicit learner action and must
-   preserve locally earned progress during the initial backup/restore flow.
+3. **Local progress is authoritative until opt-in backup connects.** Keep
+   learner progress on-device by default. Optional Google sign-in/cloud backup
+   starts only after an explicit learner action (or post-first-frame restore of
+   a previously connected account) and must merge without losing locally earned
+   progress or reviving cleared review items.
 4. **Never commit secrets.** This includes `google-services.json`,
    `android/key.properties`, `*.jks`/`*.keystore`, `*.pem`, tokens, and Firebase
    credentials. Use repository secrets or other approved local-only config.

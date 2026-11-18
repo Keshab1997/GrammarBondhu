@@ -52,3 +52,5 @@ app.*.map.json
 # without it builds a guest-only app, which is supported on purpose.
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+.agent-screens/
+.agent-pack-backups/
