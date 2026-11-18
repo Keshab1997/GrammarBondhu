@@ -106,10 +106,17 @@ class _LoginScreenState extends State<LoginScreen> {
         .clamp(140.0, 220.0)
         .toDouble();
     final text = Theme.of(context).textTheme;
+    final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final fieldRadius = BorderRadius.circular(AppRadii.chip);
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: fieldRadius,
+      borderSide: const BorderSide(color: AppColors.textMuted),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
         child: Column(
           children: [
             SizedBox(
@@ -121,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFFBDE6FF), Color(0xFF7FC4F5)],
+                        colors: [AppColors.skyBottom, AppColors.skyTop],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
@@ -130,18 +137,54 @@ class _LoginScreenState extends State<LoginScreen> {
                   Image.asset(
                     'assets/illustrations/login_hero.webp',
                     fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                    gaplessPlayback: true,
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                   Positioned(
-                    top: MediaQuery.paddingOf(context).top + 8,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: AppSpacing.xxl + AppSpacing.md,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.surface.withValues(alpha: 0),
+                              AppColors.surface,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
                     left: 12,
-                    child: Material(
-                      color: Colors.white.withValues(alpha: 0.92),
-                      shape: const CircleBorder(),
-                      child: IconButton(
-                        tooltip: 'Back',
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back_rounded),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: AppShadows.cardSoft,
+                      ),
+                      child: Material(
+                        color: AppColors.surface,
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        child: SizedBox.square(
+                          dimension: 48,
+                          child: IconButton(
+                            tooltip: 'Back',
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size.square(48),
+                              foregroundColor: AppColors.primaryDeeper,
+                            ),
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -195,6 +238,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: text.bodyMedium,
                     ),
+                    const SizedBox(height: AppSpacing.sm),
+                    const Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        _ReassuranceChip(
+                          icon: Icons.wifi_off_rounded,
+                          label: 'Offline-ready',
+                        ),
+                        _ReassuranceChip(
+                          icon: Icons.lock_outline_rounded,
+                          label: 'Private on device',
+                        ),
+                      ],
+                    ),
                     SizedBox(height: compact ? AppSpacing.md : AppSpacing.lg),
                     TextField(
                       controller: _nameController,
@@ -205,12 +264,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Your name (optional)',
                         hintText: 'What should we call you?',
-                        prefixIcon: const Icon(Icons.person_outline_rounded),
+                        hintMaxLines: 2,
+                        floatingLabelBehavior: largeText
+                            ? FloatingLabelBehavior.always
+                            : FloatingLabelBehavior.auto,
+                        prefixIcon: largeText
+                            ? null
+                            : const Icon(Icons.person_outline_rounded),
+                        prefixIconColor: AppColors.textSecondary,
+                        hintStyle:
+                            const TextStyle(color: AppColors.textSecondary),
+                        labelStyle:
+                            const TextStyle(color: AppColors.textSecondary),
+                        floatingLabelStyle:
+                            const TextStyle(color: AppColors.primaryDeeper),
+                        counterStyle:
+                            const TextStyle(color: AppColors.textSecondary),
                         filled: true,
                         fillColor: AppColors.background,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppRadii.button),
-                          borderSide: BorderSide.none,
+                        border: fieldBorder,
+                        enabledBorder: fieldBorder,
+                        focusedBorder: fieldBorder.copyWith(
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -223,27 +301,36 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        alignment: Alignment.center,
+                      ),
                       onPressed: _signingIn
                           ? null
                           : () {
                               _nameController.clear();
                               _continue();
                             },
-                      child: const Text('Continue without a name'),
+                      child: const Text(
+                        'Continue without a name',
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Expanded(child: Divider()),
+                        const Expanded(child: _AlternativeRule()),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             'or',
-                            style: text.bodySmall
-                                ?.copyWith(color: AppColors.textMuted),
+                            style: text.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        const Expanded(child: Divider()),
+                        const Expanded(child: _AlternativeRule()),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -259,8 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Your profile stays on this device. Google sign-in is '
                       'optional and never asked for at launch.',
                       textAlign: TextAlign.center,
-                      style:
-                          text.bodySmall?.copyWith(color: AppColors.textMuted),
+                      style: text.bodySmall
+                          ?.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -269,6 +356,59 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReassuranceChip extends StatelessWidget {
+  const _ReassuranceChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: AppColors.primaryDeeper),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.primaryDeeper,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AlternativeRule extends StatelessWidget {
+  const _AlternativeRule();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: AppColors.textMuted.withValues(alpha: 0.35),
     );
   }
 }

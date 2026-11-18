@@ -12,27 +12,50 @@ class CharacterAvatar extends StatelessWidget {
     super.key,
     required this.characterId,
     this.size = 72,
+    this.showBorder = true,
   });
 
   final String characterId;
   final double size;
+  final bool showBorder;
 
   @override
   Widget build(BuildContext context) {
     final path = AssetLookup.characterPath(characterId);
     final name = AssetLookup.characterDisplayName(characterId);
-    return ClipOval(
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: path == null
-            ? _FallbackAvatar(name: name, size: size)
-            : Image.asset(
-                path,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    _FallbackAvatar(name: name, size: size),
+    final fallback = _FallbackAvatar(name: name, size: size);
+    return SizedBox.square(
+      dimension: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: showBorder && size >= 40 ? AppShadows.cardSoft : null,
+        ),
+        child: ClipOval(
+          child: DecoratedBox(
+            decoration: const BoxDecoration(color: AppColors.primarySoft),
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: showBorder
+                    ? Border.all(
+                        color: Colors.white, width: size >= 44 ? 2 : 1.5)
+                    : null,
               ),
+              child: path == null
+                  ? fallback
+                  : Image.asset(
+                      path,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      gaplessPlayback: true,
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (_, __, ___) => fallback,
+                    ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -101,6 +124,8 @@ class SceneBackground extends StatelessWidget {
           Image.asset(
             path,
             fit: BoxFit.cover,
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.medium,
             errorBuilder: (_, __, ___) => fallback,
           ),
         child,
@@ -127,62 +152,47 @@ class ChapterThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLocked = fallbackIcon == Icons.lock_rounded;
-    final fallback = isLocked
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: SizedBox(
-              width: size,
-              height: size,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFFB8B8D1), Color(0xFF7E7EA0)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                  ),
-                  Opacity(
-                    opacity: 0.9,
-                    child: Image.asset(
-                      'assets/illustrations/locked_chapter.webp',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Icon(fallbackIcon,
-                            color: Colors.white, size: size * 0.45),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        : Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: AppColors.chapterGradient,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(radius),
-            ),
-            child: Icon(fallbackIcon, color: Colors.white, size: size * 0.45),
-          );
-    if (assetPath == null) return fallback;
+    final corners = BorderRadius.circular(radius);
+    final icon = Icon(fallbackIcon, color: Colors.white, size: size * 0.45);
+    final fallback = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isLocked
+              ? const [AppColors.textMuted, AppColors.textSecondary]
+              : AppColors.chapterGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: isLocked
+          ? Image.asset(
+              'assets/illustrations/locked_chapter.webp',
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (_, __, ___) => Center(child: icon),
+            )
+          : Center(child: icon),
+    );
     return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Image.asset(
-          assetPath!,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => fallback,
+      borderRadius: corners,
+      child: SizedBox.square(
+        dimension: size,
+        child: DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            borderRadius: corners,
+            border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+          ),
+          child: assetPath == null
+              ? fallback
+              : Image.asset(
+                  assetPath!,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (_, __, ___) => fallback,
+                ),
         ),
       ),
     );
