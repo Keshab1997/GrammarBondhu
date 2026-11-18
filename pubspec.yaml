@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Material Design widgets. Flutter ships these as their own package now and
+  # deprecates `package:flutter/material.dart`; CI analyzes with --fatal-infos,
+  # so the app imports `package:material_ui/material_ui.dart` instead.
+  material_ui: ^1.11.0
   # Lightweight state management — deliberately minimal for low-RAM devices.
   provider: ^6.1.2
   # Local persistence for settings + progress (offline-first, no backend).

@@ -83,7 +83,7 @@ class ShotEnv {
   /// It is a callback rather than a `ThemeData` field on purpose. Flutter has
   /// started moving material out of the framework into `package:material_ui`,
   /// where `ThemeData` is a *different type* than the one in
-  /// `package:flutter/material.dart` - so a framework that named either import
+  /// `package:material_ui/material_ui.dart` - so a framework that named either import
   /// would fail to compile in half the projects that install it. Handing the
   /// shell back to the project keeps this file free of both, and lets a project
   /// add a locale, a golden-ratio fix or a ProviderScope without touching the,
