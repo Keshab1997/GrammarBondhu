@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Local learner progress — persisted as one JSON blob in SharedPreferences.
 ///
 /// Deliberately lightweight: progress data is small key-value state
@@ -9,12 +11,14 @@ class UserProgress {
     this.totalXp = 0,
     this.coins = 0,
     this.streakDays = 0,
+    int bestStreakDays = 0,
     this.questionsAnsweredToday = 0,
     this.dailyGoalQuestions = 5,
     this.lastStudyDate,
     this.lastQuestionDate,
     DateTime? now,
   })  : chapters = chapters ?? {},
+        bestStreakDays = math.max(streakDays, bestStreakDays),
         _now = now;
 
   final DateTime? _now;
@@ -22,6 +26,7 @@ class UserProgress {
   int totalXp;
   int coins;
   int streakDays;
+  int bestStreakDays;
   int questionsAnsweredToday;
   int dailyGoalQuestions;
   DateTime? lastStudyDate;
@@ -65,13 +70,13 @@ class UserProgress {
 
   /// Rolls the streak forward once per study day. Returns the new streak.
   int registerStudyDay(DateTime now) {
-    final today = DateTime(now.year, now.month, now.day);
+    final local = now.toLocal();
     final last = lastStudyDate;
     if (last == null) {
       streakDays = 1;
     } else {
-      final lastDay = DateTime(last.year, last.month, last.day);
-      final diff = today.difference(lastDay).inDays;
+      final diff =
+          _localCalendarDay(local).difference(_localCalendarDay(last)).inDays;
       if (diff == 1) {
         streakDays += 1;
       } else if (diff > 1) {
@@ -79,8 +84,18 @@ class UserProgress {
       }
       // diff == 0 → same day, streak unchanged.
     }
-    lastStudyDate = today;
+    lastStudyDate = DateTime(local.year, local.month, local.day);
+    bestStreakDays = math.max(bestStreakDays, streakDays);
     return streakDays;
+  }
+
+  /// A streak stays active through the day after the learner last studied.
+  int activeStreakOn(DateTime now) {
+    final last = lastStudyDate;
+    if (last == null) return 0;
+    final diff =
+        _localCalendarDay(now).difference(_localCalendarDay(last)).inDays;
+    return diff == 0 || diff == 1 ? streakDays : 0;
   }
 
   /// Reads the saved count only if it belongs to the local day of [now].
@@ -117,8 +132,8 @@ class UserProgress {
   }
 
   /// Merges two device snapshots without adding duplicate XP or quiz attempts.
-  /// Per-chapter achievements use the strongest value, while missed questions
-  /// are unioned so neither device loses its review list.
+  /// Per-chapter achievements use the strongest value. For review, the latest
+  /// change wins per question so a stale miss cannot undo a clear.
   static UserProgress mergeForCloud(UserProgress local, UserProgress remote) {
     final mergedChapters = <String, ChapterProgress>{};
     for (final id in {...local.chapters.keys, ...remote.chapters.keys}) {
@@ -131,6 +146,33 @@ class UserProgress {
       }
 
       final openedOnRemote = _isLater(b.lastOpenedAt, a.lastOpenedAt);
+      final missedQuestionIds = <String>{};
+      final reviewUpdatedAt = <String, DateTime>{};
+      for (final questionId in {
+        ...a.missedQuestionIds,
+        ...b.missedQuestionIds,
+        ...a.reviewUpdatedAt.keys,
+        ...b.reviewUpdatedAt.keys,
+      }) {
+        final aTime = a.reviewUpdatedAt[questionId];
+        final bTime = b.reviewUpdatedAt[questionId];
+        final latest = _laterDate(aTime, bTime);
+        if (latest != null) reviewUpdatedAt[questionId] = latest;
+
+        final aMissed = a.missedQuestionIds.contains(questionId);
+        final bMissed = b.missedQuestionIds.contains(questionId);
+        final bool missed;
+        if (_isLater(aTime, bTime)) {
+          missed = aMissed;
+        } else if (_isLater(bTime, aTime)) {
+          missed = bMissed;
+        } else {
+          // Untimestamped misses survive on either side. At an exact timestamp
+          // tie, prefer the clear regardless of which device is syncing.
+          missed = latest == null ? aMissed || bMissed : aMissed && bMissed;
+        }
+        if (missed) missedQuestionIds.add(questionId);
+      }
       mergedChapters[id] = ChapterProgress(
         chapterId: id,
         completed: a.completed || b.completed,
@@ -145,7 +187,8 @@ class UserProgress {
         resumeSceneIndex:
             openedOnRemote ? b.resumeSceneIndex : a.resumeSceneIndex,
         lastOpenedAt: _laterDate(a.lastOpenedAt, b.lastOpenedAt),
-        missedQuestionIds: {...a.missedQuestionIds, ...b.missedQuestionIds},
+        missedQuestionIds: missedQuestionIds,
+        reviewUpdatedAt: reviewUpdatedAt,
       );
     }
 
@@ -166,6 +209,19 @@ class UserProgress {
             ? remote.questionsAnsweredToday
             : local.questionsAnsweredToday;
 
+    final localStudy = local.lastStudyDate;
+    final remoteStudy = remote.lastStudyDate;
+    final lastStudy = _laterDate(localStudy, remoteStudy);
+    final sameStudyDay = localStudy != null &&
+        remoteStudy != null &&
+        _localCalendarDay(localStudy) == _localCalendarDay(remoteStudy);
+    final int streak;
+    if (sameStudyDay || lastStudy == null) {
+      streak = math.max(local.streakDays, remote.streakDays);
+    } else {
+      streak = lastStudy == remoteStudy ? remote.streakDays : local.streakDays;
+    }
+
     return UserProgress(
       chapters: mergedChapters,
       totalXp: [local.totalXp, remote.totalXp, chapterXp].reduce(
@@ -174,13 +230,12 @@ class UserProgress {
       coins: [local.coins, remote.coins, chapterCoins].reduce(
         (a, b) => a > b ? a : b,
       ),
-      streakDays: local.streakDays > remote.streakDays
-          ? local.streakDays
-          : remote.streakDays,
+      streakDays: streak,
+      bestStreakDays: math.max(local.bestStreakDays, remote.bestStreakDays),
       questionsAnsweredToday: questionsToday,
       // Goal and UI preferences belong to the device doing the restore.
       dailyGoalQuestions: local.dailyGoalQuestions,
-      lastStudyDate: _laterDate(local.lastStudyDate, remote.lastStudyDate),
+      lastStudyDate: lastStudy,
       lastQuestionDate: questionDate,
     );
   }
@@ -198,6 +253,7 @@ class UserProgress {
       totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       coins: (json['coins'] as num?)?.toInt() ?? 0,
       streakDays: (json['streak_days'] as num?)?.toInt() ?? 0,
+      bestStreakDays: (json['best_streak_days'] as num?)?.toInt() ?? 0,
       questionsAnsweredToday: (json['questions_today'] as num?)?.toInt() ?? 0,
       // A stored 0 (or a hand-edited 999) would divide by zero on the goal
       // card or leave the learner permanently behind, so it is clamped on the
@@ -216,6 +272,7 @@ class UserProgress {
         'total_xp': totalXp,
         'coins': coins,
         'streak_days': streakDays,
+        'best_streak_days': bestStreakDays,
         'questions_today': questionsAnsweredToday,
         'daily_goal_questions': dailyGoalQuestions,
         'last_study_date': lastStudyDate?.toIso8601String(),
@@ -235,6 +292,13 @@ bool _isLater(DateTime? candidate, DateTime? reference) {
 bool _sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
+// Use UTC for day arithmetic, not for deciding which local day it is. A local
+// midnight-to-midnight interval can be 23 or 25 hours at a DST transition.
+DateTime _localCalendarDay(DateTime date) {
+  final local = date.toLocal();
+  return DateTime.utc(local.year, local.month, local.day);
+}
+
 class ChapterProgress {
   ChapterProgress({
     required this.chapterId,
@@ -247,7 +311,9 @@ class ChapterProgress {
     this.resumeSceneIndex,
     this.lastOpenedAt,
     Set<String>? missedQuestionIds,
-  }) : missedQuestionIds = missedQuestionIds ?? <String>{};
+    Map<String, DateTime>? reviewUpdatedAt,
+  })  : missedQuestionIds = missedQuestionIds ?? <String>{},
+        reviewUpdatedAt = reviewUpdatedAt ?? {};
 
   final String chapterId;
   bool completed;
@@ -261,6 +327,9 @@ class ChapterProgress {
 
   /// Quiz questions the learner has answered incorrectly and can review later.
   final Set<String> missedQuestionIds;
+
+  /// Last review changes, including clears (a timestamp without a missed ID).
+  final Map<String, DateTime> reviewUpdatedAt;
 
   /// Scene index to resume an unfinished chapter; null when not started.
   int? resumeSceneIndex;
@@ -281,11 +350,26 @@ class ChapterProgress {
                 ?.whereType<String>()
                 .toSet() ??
             <String>{},
+        reviewUpdatedAt: _decodeReviewUpdates(json['review_updated_at']),
         resumeSceneIndex: (json['resume_scene_index'] as num?)?.toInt(),
         lastOpenedAt: json['last_opened_at'] == null
             ? null
             : DateTime.tryParse(json['last_opened_at'] as String),
       );
+
+  static Map<String, DateTime> _decodeReviewUpdates(Object? raw) {
+    final updates = <String, DateTime>{};
+    if (raw is Map) {
+      for (final entry in raw.entries) {
+        final id = entry.key;
+        final value = entry.value;
+        if (id is! String || value is! String) continue;
+        final date = DateTime.tryParse(value);
+        if (date != null) updates[id] = date.toUtc();
+      }
+    }
+    return updates;
+  }
 
   Map<String, dynamic> toJson() => {
         'chapter_id': chapterId,
@@ -296,6 +380,10 @@ class ChapterProgress {
         'coins_earned': coinsEarned,
         'attempts': attempts,
         'missed_question_ids': missedQuestionIds.toList()..sort(),
+        if (reviewUpdatedAt.isNotEmpty)
+          'review_updated_at': reviewUpdatedAt.map(
+            (id, date) => MapEntry(id, date.toUtc().toIso8601String()),
+          ),
         'resume_scene_index': resumeSceneIndex,
         'last_opened_at': lastOpenedAt?.toIso8601String(),
       };

@@ -1,8 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
+import 'package:grammar_bondhu/app/state/settings_controller.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
 import 'package:grammar_bondhu/data/models/chapter.dart';
 import 'package:grammar_bondhu/data/models/localized_text.dart';
+import 'package:grammar_bondhu/data/models/progress.dart';
+import 'package:grammar_bondhu/data/repositories/content_repository.dart';
+import 'package:grammar_bondhu/features/progress/progress_screen.dart';
+import 'package:grammar_bondhu/features/rewards/rewards_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Chapter _testChapter() => Chapter(
@@ -186,6 +194,44 @@ void main() {
       expect(controller.progress.totalXp, 50);
     });
 
+    test('going from two to three stars grants only the remaining coins',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final controller = ProgressController(store, store.loadProgress());
+      final chapter = _testChapter();
+      final now = DateTime(2026, 10, 21);
+
+      final first = await controller.recordQuizRun(
+        chapter: chapter,
+        correct: 3,
+        total: 4,
+        now: now,
+      );
+      expect(first.stars, 2);
+      expect(first.coinsEarned, 5);
+
+      final improved = await controller.recordQuizRun(
+        chapter: chapter,
+        correct: 4,
+        total: 4,
+        now: now,
+      );
+      expect(improved.stars, 3);
+      expect(improved.coinsEarned, 5);
+      expect(controller.progress.coins, 10);
+      expect(store.loadProgress().chapter(chapter.id).coinsEarned, 10);
+
+      final replay = await controller.recordQuizRun(
+        chapter: chapter,
+        correct: 4,
+        total: 4,
+        now: now,
+      );
+      expect(replay.coinsEarned, 0);
+      expect(store.loadProgress().coins, 10);
+    });
+
     test('recommendedChapterId points at first unfinished chapter', () async {
       SharedPreferences.setMockInitialValues({});
       final store = await LocalStore.open();
@@ -241,6 +287,112 @@ void main() {
         now: DateTime(2026, 10, 21),
       );
       expect(controller.recommendedChapterId(chapters), 'ch02');
+    });
+  });
+
+  group('Study streaks', () {
+    test('calendar days carry across DST and decay after a missed day', () {
+      final progress = UserProgress();
+      // With TZ=America/New_York these adjacent midnights span just 23 hours.
+      final springForward = DateTime(2026, 3, 8);
+      final nextDay = DateTime(2026, 3, 9);
+      expect(progress.registerStudyDay(springForward), 1);
+      expect(progress.activeStreakOn(nextDay), 1);
+      expect(progress.registerStudyDay(nextDay), 2);
+      expect(progress.registerStudyDay(DateTime(2026, 3, 10)), 3);
+      expect(progress.registerStudyDay(DateTime(2026, 3, 10, 23)), 3);
+      expect(progress.activeStreakOn(DateTime(2026, 3, 11, 23)), 3);
+      expect(progress.activeStreakOn(DateTime(2026, 3, 12)), 0);
+      expect(progress.streakDays, 3); // Reading after decay is non-mutating.
+      expect(progress.registerStudyDay(DateTime(2026, 3, 12)), 1);
+
+      final reloaded = UserProgress.fromJson(progress.toJson());
+      expect(reloaded.bestStreakDays, 3);
+      expect(reloaded.streakDays, 1);
+      expect(reloaded.activeStreakOn(DateTime(2026, 3, 12)), 1);
+    });
+
+    test('cloud merge keeps the freshest streak and the historical best', () {
+      final legacy = UserProgress.fromJson({
+        'streak_days': 7,
+        'last_study_date': '2026-11-14T00:00:00.000',
+      });
+      expect(legacy.bestStreakDays, 7);
+      final today = DateTime(2026, 11, 18);
+      final fresh = UserProgress(streakDays: 1, lastStudyDate: today);
+
+      for (final combined in [
+        UserProgress.mergeForCloud(legacy, fresh),
+        UserProgress.mergeForCloud(fresh, legacy),
+      ]) {
+        expect(combined.lastStudyDate, today);
+        expect(combined.activeStreakOn(today), 1);
+        expect(combined.bestStreakDays, 7);
+      }
+
+      final sameDay = UserProgress(
+        streakDays: 4,
+        lastStudyDate: DateTime(2026, 11, 18, 12),
+        bestStreakDays: 5,
+      );
+      final merged = UserProgress.mergeForCloud(sameDay, fresh);
+      expect(merged.activeStreakOn(today), 4);
+      expect(merged.bestStreakDays, 5);
+    });
+
+    testWidgets('Progress and Rewards show the active streak, not the record',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final progress = ProgressController(
+        store,
+        UserProgress(streakDays: 3, lastStudyDate: DateTime(2026, 11, 15)),
+      );
+      final now = DateTime(2026, 11, 18);
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: progress),
+            ChangeNotifierProvider(
+              create: (_) => ContentController(ContentRepository()),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => SettingsController(store, store.loadSettings()),
+            ),
+          ],
+          child: MaterialApp(home: ProgressScreen(now: now)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Quizzes Finished'), findsOneWidget);
+      expect(find.text('0 days'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('This week'), 150);
+      expect(find.text('Start today'), findsOneWidget);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: progress,
+          child: MaterialApp(home: Scaffold(body: RewardsScreen(now: now))),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final streakStat = find
+          .ancestor(
+            of: find.text('Day Streak'),
+            matching: find.byType(Column),
+          )
+          .first;
+      expect(find.descendant(of: streakStat, matching: find.text('0')),
+          findsOneWidget);
+      await tester.scrollUntilVisible(find.text('3-Day Streak'), 200);
+      final streakBadge = find.widgetWithText(Row, '3-Day Streak');
+      expect(
+        find.descendant(
+          of: streakBadge,
+          matching: find.byIcon(Icons.check_circle_rounded),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

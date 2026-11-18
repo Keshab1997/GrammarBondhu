@@ -8,7 +8,9 @@ import '../story/story_screen.dart';
 
 /// Rewards tab — streak, coins, XP and lightweight achievements.
 class RewardsScreen extends StatelessWidget {
-  const RewardsScreen({super.key});
+  const RewardsScreen({super.key, this.now});
+
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class RewardsScreen extends StatelessWidget {
         icon: Icons.local_fire_department_rounded,
         title: '3-Day Streak',
         detail: 'Study three days in a row',
-        earned: p.streakDays >= 3,
+        earned: p.bestStreakDays >= 3,
       ),
       (
         icon: Icons.star_rounded,
@@ -44,7 +46,12 @@ class RewardsScreen extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          AppSpacing.md,
+          AppSpacing.md,
+          108,
+        ),
         children: [
           Text('Rewards', style: text.titleLarge),
           const SizedBox(height: AppSpacing.md),
@@ -94,7 +101,7 @@ class RewardsScreen extends StatelessWidget {
                 Expanded(
                   child: _BigStat(
                       icon: Icons.local_fire_department_rounded,
-                      value: '${p.streakDays}',
+                      value: '${p.activeStreakOn(now ?? DateTime.now())}',
                       label: 'Day Streak'),
                 ),
                 Expanded(

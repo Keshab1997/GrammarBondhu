@@ -95,39 +95,7 @@ class SettingsScreen extends StatelessWidget {
               label: 'Reset Progress',
               trailing: const Icon(Icons.chevron_right_rounded,
                   color: AppColors.textSecondary),
-              onTap: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadii.card),
-                    ),
-                    title: const Text('Reset progress?'),
-                    content: const Text(
-                      'This clears XP, stars and chapter progress on this device. '
-                      'It cannot be undone.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Reset',
-                            style: TextStyle(color: AppColors.error)),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirmed == true && context.mounted) {
-                  await context.read<ProgressController>().resetAll();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Progress reset.')));
-                  }
-                }
-              },
+              onTap: () => _resetProgress(context),
             ),
             const _GroupHeader('About'),
             _SettingsTile(
@@ -151,6 +119,73 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _resetProgress(BuildContext context) async {
+    final settings = context.read<SettingsController>();
+    final progress = context.read<ProgressController>();
+    bool cloudConnected() => settings.cloudConnected || progress.cloudConnected;
+
+    if (cloudConnected()) {
+      await _showDisconnectBeforeReset(context);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.card),
+        ),
+        title: const Text('Reset progress?'),
+        content: const Text(
+          'This clears XP, stars and chapter progress on this device. '
+          'It cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child:
+                const Text('Reset', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    // The backup may have connected while the confirmation was open.
+    if (cloudConnected()) {
+      await _showDisconnectBeforeReset(context);
+      return;
+    }
+
+    await progress.resetAll();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Progress reset.')),
+      );
+    }
+  }
+
+  Future<void> _showDisconnectBeforeReset(BuildContext context) =>
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Disconnect Google first'),
+          content: const Text(
+            'Reset Progress only clears progress on this device. Disconnect '
+            'Google in Profile first. Your cloud backup will not change.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
 
   void _showAbout(BuildContext context) {
     showDialog<void>(

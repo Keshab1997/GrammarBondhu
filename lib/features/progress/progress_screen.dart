@@ -33,7 +33,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final progress = context.watch<ProgressController>();
     final language = context.watch<SettingsController>().supportLanguage;
     final p = progress.progress;
-    final now = widget.now ?? DateTime.now();
+    final now = (widget.now ?? DateTime.now()).toLocal();
+    final activeStreak = p.activeStreakOn(now);
     final reviewCount = content.chapters.fold<int>(
       0,
       (count, chapter) =>
@@ -120,7 +121,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             _StatTile(
                               icon: Icons.quiz_rounded,
                               color: AppColors.success,
-                              label: 'Quiz Answers',
+                              label: 'Quizzes Finished',
                               value: '${p.totalQuizAnswered}',
                             ),
                             _StatTile(
@@ -128,7 +129,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               color: AppColors.accentDark,
                               label: 'Streak',
                               value:
-                                  '${p.streakDays} ${p.streakDays == 1 ? 'day' : 'days'}',
+                                  '${activeStreak} ${activeStreak == 1 ? 'day' : 'days'}',
                             ),
                             _StatTile(
                               icon: Icons.military_tech_rounded,
@@ -145,8 +146,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _StreakStrip(
-                      streakDays: p.streakDays,
-                      today: DateTime.now(),
+                      streakDays: activeStreak,
+                      today: now,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     _ChapterXpCard(
@@ -244,7 +245,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           _StatRow(label: 'Coins', value: '${p.coins}'),
                           _StatRow(
                               label: 'Current streak',
-                              value: '${p.streakDays} days'),
+                              value: '${activeStreak} days'),
                           _StatRow(
                               label: 'Questions today',
                               value: '${p.questionsAnsweredOn(now)}'),
