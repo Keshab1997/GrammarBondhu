@@ -56,9 +56,12 @@ provide translations and explanations.
 
 ## Tech
 
-- Flutter + Dart, Material 3, `provider` + `shared_preferences` (deliberately
-  lightweight for low-RAM devices), with optional Firebase Auth/Firestore for
-  account sign-in and progress backup
+- Flutter + Dart, Material 3 via `package:material_ui/material_ui.dart`,
+  `provider` + `shared_preferences` (deliberately lightweight for low-RAM
+  devices), with optional Firebase Auth/Firestore for account sign-in and
+  progress backup
+- Toolchain pinned in `.fvmrc` (Flutter 3.50.0) and picked up by CI, so a
+  drifting `stable` channel cannot change the analyzer rules under us
 - **JSON-driven content**: `assets/data/manifest.json` +
   `assets/data/chapters/chapter_NN.json` — add a chapter by adding one JSON
   file and one manifest entry; no code changes
@@ -79,6 +82,7 @@ provide translations and explanations.
 flutter pub get
 flutter run            # Android device/emulator
 flutter test           # automated tests
+flutter analyze --no-pub --fatal-infos   # what CI gates on
 ```
 
 ## Optional Google sign-in and cloud backup
