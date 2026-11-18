@@ -132,6 +132,7 @@ class AssetLookup {
     'ch14_classroom': 'assets/backgrounds/scene_ch14_classroom.webp',
     'ch14_library': 'assets/backgrounds/scene_ch14_library.webp',
     'ch15_classroom': 'assets/backgrounds/scene_ch15_classroom.webp',
+    'ch15_library': 'assets/backgrounds/scene_ch15_library.webp',
   };
 
   static const Map<String, String> illustrations = {

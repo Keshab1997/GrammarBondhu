@@ -40,6 +40,10 @@ VOICE = {
     "narrator_f_en": "en-IN-NeerjaNeural",
     "narrator_m_bn": "bn-IN-BashkarNeural",
     "narrator_m_en": "en-IN-PrabhatNeural",
+    # The board and the teacher's lines are trilingual, so the lesson needs a
+    # Hindi narrator too — without these two, --langs hi died on a KeyError.
+    "narrator_f_hi": "hi-IN-SwaraNeural",
+    "narrator_m_hi": "hi-IN-MadhurNeural",
 }
 
 # Story speakers, by who they are. Anything unlisted is treated as female: the

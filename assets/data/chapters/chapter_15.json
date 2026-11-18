@@ -28,7 +28,7 @@
   "scenes": [
     {
       "scene_id": "ch15_s1",
-      "background_id": "bg_library",
+      "background_id": "ch15_library",
       "character_ids": [
         "rahul",
         "priya"
