@@ -1,0 +1,22 @@
+{
+  "app_name": "GrammarBondhu",
+  "version": 1,
+  "default_support_language": "bn",
+  "chapters": [
+    { "chapter_id": "ch01", "file": "chapters/chapter_01.json", "order": 1 },
+    { "chapter_id": "ch02", "file": "chapters/chapter_02.json", "order": 2 },
+    { "chapter_id": "ch03", "file": "chapters/chapter_03.json", "order": 3 },
+    { "chapter_id": "ch04", "file": "chapters/chapter_04.json", "order": 4 },
+    { "chapter_id": "ch05", "file": "chapters/chapter_05.json", "order": 5 },
+    { "chapter_id": "ch06", "file": "chapters/chapter_06.json", "order": 6 },
+    { "chapter_id": "ch07", "file": "chapters/chapter_07.json", "order": 7 },
+    { "chapter_id": "ch08", "file": "chapters/chapter_08.json", "order": 8 },
+    { "chapter_id": "ch09", "file": "chapters/chapter_09.json", "order": 9 },
+    { "chapter_id": "ch10", "file": "chapters/chapter_10.json", "order": 10 },
+    { "chapter_id": "ch11", "file": "chapters/chapter_11.json", "order": 11 },
+    { "chapter_id": "ch12", "file": "chapters/chapter_12.json", "order": 12 },
+    { "chapter_id": "ch13", "file": "chapters/chapter_13.json", "order": 13 },
+    { "chapter_id": "ch14", "file": "chapters/chapter_14.json", "order": 14 },
+    { "chapter_id": "ch15", "file": "chapters/chapter_15.json", "order": 15 }
+  ]
+}

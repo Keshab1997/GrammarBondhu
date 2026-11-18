@@ -1,0 +1,220 @@
+{
+  "chapter_id": "ch09",
+  "title": {
+    "en": "The School Newspaper",
+    "bn": "স্কুলের খবরের কাগজ",
+    "hi": "स्कूल का अख़बार"
+  },
+  "description": {
+    "en": "Rahul and Priya turn their exhibition notes into a newspaper story by asking clear questions.",
+    "bn": "ঠিক প্রশ্ন করে রাহুল আর প্রিয়া প্রদর্শনীর নোট থেকে খবরের কাগজের জন্য একটা লেখা তৈরি করে।",
+    "hi": "राहुल और प्रिया साफ़-साफ़ सवाल पूछकर प्रदर्शनी के नोट्स से अख़बार के लिए एक ख़बर तैयार करते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Asking Questions",
+    "bn": "প্রশ্ন করা",
+    "hi": "सवाल पूछना"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_library.webp",
+  "rewards": { "xp": 90, "coins": 18, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch09_s1",
+      "background_id": "bg_library",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Do you have our exhibition notes, Priya? The newspaper team needs our story today.",
+            "bn": "প্রিয়া, প্রদর্শনীর নোটগুলো কি তোমার কাছে আছে? খবরের কাগজের দলের আজই আমাদের লেখাটা চাই।",
+            "hi": "प्रिया, क्या प्रदर्शनी के नोट्स तुम्हारे पास हैं? अख़बार की टीम को हमारी ख़बर आज ही चाहिए।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Yes! But we still need a few details. When did the exhibition open?",
+            "bn": "হ্যাঁ! তবে আরও কিছু তথ্য দরকার। প্রদর্শনী কখন শুরু হয়েছিল?",
+            "hi": "हाँ! लेकिन हमें कुछ और जानकारी चाहिए। प्रदर्शनी कब शुरू हुई थी?"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch09_s2",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "teacher", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Mrs. Sen, did the exhibition open at nine?",
+            "bn": "মিসেস সেন, প্রদর্শনী কি ন’টায় শুরু হয়েছিল?",
+            "hi": "सेन मैम, क्या प्रदर्शनी नौ बजे शुरू हुई थी?"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Yes, it did. Does your story explain what visitors did there?",
+            "bn": "হ্যাঁ, ন’টাতেই। তোমাদের লেখায় কি বলা আছে দর্শকেরা সেখানে কী করেছিল?",
+            "hi": "हाँ, नौ बजे ही। क्या तुम्हारी ख़बर में लिखा है कि दर्शकों ने वहाँ क्या किया?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "It does now! I added a line about the visitors measuring the bean plants.",
+            "bn": "এবার আছে! দর্শকেরা যে শিমগাছগুলোর উচ্চতা মেপেছিল, সেটা নিয়ে একটা লাইন লিখেছি।",
+            "hi": "अब लिखा है! मैंने एक पंक्ति जोड़ी है कि दर्शकों ने सेम के पौधों की ऊँचाई मापी।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch09_s3",
+      "background_id": "bg_library",
+      "character_ids": ["priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Our story is ready. What do we write about next?",
+            "bn": "আমাদের লেখাটা তৈরি। এর পর কী নিয়ে লিখব?",
+            "hi": "हमारी ख़बर तैयार है। अब हम किस बारे में लिखें?"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Sports Day is next week. Try asking what each team needs before the races.",
+            "bn": "আগামী সপ্তাহে ক্রীড়া দিবস। দৌড়ের আগে কোন দলের কী দরকার, জিজ্ঞেস করে দেখতে পারো।",
+            "hi": "अगले हफ़्ते खेल दिवस है। पूछकर देखो कि दौड़ से पहले हर टीम को क्या चाहिए।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch09_c1",
+          "text": {
+            "en": "Start with “Where do the teams meet?”",
+            "bn": "এই প্রশ্নটা দিয়ে শুরু করি: “দলগুলো কোথায় জড়ো হয়?”",
+            "hi": "इस सवाल से शुरू करें: “टीमें कहाँ इकट्ठी होती हैं?”"
+          },
+          "response": {
+            "en": "That asks for a place, not just a yes or no. It will help the runners find their teams.",
+            "bn": "এই প্রশ্নে জায়গার কথা জানতে চাওয়া হচ্ছে; শুধু হ্যাঁ বা না বললে চলবে না। এতে দৌড়বিদেরা নিজেদের দল খুঁজে পাবে।",
+            "hi": "इस सवाल में जगह पूछी गई है, इसलिए सिर्फ़ हाँ या ना काफ़ी नहीं है। इससे धावकों को अपनी टीम ढूँढ़ने में मदद मिलेगी।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Ask for a Yes, a No or a Detail",
+      "bn": "হ্যাঁ-না আর তথ্য জানার প্রশ্ন",
+      "hi": "हाँ-ना या जानकारी वाले सवाल"
+    },
+    "explanation": {
+      "en": "Start a simple present yes/no question with do (I, you, we, they) or does (he, she, it). For the simple past, use did with any subject. Put the subject next, then the base verb: “Did it open?” To ask for a detail in these questions, put a question word first: when for time, where for place and what for a thing or action.",
+      "bn": "সাধারণ বর্তমান কালে হ্যাঁ-না প্রশ্নের শুরুতে do (I, you, we, they) বা does (he, she, it) বসাও। সাধারণ অতীত কালে সব কর্তার সঙ্গেই did বসে। তারপর কর্তা, তারপর ক্রিয়ার মূল রূপ: “Did it open?” নির্দিষ্ট তথ্য জানতে এই ধরনের প্রশ্নের শুরুতে প্রশ্নসূচক শব্দ বসাও: সময়ের জন্য when, জায়গার জন্য where, আর জিনিস বা কাজের জন্য what।",
+      "hi": "सामान्य वर्तमान काल में हाँ-ना वाले सवाल की शुरुआत do (I, you, we, they) या does (he, she, it) से करो। सामान्य भूतकाल में किसी भी कर्ता के साथ did लगाओ। फिर कर्ता और उसके बाद क्रिया का मूल रूप रखो: “Did it open?” ऐसी रचना में जानकारी माँगने के लिए सवाल का शब्द सबसे पहले लगाओ: समय के लिए when, जगह के लिए where और किसी चीज़ या काम के लिए what।"
+    },
+    "examples": [
+      {
+        "sentence": "Do you have our notes?",
+        "note": {
+          "en": "Use do with you in the simple present.",
+          "bn": "সাধারণ বর্তমান কালে you-এর সঙ্গে do বসে।",
+          "hi": "सामान्य वर्तमान काल में you के साथ do लगता है।"
+        }
+      },
+      {
+        "sentence": "Does your story explain the chart?",
+        "note": {
+          "en": "Use does for one story, and keep explain in its base form.",
+          "bn": "একটা লেখার কথা বলছি, তাই does; explain মূল রূপেই থাকে।",
+          "hi": "एक ख़बर की बात है, इसलिए does लगाओ और explain का मूल रूप रखो।"
+        }
+      },
+      {
+        "sentence": "Did the exhibition open at nine?",
+        "note": {
+          "en": "Did marks the past, so use open, not opened.",
+          "bn": "did দিয়েই অতীত বোঝায়, তাই opened নয়, open বসবে।",
+          "hi": "Did से बीते समय का पता चलता है, इसलिए opened नहीं, open लगाओ।"
+        }
+      },
+      {
+        "sentence": "Where do the teams meet?",
+        "note": {
+          "en": "Put where first to ask for a place.",
+          "bn": "জায়গা জানতে প্রশ্নের শুরুতে where বসাও।",
+          "hi": "जगह पूछने के लिए where सबसे पहले लगाओ।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch09_q1",
+      "question": "___ you have a copy of the notes? Use the simple present.",
+      "options": ["Does", "Did", "Do", "Doing"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "For a simple present question with you, use do.",
+        "bn": "সাধারণ বর্তমান কালের প্রশ্নে you-এর সঙ্গে do বসে।",
+        "hi": "सामान्य वर्तमान काल के सवाल में you के साथ do लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch09_q2",
+      "question": "___ this chart belong to Priya? Use the simple present.",
+      "options": ["Does", "Do", "Did", "Doing"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "This chart is singular, so the simple present question starts with does.",
+        "bn": "this chart একবচন, তাই সাধারণ বর্তমান কালের প্রশ্ন does দিয়ে শুরু হবে।",
+        "hi": "This chart एकवचन है, इसलिए सामान्य वर्तमान काल का सवाल does से शुरू होगा।"
+      }
+    },
+    {
+      "question_id": "ch09_q3",
+      "question": "Did the exhibition ___ at nine?",
+      "options": ["opened", "opens", "opening", "open"],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Did already signals the past. Follow the subject with the base verb open.",
+        "bn": "did দিয়েই অতীত বোঝাচ্ছে। কর্তার পরে ক্রিয়ার মূল রূপ open বসাও।",
+        "hi": "Did से बीते समय का पता चल जाता है। कर्ता के बाद क्रिया का मूल रूप open लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch09_q4",
+      "question": "Choose a word to ask for a place: “___ do the teams meet?”",
+      "options": ["When", "Where", "Why", "How"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Where asks for a place, such as “by the gate.”",
+        "bn": "where দিয়ে জায়গা জানতে চাওয়া হয়, যেমন “গেটের পাশে”।",
+        "hi": "Where जगह पूछता है, जैसे “फाटक के पास।”"
+      }
+    },
+    {
+      "question_id": "ch09_q5",
+      "question": "The answer is “At nine o’clock.” Which question asks for that detail?",
+      "options": ["Where did the exhibition open?", "Why did the exhibition open?", "When did the exhibition open?", "Did the exhibition open?"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "When asks for the time; “at nine o’clock” gives that detail.",
+        "bn": "when দিয়ে সময় জানতে চাওয়া হয়; “ন’টায়” হলো সেই সময়।",
+        "hi": "When समय पूछता है; “नौ बजे” वही जानकारी देता है।"
+      }
+    }
+  ]
+}
