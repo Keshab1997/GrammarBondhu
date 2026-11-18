@@ -15,6 +15,8 @@ Encoding per clip (50 ms / 20 Hz step):
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -378,6 +380,14 @@ def main() -> int:
     lines.extend(["  };", "}", ""])
 
     OUT_PATH.write_text("\n".join(lines), encoding="utf-8")
+
+    # The checked-in file must already be in `dart format` shape: CI runs
+    # `dart format --set-exit-if-changed .` and generated code is not exempt.
+    dart = shutil.which("dart")
+    if dart:
+        subprocess.run([dart, "format", str(OUT_PATH)], check=False)
+    else:
+        print("  ! dart not on PATH -- run `dart format` before committing")
 
     total_frames = sum(counts.values())
     print(
