@@ -1,4 +1,4 @@
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,10 +12,12 @@ import 'package:grammar_bondhu/features/chapters/chapter_detail_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
 import 'package:grammar_bondhu/features/grammar/grammar_lesson_screen.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
+import 'package:grammar_bondhu/features/onboarding/onboarding_screen.dart';
 import 'package:grammar_bondhu/features/profile/profile_screen.dart';
 import 'package:grammar_bondhu/features/progress/progress_screen.dart';
 import 'package:grammar_bondhu/features/quiz/quiz_screen.dart';
 import 'package:grammar_bondhu/features/rewards/rewards_screen.dart';
+import 'package:grammar_bondhu/features/settings/language_selection_screen.dart';
 import 'package:grammar_bondhu/features/story/story_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,18 +63,19 @@ Future<({ContentController content, ProgressController progress})> _pump(
         ),
         ChangeNotifierProvider.value(value: progress),
       ],
-      // The story stage has a continuous idle bob; reduced motion is how a
-      // test gets a tree that settles, and how the OS gets a still app.
-      child: MediaQuery(
-        data: MediaQueryData(
-          textScaler: TextScaler.linear(textScale),
-          disableAnimations: true,
+      child: MaterialApp(
+        // Set the requested scale inside the app, retaining the test view's
+        // real dimensions. Reduced motion also lets the story stage settle.
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: true,
+          ),
+          child: child!,
         ),
-        child: MaterialApp(
-          home: screen(content),
-          onUnknownRoute: (settings) =>
-              MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
-        ),
+        home: screen(content),
+        onUnknownRoute: (settings) =>
+            MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
       ),
     ),
   );
@@ -93,6 +96,18 @@ final Map<String, Widget Function(ContentController content)> _screens = {
   'profile': (_) => const ProfileScreen(),
 };
 
+void _expectLanguageButton(WidgetTester tester, Finder target,
+    {required bool selected}) {
+  final node = tester.getSemantics(target);
+  expect(node.flagsCollection.isButton, isTrue);
+  expect(node.flagsCollection.isSelected,
+      selected ? ui.Tristate.isTrue : ui.Tristate.isFalse);
+  expect(node.getSemanticsData().hasAction(ui.SemanticsAction.tap), isTrue);
+  final size = tester.getSize(target);
+  expect(size.width, greaterThanOrEqualTo(AccessibleLayout.minTouchTarget));
+  expect(size.height, greaterThanOrEqualTo(AccessibleLayout.minTouchTarget));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -108,6 +123,61 @@ void main() {
           expect(tester.takeException(), isNull);
         });
       }
+    }
+
+    for (final scale in _scales) {
+      testWidgets('onboarding page two at ${(scale * 100).round()}% text',
+          (tester) async {
+        await _pump(tester, (_) => const OnboardingScreen(), textScale: scale);
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+        expect(find.text('3 Languages,\n1 Goal'), findsOneWidget);
+        for (final (label, spoken) in [
+          ('English', 'English explanation'),
+          ('বাংলা', 'Bengali explanation'),
+          ('हिन्दी', 'Hindi explanation'),
+        ]) {
+          final pill = find.text(label);
+          await tester.ensureVisible(pill);
+          await tester.pumpAndSettle();
+          expect(pill.hitTestable(), findsOneWidget);
+          _expectLanguageButton(tester, find.bySemanticsLabel(spoken),
+              selected: label == 'বাংলা');
+        }
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('language settings preview at ${(scale * 100).round()}% text',
+          (tester) async {
+        await _pump(tester, (_) => const LanguageSelectionScreen(),
+            textScale: scale);
+        final settings = tester
+            .element(find.byType(LanguageSelectionScreen))
+            .read<SettingsController>();
+        var fromPreview = false;
+        for (final (label, note) in [
+          ('English', 'Use am with I.'),
+          ('বাংলা', 'I-এর সঙ্গে am বসে।'),
+          ('हिन्दी', 'I के साथ am लगता है।'),
+        ]) {
+          final name = find.text(label);
+          await tester.scrollUntilVisible(name, fromPreview ? -180 : 180);
+          await tester.tap(name);
+          await tester.pumpAndSettle();
+          _expectLanguageButton(
+              tester, find.bySemanticsLabel(RegExp('^$label\\. ')),
+              selected: true);
+          await tester.scrollUntilVisible(find.text(note), 180);
+          await tester.pumpAndSettle();
+          expect(find.text('Preview'), findsOneWidget);
+          expect(find.text('I am holding my umbrella.'), findsOneWidget);
+          expect(find.text(note).hitTestable(), findsOneWidget);
+          expect(
+              settings.supportLanguage, 'bn'); // Continue has not been pressed.
+          fromPreview = true;
+        }
+        expect(tester.takeException(), isNull);
+      });
     }
 
     testWidgets('quiz survives at 320 dp with the largest scale',
@@ -134,6 +204,16 @@ void main() {
       expect(tester.takeException(), isNull);
 
       expect(find.text('Try Again'), findsOneWidget);
+      for (final (label, spoken) in [
+        ('EN', 'English explanation'),
+        ('বাংলা', 'Bengali explanation'),
+        ('हिन्दी', 'Hindi explanation'),
+      ]) {
+        await tester.ensureVisible(find.text(label));
+        await tester.pumpAndSettle();
+        _expectLanguageButton(tester, find.bySemanticsLabel(spoken),
+            selected: label == 'বাংলা');
+      }
       expect(tester.takeException(), isNull);
     });
   });
@@ -155,8 +235,8 @@ void main() {
           RegExp('^Option A: ${RegExp.escape(question.options[0])}'),
         ),
       );
-      expect(first.hasFlag(SemanticsFlag.isButton), isTrue);
-      expect(first.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
+      expect(first.flagsCollection.isButton, isTrue);
+      expect(first.flagsCollection.isEnabled, ui.Tristate.isTrue);
       semantics.dispose();
     });
 
@@ -176,14 +256,14 @@ void main() {
           RegExp('^Option B: ${RegExp.escape(question.options[1])}'),
         ),
       );
-      expect(chosen.hasFlag(SemanticsFlag.isSelected), isTrue);
+      expect(chosen.flagsCollection.isSelected, ui.Tristate.isTrue);
 
       final other = tester.getSemantics(
         find.bySemanticsLabel(
           RegExp('^Option A: ${RegExp.escape(question.options[0])}'),
         ),
       );
-      expect(other.hasFlag(SemanticsFlag.isSelected), isFalse);
+      expect(other.flagsCollection.isSelected, ui.Tristate.isFalse);
       semantics.dispose();
     });
 
@@ -243,7 +323,7 @@ void main() {
       );
       // A live region: the reader speaks it when it appears, without the
       // learner having to hunt for what changed.
-      expect(feedback.hasFlag(SemanticsFlag.isLiveRegion), isTrue);
+      expect(feedback.flagsCollection.isLiveRegion, isTrue);
       expect(feedback.label, contains(question.correctAnswer));
       semantics.dispose();
     });
@@ -257,6 +337,27 @@ void main() {
   });
 
   group('touch targets', () {
+    testWidgets('lesson close and board language controls have 48 dp targets',
+        (tester) async {
+      await _pump(
+          tester, (c) => GrammarLessonScreen(chapterId: c.chapters.first.id),
+          textScale: 2);
+      final close = find.byTooltip('Close lesson');
+      expect(close.hitTestable(), findsOneWidget);
+      final size = tester.getSize(close);
+      expect(size.width, greaterThanOrEqualTo(AccessibleLayout.minTouchTarget));
+      expect(
+          size.height, greaterThanOrEqualTo(AccessibleLayout.minTouchTarget));
+      final toggle = find.bySemanticsLabel('Show lesson in Bengali');
+      expect(tester.getSize(toggle).height,
+          greaterThanOrEqualTo(AccessibleLayout.minTouchTarget));
+      expect(tester.getSemantics(toggle).flagsCollection.isButton, isTrue);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Show lesson in English'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('narration button keeps a 48 dp target', (tester) async {
       await _pump(
         tester,
@@ -317,7 +418,9 @@ void main() {
       var selected = 0;
       for (final label in ['EN', 'বাংলা', 'हिन्दी']) {
         final node = tester.getSemantics(find.bySemanticsLabel(label));
-        if (node.hasFlag(SemanticsFlag.isSelected)) selected += 1;
+        if (node.flagsCollection.isSelected == ui.Tristate.isTrue) {
+          selected += 1;
+        }
       }
       expect(selected, 1);
       semantics.dispose();

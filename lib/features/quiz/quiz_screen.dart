@@ -8,7 +8,9 @@ import '../../app/theme/app_theme.dart';
 import '../../core/utils/accessible_layout.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../data/models/chapter.dart';
+import '../../data/models/localized_text.dart';
 import '../completion/chapter_completed_screen.dart';
+import '../settings/language_selection_screen.dart';
 
 /// Screens 11 & 12 — multiple-choice quiz with kind, explanatory feedback.
 class QuizScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   int _questionIndex = 0;
   int? _selected;
+  String? _explanationLang;
   bool _submitted = false;
   bool _submitting = false;
   bool _finishing = false;
@@ -63,6 +66,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (!_submitted || _submitting || _finishing) return;
     setState(() {
       _selected = null;
+      _explanationLang = null;
       _submitted = false;
     });
   }
@@ -73,6 +77,7 @@ class _QuizScreenState extends State<QuizScreen> {
       setState(() {
         _questionIndex += 1;
         _countedThisQuestion = false;
+        _explanationLang = null;
         _selected = null;
         _submitted = false;
       });
@@ -122,7 +127,7 @@ class _QuizScreenState extends State<QuizScreen> {
     }
 
     final question = chapter.quiz[_questionIndex];
-    final lang = settings.supportLanguage;
+    final activeLang = _explanationLang ?? settings.supportLanguage;
     final isCorrect = _submitted && _selected == question.correctIndex;
 
     return Scaffold(
@@ -295,11 +300,10 @@ class _QuizScreenState extends State<QuizScreen> {
                                     _FeedbackCard(
                                       isCorrect: isCorrect,
                                       correctAnswer: question.correctAnswer,
-                                      explanation:
-                                          question.explanation.of(lang),
-                                      englishExplanation:
-                                          question.explanation.en,
-                                      showTranslation: lang != 'en',
+                                      explanation: question.explanation,
+                                      activeLang: activeLang,
+                                      onLanguageChanged: (code) => setState(
+                                          () => _explanationLang = code),
                                     ),
                                     const SizedBox(height: AppSpacing.md),
                                     if (!isCorrect)
@@ -469,15 +473,15 @@ class _FeedbackCard extends StatelessWidget {
     required this.isCorrect,
     required this.correctAnswer,
     required this.explanation,
-    required this.englishExplanation,
-    required this.showTranslation,
+    required this.activeLang,
+    required this.onLanguageChanged,
   });
 
   final bool isCorrect;
   final String correctAnswer;
-  final String explanation;
-  final String englishExplanation;
-  final bool showTranslation;
+  final LocalizedText explanation;
+  final String activeLang;
+  final ValueChanged<String> onLanguageChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -487,57 +491,72 @@ class _FeedbackCard extends StatelessWidget {
     // Announced as one sentence. Read piecemeal, a reader visits "Correct!",
     // then an answer string with no verb, then the explanation - with no clue
     // which question they belong to.
+    final note = explanation.of(activeLang);
     final spoken = isCorrect
-        ? 'Correct. $explanation'
-        : "Incorrect. The correct answer is $correctAnswer. $explanation";
-    return Semantics(
-      liveRegion: true,
-      container: true,
-      label: spoken,
-      child: ExcludeSemantics(
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: soft,
-            borderRadius: BorderRadius.circular(AppRadii.card),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    isCorrect
-                        ? Icons.check_circle_rounded
-                        : Icons.cancel_rounded,
-                    color: color,
-                    size: 28,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  // The verdict word takes the rest of the line and wraps;
-                  // at 200% it is 224 px wider than the card, which is the
-                  // overflow this test caught after submitting.
-                  Flexible(
-                    child: Text(
-                      isCorrect ? 'Correct!' : 'Incorrect',
-                      style: text.titleLarge?.copyWith(color: color),
+        ? 'Correct. $note'
+        : 'Incorrect. The correct answer is $correctAnswer. $note';
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: soft,
+        borderRadius: BorderRadius.circular(AppRadii.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            liveRegion: true,
+            container: true,
+            excludeSemantics: true,
+            label: spoken,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isCorrect
+                          ? Icons.check_circle_rounded
+                          : Icons.cancel_rounded,
+                      color: color,
+                      size: 28,
                     ),
+                    const SizedBox(width: AppSpacing.sm),
+                    // The verdict word takes the rest of the line and wraps;
+                    // at 200% it is 224 px wider than the card, which is the
+                    // overflow this test caught after submitting.
+                    Flexible(
+                      child: Text(
+                        isCorrect ? 'Correct!' : 'Incorrect',
+                        style: text.titleLarge?.copyWith(color: color),
+                      ),
+                    ),
+                  ],
+                ),
+                if (!isCorrect) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    "The correct answer is: '$correctAnswer'",
+                    style:
+                        text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ],
-              ),
-              if (!isCorrect) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  "The correct answer is: '$correctAnswer'",
-                  style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
+                Text(note, style: text.bodyMedium?.copyWith(height: 1.45)),
               ],
-              const SizedBox(height: AppSpacing.sm),
-              Text(showTranslation ? explanation : englishExplanation,
-                  style: text.bodyMedium?.copyWith(height: 1.45)),
-            ],
+            ),
           ),
-        ),
+          // These are actions in their own right, not part of the spoken verdict.
+          if (explanation.bn != null || explanation.hi != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            ExplanationLanguagePicker(
+              selected: activeLang,
+              onChanged: onLanguageChanged,
+              translations: explanation,
+              englishLabel: 'EN',
+            ),
+          ],
+        ],
       ),
     );
   }

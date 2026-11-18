@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
+import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
@@ -46,6 +47,8 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
   Widget build(BuildContext context) {
     final content = context.watch<ContentController>();
     final progress = context.watch<ProgressController>();
+    final lang = context.select(
+        (SettingsController? settings) => settings?.supportLanguage ?? 'en');
     final chapters = content.chapters;
 
     final cards = <Widget>[];
@@ -68,6 +71,7 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
         child: _ChapterCard(
           chapter: chapter,
+          supportLanguage: lang,
           number: index + 1,
           locked: isLocked,
           completed: record.completed,
@@ -226,6 +230,7 @@ class _FilterChip extends StatelessWidget {
 class _ChapterCard extends StatelessWidget {
   const _ChapterCard({
     required this.chapter,
+    required this.supportLanguage,
     required this.number,
     required this.locked,
     required this.completed,
@@ -238,6 +243,7 @@ class _ChapterCard extends StatelessWidget {
   });
 
   final Chapter chapter;
+  final String supportLanguage;
   final int number;
   final bool locked;
   final bool completed;
@@ -251,6 +257,8 @@ class _ChapterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final topic = chapter.grammarTopic.of(supportLanguage);
+    final level = chapter.difficultyLabel;
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.sm),
@@ -328,38 +336,41 @@ class _ChapterCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      chapter.grammarTopic.en,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodyMedium,
-                    ),
+                    Text(chapter.grammarTopic.en, style: text.bodyMedium),
+                    if (supportLanguage != 'en' &&
+                        topic != chapter.grammarTopic.en)
+                      Text(topic,
+                          style: text.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary)),
+                    if (level.isNotEmpty && level != 'Beginner')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: _Badge(label: level, color: AppColors.primary),
+                      ),
                     const SizedBox(height: 6),
                     if (completed)
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text('Completed',
                               style: text.bodySmall?.copyWith(
                                   color: AppColors.success,
                                   fontWeight: FontWeight.w700)),
-                          const SizedBox(width: AppSpacing.sm),
                           StarsDisplay(count: stars, size: 15),
                         ],
                       )
                     else if (inProgress)
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          _Badge(
+                          const _Badge(
                               label: 'IN PROGRESS', color: AppColors.primary),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              'Step ${(resumeStep ?? 0).clamp(0, sceneCount) + 1} of ${sceneCount + 1}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: text.bodySmall
-                                  ?.copyWith(color: AppColors.primary),
-                            ),
+                          Text(
+                            'Step ${(resumeStep ?? 0).clamp(0, sceneCount) + 1} of ${sceneCount + 1}',
+                            style: text.bodySmall
+                                ?.copyWith(color: AppColors.primary),
                           ),
                         ],
                       )
