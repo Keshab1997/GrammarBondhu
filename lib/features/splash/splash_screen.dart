@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../app/state/content_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
-import '../../core/widgets/brand_logo.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../core/widgets/brand_logo.dart';
 import '../home/home_shell.dart';
 import '../onboarding/onboarding_screen.dart';
 import 'hero_frames.dart';
@@ -34,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Content loads quietly behind the scene; nothing here animates the
     // chrome, so the screen is complete on its very first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final content = context.read<ContentController>();
       if (!content.isLoaded && !content.isLoading) {
         content.load();
@@ -68,7 +69,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
               child: Column(
                 children: [
-                  BrandLogo(fontSize: logoSize, compact: true),
+                  BrandLogo(
+                    fontSize: logoSize,
+                    compact: true,
+                    showTagline: false,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  const _TaglinePill(),
                   const SizedBox(height: AppSpacing.sm),
                   const Expanded(
                     child: Center(child: _StorybookFrame()),
@@ -93,6 +100,40 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
+/// The wordmark stays untouched; the splash tagline has its own solid surface.
+class _TaglinePill extends StatelessWidget {
+  const _TaglinePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primarySoft),
+        boxShadow: AppShadows.cardSoft,
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        child: Text(
+          'LEARN ENGLISH THROUGH STORIES',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppColors.primaryDeeper,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.1,
+            height: 1.2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // The storybook frame
 // ---------------------------------------------------------------------------
@@ -107,6 +148,7 @@ class _StorybookFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return AspectRatio(
       aspectRatio: _artAspect,
       child: DecoratedBox(
@@ -125,16 +167,19 @@ class _StorybookFrame extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const HeroFrames(),
-              // A whisper of shade at the very bottom so the white keyline
-              // never sits on a blown-out bright edge.
-              const IgnorePointer(
+              // Avoid starting the slideshow timer at all in reduced motion.
+              if (reduceMotion) const _StillHero() else const HeroFrames(),
+              // A subtle bottom keyline scrim leaves the subjects untouched.
+              IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment(0, 0.86),
+                      begin: const Alignment(0, 0.86),
                       end: Alignment.bottomCenter,
-                      colors: [Color(0x0013276B), Color(0x6613276B)],
+                      colors: [
+                        AppColors.primaryDeeper.withValues(alpha: 0),
+                        AppColors.primaryDeeper.withValues(alpha: 0.35),
+                      ],
                     ),
                   ),
                 ),
@@ -154,6 +199,30 @@ class _StorybookFrame extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StillHero extends StatelessWidget {
+  const _StillHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      HeroFrames.assetFor(0),
+      key: const ValueKey<int>(0),
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
+      filterQuality: FilterQuality.high,
+      gaplessPlayback: true,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/illustrations/splash_hero.webp',
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        filterQuality: FilterQuality.high,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => const ColoredBox(color: AppColors.skyTop),
       ),
     );
   }
@@ -253,9 +322,9 @@ class _SkyBackdrop extends StatelessWidget {
                 center: const Alignment(0, 0.55),
                 radius: 0.55,
                 colors: [
-                  const Color(0xFFFFF3D6).withValues(alpha: 0.55),
-                  const Color(0xFFFFE3A8).withValues(alpha: 0.18),
-                  Colors.white.withValues(alpha: 0.0),
+                  AppColors.accentSoft.withValues(alpha: 0.62),
+                  AppColors.goldTop.withValues(alpha: 0.16),
+                  AppColors.accentSoft.withValues(alpha: 0),
                 ],
                 stops: const [0.0, 0.45, 1.0],
               ),
@@ -274,8 +343,8 @@ class _SkyBackdrop extends StatelessWidget {
                 center: const Alignment(0, 0.75),
                 radius: 0.8,
                 colors: [
-                  AppColors.primary.withValues(alpha: 0.40),
-                  AppColors.primary.withValues(alpha: 0.0),
+                  AppColors.primaryGlow.withValues(alpha: 0.20),
+                  AppColors.primaryGlow.withValues(alpha: 0),
                 ],
               ),
             ),
