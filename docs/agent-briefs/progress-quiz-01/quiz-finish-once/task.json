@@ -1,0 +1,19 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "B",
+  "task": "quiz-finish-once",
+  "allowed": [
+    "lib/features/quiz/quiz_screen.dart",
+    "test/quiz_completion_test.dart"
+  ],
+  "commit": "fix(quiz): finish each quiz attempt only once",
+  "check": {
+    "kind": "flutter",
+    "version": "3.50.0",
+    "test": "test/quiz_completion_test.dart"
+  },
+  "arena": {
+    "branch": "auto",
+    "base_sha": "332fa73e66159c73d861d1a825403bff05ed544d"
+  }
+}
