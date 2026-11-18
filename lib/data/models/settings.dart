@@ -6,6 +6,7 @@ class AppSettings {
   AppSettings({
     this.supportLanguage = 'bn',
     this.audioEnabled = true,
+    this.autoPlayStory = true,
     this.notificationsEnabled = true,
     this.onboardingComplete = false,
     this.displayName,
@@ -16,6 +17,10 @@ class AppSettings {
   /// 'en' | 'bn' | 'hi' — 'en' means "show English only".
   String supportLanguage;
   bool audioEnabled;
+
+  /// When true, story characters automatically speak each line and step to the
+  /// next line after a short conversational pause (stopping at choices).
+  bool autoPlayStory;
   bool notificationsEnabled;
   bool onboardingComplete;
 
@@ -36,6 +41,7 @@ class AppSettings {
     return AppSettings(
       supportLanguage: isSupportedLanguage(language) ? language : 'bn',
       audioEnabled: json['audio_enabled'] as bool? ?? true,
+      autoPlayStory: json['auto_play_story'] as bool? ?? true,
       notificationsEnabled: json['notifications_enabled'] as bool? ?? true,
       onboardingComplete: json['onboarding_complete'] as bool? ?? false,
       displayName: json['display_name'] as String?,
@@ -47,6 +53,7 @@ class AppSettings {
   Map<String, dynamic> toJson() => {
         'support_language': supportLanguage,
         'audio_enabled': audioEnabled,
+        'auto_play_story': autoPlayStory,
         'notifications_enabled': notificationsEnabled,
         'onboarding_complete': onboardingComplete,
         'display_name': displayName,

@@ -28,6 +28,8 @@ class AudioController extends ChangeNotifier {
   Future<void>? _stopping;
 
   String? _playing;
+  String? _lastCompletedId;
+  int _completedCount = 0;
 
   /// Why the last attempt failed, if it did. Surfaced by the button so a
   /// silent phone can be debugged without a cable attached.
@@ -38,6 +40,11 @@ class AudioController extends ChangeNotifier {
   /// The clip that is currently sounding, if any.
   String? get playingId => _playing;
 
+  /// Most recent clip that played all the way to its natural end (not stopped
+  /// early by a tap, page turn or clip switch), paired with [completedCount].
+  String? get lastCompletedId => _lastCompletedId;
+  int get completedCount => _completedCount;
+
   /// False when the learner has switched narration off in Settings.
   bool get enabled => _settings.audioEnabled;
 
@@ -46,6 +53,15 @@ class AudioController extends ChangeNotifier {
   /// True when this clip can be offered at all: narration is on and the clip
   /// really shipped in the bundle.
   bool canPlay(String clipId) => enabled && AudioCatalog.has(clipId);
+
+  /// Starts [clipId] from the beginning, replacing anything currently playing.
+  ///
+  /// Used by story auto-play so entering a line never toggles it off by
+  /// mistake; [toggle] stays for interactive speaker buttons.
+  Future<bool> play(String clipId) async {
+    if (!canPlay(clipId)) return false;
+    return _start(clipId);
+  }
 
   /// Tap behaviour: start this clip, or stop it if it is already sounding.
   ///
@@ -57,6 +73,10 @@ class AudioController extends ChangeNotifier {
       return true;
     }
     if (!canPlay(clipId)) return false;
+    return _start(clipId);
+  }
+
+  Future<bool> _start(String clipId) async {
     final request = _newRequest();
     final switching = _playing != null;
     _playing = clipId;
@@ -73,7 +93,10 @@ class AudioController extends ChangeNotifier {
       // stopping it and only arm B's once its source has finished loading.
       _completion = _port.completions.listen((_) {
         if (request != _request || _playing == null) return;
+        final finished = _playing;
         _playing = null;
+        _lastCompletedId = finished;
+        _completedCount += 1;
         notifyListeners();
       });
       return true;

@@ -1,3 +1,33 @@
+import 'speech_cadence.dart';
+
+/// Pixel-registered full-body animation frames for one story character.
+class CharacterFrames {
+  const CharacterFrames({
+    required this.closed,
+    required this.talkHalf,
+    required this.talkOpen,
+    required this.blink,
+  });
+
+  final String closed;
+  final String talkHalf;
+  final String talkOpen;
+  final String blink;
+
+  /// All frame asset paths, in warm-up order so the resting pose decodes first.
+  List<String> get all => [closed, talkHalf, talkOpen, blink];
+
+  /// Selects the frame for the current mouth shape and blink state.
+  ///
+  /// Open-mouth speech takes priority over a blink unless the mouth is closed
+  /// between phrases, because our blink frame keeps a gentle closed smile.
+  String resolve({required MouthFrame mouth, required bool blinking}) {
+    if (mouth == MouthFrame.open) return talkOpen;
+    if (mouth == MouthFrame.half) return talkHalf;
+    return blinking ? blink : closed;
+  }
+}
+
 /// Resolves content asset IDs to bundled file paths.
 ///
 /// Every render path must tolerate a missing file — the UI widgets use
@@ -20,6 +50,29 @@ class AssetLookup {
     'rahul': 'assets/characters/rahul_full.webp',
     'priya': 'assets/characters/priya_full.webp',
     'teacher': 'assets/characters/teacher_full.webp',
+  };
+
+  /// Talking and blinking full-body frames aligned pixel-for-pixel to
+  /// [fullBodyCharacters] so only the mouth and eyelids move during dialogue.
+  static const Map<String, CharacterFrames> characterFrames = {
+    'rahul': CharacterFrames(
+      closed: 'assets/characters/rahul_full.webp',
+      talkHalf: 'assets/characters/rahul_talk_half.webp',
+      talkOpen: 'assets/characters/rahul_talk_open.webp',
+      blink: 'assets/characters/rahul_blink.webp',
+    ),
+    'priya': CharacterFrames(
+      closed: 'assets/characters/priya_full.webp',
+      talkHalf: 'assets/characters/priya_talk_half.webp',
+      talkOpen: 'assets/characters/priya_talk_open.webp',
+      blink: 'assets/characters/priya_blink.webp',
+    ),
+    'teacher': CharacterFrames(
+      closed: 'assets/characters/teacher_full.webp',
+      talkHalf: 'assets/characters/teacher_talk_half.webp',
+      talkOpen: 'assets/characters/teacher_talk_open.webp',
+      blink: 'assets/characters/teacher_blink.webp',
+    ),
   };
 
   static const Map<String, String> backgrounds = {
@@ -67,6 +120,9 @@ class AssetLookup {
 
   static String? fullBodyPath(String characterId) =>
       fullBodyCharacters[characterId];
+
+  static CharacterFrames? framesFor(String characterId) =>
+      characterFrames[characterId];
 
   static String? backgroundPath(String backgroundId) =>
       backgrounds[backgroundId];

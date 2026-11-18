@@ -74,14 +74,10 @@ class ListenButton extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: border),
               ),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: Icon(
-                  playing ? Icons.graphic_eq_rounded : Icons.volume_up_rounded,
-                  key: ValueKey(playing),
-                  size: size * 0.56,
-                  color: foreground,
-                ),
+              child: Icon(
+                playing ? Icons.graphic_eq_rounded : Icons.volume_up_rounded,
+                size: size * 0.56,
+                color: foreground,
               ),
             ),
           ),

@@ -193,5 +193,18 @@ void main() {
       expect(progress.level, greaterThanOrEqualTo(5));
       expect(progress.levelTitle, 'English Champion');
     });
+
+    test('every cast member ships all four talking and blinking frames', () {
+      for (final id in AssetLookup.fullBodyCharacters.keys) {
+        final frames = AssetLookup.framesFor(id);
+        expect(frames, isNotNull, reason: id);
+        expect(frames!.all.toSet(), hasLength(4), reason: id);
+        for (final path in frames.all) {
+          final file = File(path);
+          expect(file.existsSync(), isTrue, reason: '$id: $path');
+          expect(file.lengthSync(), greaterThan(1024), reason: '$id: $path');
+        }
+      }
+    });
   });
 }

@@ -63,6 +63,17 @@ class SettingsScreen extends StatelessWidget {
                     context.read<SettingsController>().setAudioEnabled(v),
               ),
             ),
+            _SettingsTile(
+              icon: Icons.play_circle_outline_rounded,
+              color: AppColors.primary,
+              label: 'Auto-play stories',
+              trailing: Switch(
+                value: s.autoPlayStory,
+                activeThumbColor: AppColors.primary,
+                onChanged: (v) =>
+                    context.read<SettingsController>().setAutoPlayStory(v),
+              ),
+            ),
             const _GroupHeader('Offline learning'),
             AppCard(
               child: Row(

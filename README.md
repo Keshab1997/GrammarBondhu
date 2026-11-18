@@ -33,6 +33,10 @@ provide translations and explanations.
   14. **The Rainy-Day Play** — joining ideas (and / but / because / so)
   15. **Our Class Scrapbook** — present perfect (have / has + past participle)
 
+- 🎬 **Animated auto-play stories** — Rahul, Priya and Mrs. Sen speak their
+  lines out loud in Indian English and Bengali across all 15 chapters, with
+  pixel-locked lip-sync frames, natural eye blinks, and automatic line-by-line
+  playback that pauses at interactive choices (with an on-stage `Auto` switch)
 - 🌐 **Three languages** — English + Bengali + Hindi translations, interactive
   onboarding language picker, live explanation preview in Settings, and
   in-story / in-lesson / in-quiz language toggles (EN / বাংলা / हिन्दी)

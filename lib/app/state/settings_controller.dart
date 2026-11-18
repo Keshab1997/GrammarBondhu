@@ -21,6 +21,9 @@ class SettingsController extends ChangeNotifier {
   /// Narration on/off — the master switch behind every speaker in the app.
   bool get audioEnabled => _settings.audioEnabled;
 
+  /// Whether story scenes speak and advance automatically between lines.
+  bool get autoPlayStory => _settings.autoPlayStory;
+
   bool get cloudConnected =>
       !_settings.isGuest && (_settings.cloudAccountId?.isNotEmpty ?? false);
 
@@ -33,6 +36,13 @@ class SettingsController extends ChangeNotifier {
 
   Future<void> setAudioEnabled(bool value) async {
     _settings.audioEnabled = value;
+    notifyListeners();
+    await _store.saveSettings(_settings);
+  }
+
+  Future<void> setAutoPlayStory(bool value) async {
+    if (_settings.autoPlayStory == value) return;
+    _settings.autoPlayStory = value;
     notifyListeners();
     await _store.saveSettings(_settings);
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -5,14 +6,16 @@ import 'package:provider/provider.dart';
 
 import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
+import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/accessible_layout.dart';
 import '../../core/utils/asset_lookup.dart';
-import '../../core/widgets/listen_button.dart';
-import '../audio/audio_controller.dart';
+import '../../core/utils/speech_cadence.dart';
 import '../../core/widgets/app_widgets.dart';
-import '../../core/widgets/idle_motion.dart';
+import '../../core/widgets/listen_button.dart';
+import '../../core/widgets/talking_character.dart';
 import '../../data/models/chapter.dart';
+import '../audio/audio_controller.dart';
 import '../grammar/grammar_lesson_screen.dart';
 
 /// Navigation arguments for the story player.
@@ -57,14 +60,59 @@ class _StoryScreenState extends State<StoryScreen> {
   /// provider again is no longer safe.
   AudioController? _audio;
 
+  Timer? _silentSpeechTimer;
+  Timer? _autoAdvanceTimer;
+  bool _silentTalking = false;
+  bool _reduceMotion = false;
+  bool _localAutoPlay = true;
+  bool _initialCueScheduled = false;
+  String? _autoQueuedClipId;
+  String? _observedPlayingId;
+  int _observedCompletedCount = 0;
+  int _utteranceKey = 0;
+  int _lineToken = 0;
+
+  static const _linePause = Duration(milliseconds: 850);
+  static const _translatedLinePause = Duration(milliseconds: 1200);
+  static const _lessonHandoffPause = Duration(milliseconds: 1250);
+  static const _choiceFeedbackPause = Duration(milliseconds: 1600);
+
+  bool get _autoPlayEnabled {
+    final settings = Provider.of<SettingsController?>(context, listen: false);
+    return settings?.autoPlayStory ?? _localAutoPlay;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _audio = AudioScope.maybeOf(context);
+    final nextAudio = AudioScope.maybeOf(context);
+    if (!identical(_audio, nextAudio)) {
+      _audio?.removeListener(_onAudioChanged);
+      _audio = nextAudio;
+      _observedPlayingId = nextAudio?.playingId;
+      _observedCompletedCount = nextAudio?.completedCount ?? 0;
+      _audio?.addListener(_onAudioChanged);
+    }
+    final nextReduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (nextReduce && !_reduceMotion) {
+      _cancelLineTimers();
+    }
+    _reduceMotion = nextReduce;
+
+    if (!_initialCueScheduled) {
+      _initialCueScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _warmChapterCast();
+        _startLineDelivery();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _cancelLineTimers();
+    _audio?.removeListener(_onAudioChanged);
     // A line that keeps talking after the learner has moved on sounds broken.
     _audio?.stop();
     super.dispose();
@@ -73,9 +121,190 @@ class _StoryScreenState extends State<StoryScreen> {
   Chapter? get _chapter =>
       context.read<ContentController>().byId(widget.args.chapterId);
 
+  String _linePrefix(String chapterId) =>
+      'story_${chapterId}_${_sceneIndex}_$_lineIndex';
+
+  void _warmChapterCast() {
+    final chapter = _chapter;
+    if (chapter == null) return;
+    final ids = <String>{
+      for (final scene in chapter.scenes) ...[
+        ...scene.characterIds,
+        for (final line in scene.dialogue) line.characterId,
+      ],
+    };
+    for (final id in ids) {
+      final frames = AssetLookup.framesFor(id);
+      if (frames == null) continue;
+      for (final path in frames.all) {
+        precacheImage(AssetImage(path), context).catchError((_) {});
+      }
+    }
+  }
+
+  void _cancelLineTimers({bool updateState = false}) {
+    _silentSpeechTimer?.cancel();
+    _silentSpeechTimer = null;
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = null;
+    _autoQueuedClipId = null;
+    if (_silentTalking) {
+      _silentTalking = false;
+      if (updateState && mounted) setState(() {});
+    }
+  }
+
+  void _onAudioChanged() {
+    if (!mounted) return;
+    final audio = _audio;
+    if (audio == null) return;
+
+    final chapter = _chapter;
+    final prefix = chapter == null ? null : _linePrefix(chapter.id);
+    final playing = audio.playingId;
+    final completed = audio.completedCount;
+
+    // A fresh clip started for the line currently on stage (for instance, the
+    // learner tapped Bangla or replayed English): rewind the mouth cadence and
+    // stand down any pending auto-step so we never cut off what they chose.
+    if (playing != null &&
+        playing != _observedPlayingId &&
+        prefix != null &&
+        playing.startsWith('${prefix}_')) {
+      _silentSpeechTimer?.cancel();
+      _silentSpeechTimer = null;
+      _autoAdvanceTimer?.cancel();
+      _autoAdvanceTimer = null;
+      _silentTalking = false;
+      _utteranceKey += 1;
+      if (playing != _autoQueuedClipId) {
+        _autoQueuedClipId = null;
+      }
+    }
+
+    final queued = _autoQueuedClipId;
+    final finishedAutoClip = queued != null &&
+        playing == null &&
+        completed != _observedCompletedCount &&
+        audio.lastCompletedId == queued;
+
+    _observedPlayingId = playing;
+    _observedCompletedCount = completed;
+
+    if (finishedAutoClip) {
+      _autoQueuedClipId = null;
+      _scheduleAutoAdvance();
+    }
+    setState(() {});
+  }
+
+  Future<void> _startLineDelivery() async {
+    _cancelLineTimers();
+    if (!mounted || _reduceMotion || !_autoPlayEnabled) return;
+    final chapter = _chapter;
+    if (chapter == null || _sceneIndex >= chapter.scenes.length) return;
+    final scene = chapter.scenes[_sceneIndex];
+    if (_lineIndex >= scene.dialogue.length) return;
+    final line = scene.dialogue[_lineIndex];
+
+    final token = ++_lineToken;
+    final enClip = '${_linePrefix(chapter.id)}_en';
+    final audio = _audio;
+
+    if (audio != null && audio.canPlay(enClip)) {
+      _autoQueuedClipId = enClip;
+      _observedCompletedCount = audio.completedCount;
+      setState(() => _utteranceKey += 1);
+      final started = await audio.play(enClip);
+      if (!mounted || token != _lineToken) return;
+      if (!started) {
+        // Never leave auto-story stuck when an audio device refuses to open:
+        // fall back to text-paced lip-sync so the character still delivers it.
+        _autoQueuedClipId = null;
+        _startSilentSpeech(line.text.en, token: token);
+      }
+      return;
+    }
+
+    _startSilentSpeech(line.text.en, token: token);
+  }
+
+  void _startSilentSpeech(String text, {required int token}) {
+    final duration = SpeechCadence.fromText(text).silentDuration;
+    setState(() {
+      _silentTalking = true;
+      _utteranceKey += 1;
+    });
+    _silentSpeechTimer = Timer(duration, () {
+      if (!mounted || token != _lineToken) return;
+      setState(() => _silentTalking = false);
+      _scheduleAutoAdvance();
+    });
+  }
+
+  void _scheduleAutoAdvance({Duration? delay}) {
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = null;
+    if (!mounted || _reduceMotion || !_autoPlayEnabled) return;
+    final chapter = _chapter;
+    if (chapter == null || _sceneIndex >= chapter.scenes.length) return;
+    final scene = chapter.scenes[_sceneIndex];
+
+    final isLastLineInScene = _lineIndex >= scene.dialogue.length - 1;
+    // Pause for learner input when a choice is waiting on screen.
+    if (isLastLineInScene &&
+        scene.choices.isNotEmpty &&
+        _chosenChoice == null) {
+      return;
+    }
+
+    final isEndOfStory =
+        isLastLineInScene && _sceneIndex >= chapter.scenes.length - 1;
+    final wait = delay ??
+        (isEndOfStory
+            ? _lessonHandoffPause
+            : _translationLang != 'off'
+                ? _translatedLinePause
+                : _linePause);
+    final token = _lineToken;
+    _autoAdvanceTimer = Timer(wait, () {
+      if (!mounted || token != _lineToken || !_autoPlayEnabled) return;
+      _advance();
+    });
+  }
+
+  Future<void> _toggleAutoPlay() async {
+    final next = !_autoPlayEnabled;
+    final settings = Provider.of<SettingsController?>(context, listen: false);
+    if (settings != null) {
+      await settings.setAutoPlayStory(next);
+    } else {
+      setState(() => _localAutoPlay = next);
+    }
+    if (!mounted) return;
+    if (!next) {
+      ++_lineToken;
+      _cancelLineTimers(updateState: true);
+      await _audio?.stop();
+    } else {
+      unawaited(_startLineDelivery());
+    }
+  }
+
+  void _onChoicePicked(StoryChoice choice) {
+    setState(() => _chosenChoice = choice);
+    if (_autoPlayEnabled && !_reduceMotion && _audio?.playingId == null) {
+      _silentSpeechTimer?.cancel();
+      _silentTalking = false;
+      _scheduleAutoAdvance(delay: _choiceFeedbackPause);
+    }
+  }
+
   void _advance() {
     final chapter = _chapter;
     if (chapter == null || _sceneIndex >= chapter.scenes.length) return;
+    ++_lineToken;
+    _cancelLineTimers();
     _audio?.stop();
     final scene = chapter.scenes[_sceneIndex];
 
@@ -84,6 +313,7 @@ class _StoryScreenState extends State<StoryScreen> {
         _chosenChoice = null;
         _lineIndex += 1;
       });
+      unawaited(_startLineDelivery());
       return;
     }
     // The length itself is a valid bookmark: the grammar lesson is next.
@@ -95,6 +325,7 @@ class _StoryScreenState extends State<StoryScreen> {
         _sceneIndex = nextScene;
         _lineIndex = 0;
       });
+      unawaited(_startLineDelivery());
     } else {
       Navigator.of(context).pushReplacementNamed(
         GrammarLessonScreen.routeName,
@@ -119,6 +350,28 @@ class _StoryScreenState extends State<StoryScreen> {
     final scene = chapter.scenes[_sceneIndex];
     final line = scene.dialogue.isEmpty ? null : scene.dialogue[_lineIndex];
     final text = Theme.of(context).textTheme;
+    final autoPlay = context.select(
+      (SettingsController? s) => s?.autoPlayStory ?? _localAutoPlay,
+    );
+    final clipPrefix = _linePrefix(chapter.id);
+    final playingId = _audio?.playingId;
+    final playingEn = playingId == '${clipPrefix}_en';
+    final playingBn = playingId == '${clipPrefix}_bn';
+    final audioTalking = playingEn || playingBn;
+    final isSpeakerTalking = line != null && (audioTalking || _silentTalking);
+    final spokenText = line == null
+        ? ''
+        : playingBn
+            ? line.text.of('bn')
+            : line.text.en;
+    final showChoices = _lineIndex >= scene.dialogue.length - 1 &&
+        scene.choices.isNotEmpty &&
+        _chosenChoice == null;
+    final hintLabel = isSpeakerTalking
+        ? 'Speaking · Tap to skip'
+        : autoPlay && !_reduceMotion
+            ? 'Auto on · Tap to continue'
+            : 'Tap to continue';
 
     // The cast for this scene: whoever is listed, plus the current speaker if
     // the data forgot to list them (never leave the speaker off stage).
@@ -165,12 +418,17 @@ class _StoryScreenState extends State<StoryScreen> {
               _Stage(
                 cast: cast,
                 speakerId: line.characterId,
+                isSpeakerTalking: isSpeakerTalking,
+                spokenText: spokenText,
+                utteranceKey: _utteranceKey,
+                loopSpeech: audioTalking,
                 backgroundId: scene.backgroundId,
                 bubble: _DialogueBubble(
                   characterId: line.characterId,
                   line: line,
                   translationLang: _translationLang,
-                  clipPrefix: 'story_${chapter.id}_${_sceneIndex}_$_lineIndex',
+                  clipPrefix: clipPrefix,
+                  isTalking: isSpeakerTalking,
                 ),
               ),
             // Bottom interaction zone: choices, then the advance hint.
@@ -188,12 +446,11 @@ class _StoryScreenState extends State<StoryScreen> {
                         choice: _chosenChoice!,
                         lang: _translationLang,
                       ),
-                    if (scene.choices.isNotEmpty && _chosenChoice == null)
+                    if (showChoices)
                       _ChoiceList(
                         choices: scene.choices,
                         lang: _translationLang,
-                        onChosen: (choice) =>
-                            setState(() => _chosenChoice = choice),
+                        onChosen: _onChoicePicked,
                       )
                     else
                       Padding(
@@ -202,15 +459,19 @@ class _StoryScreenState extends State<StoryScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.touch_app_rounded,
-                                size: 15,
-                                color: Colors.white.withValues(alpha: 0.95)),
+                            Icon(
+                              isSpeakerTalking
+                                  ? Icons.graphic_eq_rounded
+                                  : Icons.touch_app_rounded,
+                              size: 15,
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
                             const SizedBox(width: 6),
                             // Long scales wrap the hint onto a second line
                             // instead of running 125 px past the edge.
                             Flexible(
                               child: Text(
-                                'Tap to continue',
+                                hintLabel,
                                 textAlign: TextAlign.center,
                                 style: text.bodyMedium?.copyWith(
                                   color: Colors.white,
@@ -256,14 +517,26 @@ class _StoryScreenState extends State<StoryScreen> {
                       // never dropped: at a large font scale the learner needs
                       // the translation most, so the row gives way instead.
                       Expanded(
-                        child: AccessibleLayout.needsReflow(context)
+                        child: AccessibleLayout.needsReflow(context) ||
+                                MediaQuery.sizeOf(context).width < 370
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _SceneProgress(
-                                    scene: _sceneIndex + 1,
-                                    scenes: chapter.scenes.length,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _SceneProgress(
+                                          scene: _sceneIndex + 1,
+                                          scenes: chapter.scenes.length,
+                                        ),
+                                      ),
+                                      const SizedBox(width: AppSpacing.xs),
+                                      _AutoPlayToggle(
+                                        enabled: autoPlay,
+                                        onTap: _toggleAutoPlay,
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   // Full width, so the three segments split
@@ -286,7 +559,12 @@ class _StoryScreenState extends State<StoryScreen> {
                                       scenes: chapter.scenes.length,
                                     ),
                                   ),
-                                  const SizedBox(width: AppSpacing.sm),
+                                  const SizedBox(width: AppSpacing.xs),
+                                  _AutoPlayToggle(
+                                    enabled: autoPlay,
+                                    onTap: _toggleAutoPlay,
+                                  ),
+                                  const SizedBox(width: AppSpacing.xs),
                                   _TranslationToggle(
                                     lang: _translationLang,
                                     onChanged: (value) => setState(
@@ -321,12 +599,20 @@ class _Stage extends StatelessWidget {
   const _Stage({
     required this.cast,
     required this.speakerId,
+    required this.isSpeakerTalking,
+    required this.spokenText,
+    required this.utteranceKey,
+    required this.loopSpeech,
     required this.backgroundId,
     required this.bubble,
   });
 
   final List<String> cast;
   final String speakerId;
+  final bool isSpeakerTalking;
+  final String spokenText;
+  final int utteranceKey;
+  final bool loopSpeech;
   final String? backgroundId;
   final Widget bubble;
 
@@ -381,10 +667,14 @@ class _Stage extends StatelessWidget {
                 // A floor strip so shoes are never cut by the screen edge and
                 // the "Tap to continue" hint does not sit on their feet.
                 bottom: _stageBottomInset(context),
-                child: _Character(
-                  id: p.id,
+                child: TalkingCharacter(
+                  characterId: p.id,
                   height: p.height,
                   isSpeaker: p.isSpeaker,
+                  isTalking: p.isSpeaker && isSpeakerTalking,
+                  spokenText: p.isSpeaker ? spokenText : '',
+                  utteranceKey: p.isSpeaker ? utteranceKey : 0,
+                  loopSpeech: p.isSpeaker && loopSpeech,
                 ),
               ),
             // Blurred props in front of the cast. This is the whole trick: an
@@ -491,127 +781,6 @@ class _Placement {
   double get width => height * 0.36;
 }
 
-/// One full-body character. The cut-out keeps its own ratio; the speaker is at
-/// full strength while the others dim, which is the whole "who is talking"
-/// cue.
-class _Character extends StatelessWidget {
-  const _Character({
-    required this.id,
-    required this.height,
-    required this.isSpeaker,
-  });
-
-  final String id;
-  final double height;
-  final bool isSpeaker;
-
-  @override
-  Widget build(BuildContext context) {
-    final path = AssetLookup.fullBodyPath(id);
-    final name = AssetLookup.characterDisplayName(id);
-
-    Widget art = path == null
-        ? _FallbackBody(name: name, height: height)
-        : Image.asset(
-            path,
-            height: height,
-            fit: BoxFit.contain,
-            alignment: Alignment.bottomCenter,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: (_, __, ___) =>
-                _FallbackBody(name: name, height: height),
-          );
-
-    // A touch of warmth on whoever is talking. Dimming the listener alone left
-    // the speaker looking like anyone else; the highlight does the pointing.
-    if (isSpeaker) {
-      art = ShaderMask(
-        blendMode: BlendMode.srcATop,
-        shaderCallback: (rect) => const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x14FFF3D6), Color(0x00FFF3D6)],
-          stops: [0.0, 0.45],
-        ).createShader(Offset.zero & rect.size),
-        child: art,
-      );
-    }
-
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 220),
-      opacity: isSpeaker ? 1 : 0.82,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        scale: isSpeaker ? 1 : 0.97,
-        alignment: Alignment.bottomCenter,
-        // A slow breathing bob keeps a still standee from looking frozen. It is
-        // smaller than the speaker scale change so the two never fight.
-        child: IdleBob(
-          period: isSpeaker ? 3800 : 4600,
-          phase: id.hashCode % 1000 / 1000,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              // Contact shadow: without it the feet float over the scene.
-              Container(
-                width: height * 0.26,
-                height: height * 0.035,
-                margin: EdgeInsets.only(bottom: height * 0.004),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 14,
-                    ),
-                  ],
-                ),
-              ),
-              art,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FallbackBody extends StatelessWidget {
-  const _FallbackBody({required this.name, required this.height});
-
-  final String name;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: height * 0.36,
-      height: height,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.skyTop],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(height * 0.18),
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        name.isEmpty ? '?' : name[0].toUpperCase(),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: height * 0.16,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Bubble
 // ---------------------------------------------------------------------------
@@ -624,6 +793,7 @@ class _DialogueBubble extends StatelessWidget {
     required this.line,
     required this.translationLang,
     required this.clipPrefix,
+    this.isTalking = false,
   });
 
   final String characterId;
@@ -633,6 +803,7 @@ class _DialogueBubble extends StatelessWidget {
   /// `story_<chapter>_<scene>_<line>` — the clip id is the prefix plus the
   /// language, so the bubble never has to know how assets are named.
   final String clipPrefix;
+  final bool isTalking;
 
   @override
   Widget build(BuildContext context) {
@@ -671,6 +842,16 @@ class _DialogueBubble extends StatelessWidget {
                   ),
                 ),
               ),
+              if (isTalking) ...[
+                const SizedBox(width: 6),
+                const ExcludeSemantics(
+                  child: Icon(
+                    Icons.graphic_eq_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
               const Spacer(),
               // Heard, not read: the English line is what the learner is
               // being taught to say, so it gets its own speaker.
@@ -823,9 +1004,76 @@ class _GlassIconButton extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Icon(icon, size: 20, color: Colors.white),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: AccessibleLayout.minTouchTarget,
+              minHeight: AccessibleLayout.minTouchTarget,
+            ),
+            child: Center(child: Icon(icon, size: 20, color: Colors.white)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Switches automatic story speech + line stepping on and off directly on stage.
+class _AutoPlayToggle extends StatelessWidget {
+  const _AutoPlayToggle({required this.enabled, required this.onTap});
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      button: true,
+      selected: enabled,
+      excludeSemantics: true,
+      label: 'Auto-play story',
+      onTap: onTap,
+      child: Tooltip(
+        message: enabled ? 'Pause auto-play' : 'Auto-play story',
+        child: Material(
+          color: enabled
+              ? AppColors.primary
+              : Colors.black.withValues(alpha: 0.32),
+          shape: StadiumBorder(
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.22)),
+          ),
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: AccessibleLayout.minTouchTarget,
+                minHeight: AccessibleLayout.minTouchTarget,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      enabled ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      'Auto',
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: enabled ? FontWeight.w900 : FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

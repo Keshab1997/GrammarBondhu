@@ -22,6 +22,7 @@ import 'package:grammar_bondhu/features/quiz/quiz_screen.dart';
 import 'package:grammar_bondhu/features/quiz/review_practice_screen.dart';
 import 'package:grammar_bondhu/features/rewards/rewards_screen.dart';
 import 'package:grammar_bondhu/features/settings/language_selection_screen.dart';
+import 'package:grammar_bondhu/features/story/story_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -143,6 +144,12 @@ final List<Shot> shots = <Shot>[
     dark: false,
     preferences: _learnerState(progress: _midCourseWithMistakes()),
     build: () => const ChapterDetailScreen(chapterId: 'ch11'),
+  ),
+  Shot(
+    name: 'story-ch11',
+    dark: false,
+    preferences: _learnerState(),
+    build: () => const StoryScreen(args: StoryArgs('ch11')),
   ),
   Shot(
     name: 'grammar-lesson-ch11',
