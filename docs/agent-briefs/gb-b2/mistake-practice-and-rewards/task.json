@@ -1,0 +1,21 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "A",
+  "task": "mistake-practice-and-rewards",
+  "allowed": [
+    "lib/features/home/home_screen.dart",
+    "lib/features/progress/progress_screen.dart",
+    "lib/features/quiz/review_practice_screen.dart",
+    "lib/features/rewards/rewards_screen.dart",
+    "test/home_layout_test.dart",
+    "test/review_practice_test.dart"
+  ],
+  "commit": "feat(progress): add mistake practice session, home review nudge and full rewards",
+  "arena": {
+    "branch": "arena/f3a73e45-grammarbondhu",
+    "base_sha": "01e6bb8677f29603301087e21ba278482fdf9cf0"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}

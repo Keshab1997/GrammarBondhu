@@ -1,0 +1,23 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "C",
+  "task": "chapters-11-to-15",
+  "allowed": [
+    "README.md",
+    "assets/data/chapters/chapter_11.json",
+    "assets/data/chapters/chapter_12.json",
+    "assets/data/chapters/chapter_13.json",
+    "assets/data/chapters/chapter_14.json",
+    "assets/data/chapters/chapter_15.json",
+    "assets/data/manifest.json",
+    "test/content_repository_test.dart"
+  ],
+  "commit": "feat(chapters): add intermediate trilingual chapters 11 to 15",
+  "arena": {
+    "branch": "arena/eead898e-grammarbondhu",
+    "base_sha": "96d44e3a0930396c8991c2f67d1eb6c236c68051"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}

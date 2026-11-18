@@ -1,0 +1,24 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "B",
+  "task": "trilingual-ux-and-accessibility",
+  "allowed": [
+    "lib/features/chapters/chapter_detail_screen.dart",
+    "lib/features/chapters/chapter_list_screen.dart",
+    "lib/features/grammar/grammar_lesson_screen.dart",
+    "lib/features/onboarding/onboarding_screen.dart",
+    "lib/features/quiz/quiz_screen.dart",
+    "lib/features/settings/language_selection_screen.dart",
+    "test/accessibility_text_scaling_test.dart",
+    "test/onboarding_guest_flow_test.dart",
+    "test/quiz_completion_test.dart"
+  ],
+  "commit": "feat(ux): add interactive language controls, localized chapter cues and 48dp targets",
+  "arena": {
+    "branch": "arena/77b265ce-grammarbondhu",
+    "base_sha": "f7067045d6efd3ff5a9e2c3ebadcaa54ed852119"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}
