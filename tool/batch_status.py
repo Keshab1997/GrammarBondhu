@@ -30,14 +30,20 @@ def lane_icons() -> list[str]:
 
 
 def lane_scenes() -> list[str]:
+    """One plate per (chapter, room the chapter actually uses)."""
     missing = []
     for c in chapters():
-        for bg in sorted({s["background_id"] for s in c["scenes"]}):
-            if bg == c.get("background_asset", "").rsplit("/", 1)[-1].removesuffix(".webp"):
+        cid = c["chapter_id"]
+        sets = set()
+        for scene in c["scenes"]:
+            bg = scene.get("background_id") or ""
+            if not bg:
                 continue
-            per_chapter = ROOT / f"assets/backgrounds/{bg}_{c['chapter_id']}.webp"
+            sets.add(bg[3:] if bg.startswith("bg_") else bg.split("_", 1)[-1])
+        for room in sorted(sets):
+            per_chapter = ROOT / f"assets/backgrounds/scene_{cid}_{room}.webp"
             if not per_chapter.exists():
-                missing.append(f"{c['chapter_id']}: scene art for {bg}")
+                missing.append(f"{cid}: scene art for {room}")
     return missing
 
 

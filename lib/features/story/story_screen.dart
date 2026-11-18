@@ -468,8 +468,9 @@ class _StoryScreenState extends State<StoryScreen> {
                 children: [...previous, if (current != null) current],
               ),
               child: _SceneBackdrop(
-                key: ValueKey(scene.backgroundId ?? 'none'),
+                key: ValueKey('${chapter.id}/${scene.backgroundId ?? 'none'}'),
                 backgroundId: scene.backgroundId,
+                chapterId: chapter.id,
               ),
             ),
             // Ground shading: the characters need something to stand on.
@@ -495,6 +496,7 @@ class _StoryScreenState extends State<StoryScreen> {
                 mouthFor: isSpeakerTalking ? _mouthAt : null,
                 energy: _mouthDriver?.energy ?? 0,
                 backgroundId: scene.backgroundId,
+                chapterId: chapter.id,
                 bubble: _DialogueBubble(
                   characterId: line.characterId,
                   line: line,
@@ -697,6 +699,7 @@ class _Stage extends StatelessWidget {
     required this.mouthFor,
     required this.energy,
     required this.backgroundId,
+    required this.chapterId,
     required this.bubble,
   });
 
@@ -715,6 +718,7 @@ class _Stage extends StatelessWidget {
   final double energy;
 
   final String? backgroundId;
+  final String chapterId;
   final Widget bubble;
 
   /// Character height as a fraction of the stage, and where they stand.
@@ -1557,14 +1561,23 @@ class _Foreground extends StatelessWidget {
 /// from the bottom. A soft top vignette hides the hard end of the crop and
 /// gives the bubble some air.
 class _SceneBackdrop extends StatelessWidget {
-  const _SceneBackdrop({super.key, required this.backgroundId});
+  const _SceneBackdrop({
+    super.key,
+    required this.backgroundId,
+    required this.chapterId,
+  });
 
   final String? backgroundId;
+  final String chapterId;
 
   @override
   Widget build(BuildContext context) {
-    final path =
-        backgroundId == null ? null : AssetLookup.backgroundPath(backgroundId!);
+    // This chapter's own plate first; the shared set is the fallback, so a
+    // chapter whose art has not been drawn yet still shows a real room.
+    final path = AssetLookup.chapterScenePath(chapterId, backgroundId) ??
+        (backgroundId == null
+            ? null
+            : AssetLookup.backgroundPath(backgroundId!));
     if (path == null) {
       return const DecoratedBox(
         decoration: BoxDecoration(

@@ -156,7 +156,11 @@ void main() {
               reason: '${chapter.id}: $asset');
         }
         for (final scene in chapter.scenes) {
-          final background = AssetLookup.backgrounds[scene.backgroundId];
+          // A chapter's own plate wins; the shared set is the fallback for a
+          // chapter whose art has not been drawn yet. Both must exist on disk.
+          final background =
+              AssetLookup.chapterScenePath(chapter.id, scene.backgroundId) ??
+                  AssetLookup.backgrounds[scene.backgroundId];
           expect(background, isNotNull, reason: scene.sceneId);
           expect(File(background!).existsSync(), isTrue, reason: background);
           expect(scene.characterIds, isNotEmpty, reason: scene.sceneId);

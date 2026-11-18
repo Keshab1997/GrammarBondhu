@@ -98,6 +98,22 @@ class AssetLookup {
     'bg_library': 'assets/backgrounds/bg_library.webp',
   };
 
+  /// Per-chapter scene plates: a chapter draws its own version of a set
+  /// (its classroom, its garden) instead of reusing the same four plates
+  /// for fifteen different stories.
+  static const Map<String, String> chapterScenes = {
+    'ch01_classroom': 'assets/backgrounds/scene_ch01_classroom.webp',
+    'ch02_classroom': 'assets/backgrounds/scene_ch02_classroom.webp',
+    'ch03_garden': 'assets/backgrounds/scene_ch03_garden.webp',
+    'ch04_classroom': 'assets/backgrounds/scene_ch04_classroom.webp',
+    'ch04_garden': 'assets/backgrounds/scene_ch04_garden.webp',
+    'ch05_classroom': 'assets/backgrounds/scene_ch05_classroom.webp',
+    'ch06_classroom': 'assets/backgrounds/scene_ch06_classroom.webp',
+    'ch07_classroom': 'assets/backgrounds/scene_ch07_classroom.webp',
+    'ch08_classroom': 'assets/backgrounds/scene_ch08_classroom.webp',
+    'ch09_classroom': 'assets/backgrounds/scene_ch09_classroom.webp',
+  };
+
   static const Map<String, String> illustrations = {
     'ch01_thumb': 'assets/illustrations/ch01_thumb.webp',
     'ch02_thumb': 'assets/illustrations/ch02_thumb.webp',
@@ -136,6 +152,20 @@ class AssetLookup {
   /// The grammar-topic badge for [chapterId], or null when that chapter has no
   /// art yet (the chapter page then keeps its shared glyph).
   static String? topicIcon(String chapterId) => topicIcons[chapterId];
+
+  /// The plate for [chapterId] in [backgroundId], or null when this chapter
+  /// has no art of its own for that set — callers then keep the shared plate.
+  static String? chapterScenePath(String chapterId, String? backgroundId) {
+    if (backgroundId == null) return null;
+    // A scene asks by set name (`bg_classroom`) or by its own plate id
+    // (`ch04_classroom`); both resolve to "<chapter>_<set>".
+    final set = backgroundId.startsWith('bg_')
+        ? backgroundId.substring(3)
+        : backgroundId.startsWith('${chapterId}_')
+            ? backgroundId.substring(chapterId.length + 1)
+            : backgroundId;
+    return chapterScenes['${chapterId}_$set'];
+  }
 
   static const Map<String, String> topicIcons = {
     'ch01': 'assets/icons/topic_ch01.webp',
