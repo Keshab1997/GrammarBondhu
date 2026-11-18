@@ -197,7 +197,7 @@ class _StoryScreenState extends State<StoryScreen> {
     if (_reduceMotion) return;
     final playing = _audio?.playingId;
     if (playing != null && AudioLipSync.has(playing)) {
-      _driver().followClip(playing);
+      _driver().startClip(playing);
     }
   }
 

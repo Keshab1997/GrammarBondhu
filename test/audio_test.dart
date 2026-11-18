@@ -363,6 +363,75 @@ void main() {
       expect(port.played.last, 'assets/audio/clips/board_ch01_explain_bn.mp3');
     });
 
+    testWidgets('the lesson standee talks: measured jaw shapes, live blinks',
+        (tester) async {
+      // This one needs live animation, so it builds its own tree instead of the
+      // reduced-motion harness the other audio tests use.
+      tester.view.physicalSize = const Size(353, 784);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final settings = SettingsController(store, store.loadSettings());
+      final content = ContentController(ContentRepository());
+      await content.load();
+      final port = FakeAudioPort();
+      final audio = AudioController(port: port, settings: settings);
+      addTearDown(audio.dispose);
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: content),
+            ChangeNotifierProvider.value(value: settings),
+            ChangeNotifierProvider(
+              create: (_) => ProgressController(store, store.loadProgress()),
+            ),
+          ],
+          child: AudioScope(
+            controller: audio,
+            child: MaterialApp(
+              theme: ThemeData(useMaterial3: true),
+              home: const GrammarLessonScreen(chapterId: 'ch01'),
+            ),
+          ),
+        ),
+      );
+      // Nothing has been narrated yet, so first paint holds her resting smile.
+      Set<String> standeeAssets() => {
+            for (final img in tester.widgetList<Image>(find.byType(Image)))
+              if (img.image is AssetImage) (img.image as AssetImage).assetName,
+          };
+      expect(
+        standeeAssets().where((a) => a.contains('_talk_')),
+        isEmpty,
+        reason: 'a silent standee must not mime',
+      );
+
+      // Sample her jaw across a couple of sentences she speaks on the board.
+      // With narration switched off no clip plays, so this proves the silent
+      // cadence keeps her talking at a human pace.
+      final seen = <String>{};
+      var sawBlink = false;
+      for (var step = 0; step < 240; step++) {
+        await tester.pump(const Duration(milliseconds: 20));
+        final assets = standeeAssets();
+        for (final asset in assets) {
+          if (asset.contains('teacher_pointer_talk_')) seen.add(asset);
+          if (asset.endsWith('teacher_pointer_blink.webp')) sawBlink = true;
+        }
+      }
+      expect(
+        seen,
+        contains('assets/characters/teacher_pointer_talk_half.webp'),
+      );
+      // A blink rides on top of the jaw instead of replacing it.
+      expect(sawBlink, isTrue);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('turning the page silences the page you left', (tester) async {
       final port = FakeAudioPort();
       final audio = await _pumpScreen(

@@ -22,7 +22,7 @@ import 'speech_cadence.dart';
 ///
 /// ```dart
 /// final mouth = AudioSpeakingMouth(audio: AudioScope.maybeOf(context));
-/// mouth.followClip('teach_1_en');   // or mouth.startSilent(cadence)
+/// mouth.startClip('teach_1_en');   // or mouth.startSilent(cadence)
 /// mouth.sample(tickerElapsed);      // each frame
 /// mouth.mouth;                      // read the shape
 /// ```
@@ -67,7 +67,7 @@ class AudioSpeakingMouth {
   }
 
   /// Follow the real voice of [clipId] until it stops playing.
-  void followClip(String clipId) {
+  void startClip(String clipId) {
     if (_clipId == clipId) return;
     _clipId = clipId;
     _silent = null;

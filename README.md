@@ -63,6 +63,10 @@ provide translations and explanations.
   `assets/data/chapters/chapter_NN.json` — add a chapter by adding one JSON
   file and one manifest entry; no code changes
 - Feature-based structure under `lib/features/`, models under `lib/data/`
+- **Lesson standee frames**: `tool/build_teacher_pose_frames.py` authors talking
+  and blink frames for Mrs. Sen's three lesson poses (`teacher_pointer`,
+  `teacher_book`, `teacher_invite`) with a local, feathered jaw deformation plus
+  eyelid bands, so she keeps teaching the board instead of standing frozen
 - **Measured lip-sync**: `tool/build_audio_lipsync.py` reads every narration MP3,
   extracts a 20 Hz mouth timeline (vocal energy, open-vowel formant, sibilants,
   real pauses) and writes `lib/features/audio/audio_lipsync.g.dart`. Characters

@@ -89,7 +89,7 @@ void main() {
   group('AudioSpeakingMouth', () {
     test('holds the mouth shut through the buffering window', () {
       final mouth = AudioSpeakingMouth(audio: null)
-        ..followClip('silent_for_now');
+        ..startClip('silent_for_now');
       // No audio controller at all: nothing is playing, so nothing moves.
       mouth.sample(Duration.zero);
       expect(mouth.mouth, MouthFrame.closed);

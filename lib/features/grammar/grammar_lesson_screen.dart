@@ -1,17 +1,21 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/state/content_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/accessible_layout.dart';
+import '../../core/utils/audio_speaking_mouth.dart';
+import '../../core/utils/speech_cadence.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/idle_motion.dart';
 import '../../core/widgets/listen_button.dart';
 import '../../data/models/chapter.dart';
 import '../audio/audio_controller.dart';
+import '../audio/audio_lipsync.g.dart';
 import '../quiz/quiz_screen.dart';
 
 /// Screen 10 — the grammar lesson, staged as a moment in class.
@@ -33,7 +37,7 @@ class GrammarLessonScreen extends StatefulWidget {
 }
 
 class _GrammarLessonScreenState extends State<GrammarLessonScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   /// The board is written, not rendered: each page sweeps in line by line.
   late final AnimationController _chalk = AnimationController(
     vsync: this,
@@ -61,17 +65,138 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
   /// provider again is no longer safe.
   AudioController? _audio;
 
+  /// Mrs Sen keeps explaining while the board is read aloud, so her jaw is
+  /// driven from the same measured lip-sync timeline as the story cast.
+  AudioSpeakingMouth? _mouth;
+  late final Ticker _mouthTicker = createTicker(_onMouthTick);
+
+  /// Eyelid state on the animation clock — the jaw itself is measured from audio.
+  bool _blinking = false;
+
+  /// Mrs Sen's line for the page on the board, in the current board language.
+  /// Her silent lip-sync reads this text when no recording is playing.
+  String _spokenLine = '';
+
+  /// True once the first delivery has been armed for this page.
+  bool _lineQueued = false;
+
+  /// Where she is in that line: the moment her silent delivery started, and
+  /// how long the sentence takes to say. A delivery is re-armed every time she
+  /// finishes, so the standee keeps teaching the whole time the page is open.
+  DateTime _slotStartedAt = DateTime.fromMillisecondsSinceEpoch(0);
+  Duration _slotLength = Duration.zero;
+  String? _slotClipId;
+
+  /// A blink lasts about a sixth of a second, and comes round every few
+  /// seconds with a per-page offset so it never feels metronomic.
+  static const int _blinkMs = 150;
+  static const int _blinkPeriodMs = 3900;
+
+  bool _blinkAt(Duration elapsed) {
+    final pos = (elapsed.inMilliseconds + _page * 1170) % _blinkPeriodMs;
+    return pos < _blinkMs;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _audio = AudioScope.maybeOf(context);
-    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final nextAudio = AudioScope.maybeOf(context);
+    if (!identical(nextAudio, _audio)) {
+      _audio?.removeListener(_syncMouth);
+      _mouth = AudioSpeakingMouth(audio: nextAudio);
+      _audio = nextAudio;
+      _audio?.addListener(_syncMouth);
+    }
+    if (reduceMotion) {
       _chalk.value = 1;
+    }
+    if (reduceMotion) {
+      if (_mouthTicker.isActive) _mouthTicker.stop();
+      _mouth?.stop();
+    } else if (!_mouthTicker.isActive) {
+      _mouthTicker.start();
+    }
+  }
+
+  /// Points her jaw at whatever is audible: her own `teach_*` recording when it
+  /// plays, the board narration when that is the sound, and a calm silent read
+  /// of her line when narration is off — she always talks, like a real teacher.
+  void _syncMouth() {
+    if (_spokenLine.isEmpty && _audio?.playingId == null) return;
+    // No AudioScope in this tree (golden tests, storyboard harness): she keeps
+    // her resting pose rather than guessing at a timeline.
+    final mouth = _mouth ??= AudioSpeakingMouth(audio: _audio);
+    final audio = _audio;
+    final playing = audio?.playingId;
+
+    final audioLang = _boardLangForAudio();
+    final candidates = <String>[
+      'teach_${_page + 1}_$audioLang',
+      switch (_page) {
+        0 => 'board_${widget.chapterId}_explain_$audioLang',
+        1 => 'board_${widget.chapterId}_examples_en',
+        _ => '',
+      },
+    ];
+
+    final clip = candidates.where((c) => c.isNotEmpty && c == playing).toList();
+    if (clip.isNotEmpty && AudioLipSync.has(clip.first)) {
+      // A real recording is sounding: follow its measured timeline instead.
+      _slotClipId = null;
+      _slotLength = Duration.zero;
+      mouth.startClip(clip.first);
+      return;
+    }
+
+    if (_spokenLine.isEmpty) {
+      _slotClipId = null;
+      _slotLength = Duration.zero;
+      mouth.stop();
+      return;
+    }
+
+    // No sound right now: she delivers the sentence silently, at the pace a
+    // person would say it, then pauses like a teacher waiting for the class.
+    final cadence = SpeechCadence.fromText(_spokenLine);
+    final now = DateTime.now();
+    if (_slotClipId != null || _slotLength == Duration.zero) {
+      _slotClipId = _spokenLine;
+      _slotStartedAt = now;
+      _slotLength = cadence.silentDuration;
+      mouth.startSilent(cadence);
+      return;
+    }
+
+    final elapsed = now.difference(_slotStartedAt);
+    if (elapsed >= _slotLength + const Duration(milliseconds: 1400)) {
+      // Finished the sentence and held the pause: start a fresh delivery.
+      _slotStartedAt = now;
+      _slotLength = cadence.silentDuration;
+      mouth.startSilent(cadence);
+    }
+  }
+
+  String _boardLangForAudio() {
+    final support = context.read<SettingsController>().supportLanguage;
+    return _boardInSupportLanguage ? support : 'en';
+  }
+
+  void _onMouthTick(Duration elapsed) {
+    final mouth = _mouth;
+    final mouthChanged = mouth?.sample() ?? false;
+    final blink = _blinkAt(elapsed);
+    if (mouthChanged || blink != _blinking) {
+      if (!mounted) return;
+      setState(() => _blinking = blink);
     }
   }
 
   @override
   void dispose() {
+    _audio?.removeListener(_syncMouth);
+    _mouthTicker.dispose();
+    _mouth?.dispose();
     _audio?.stop();
     _chalk.dispose();
     super.dispose();
@@ -89,6 +214,8 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
       _page = (_page + (forward ? 1 : -1)).clamp(0, _pageCount - 1);
       _revealAnswers = false;
     });
+    _lineQueued = false;
+    _syncMouth();
     if (MediaQuery.disableAnimationsOf(context)) {
       _chalk.value = 1;
     } else {
@@ -108,6 +235,17 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
     }
     final lang = settings.supportLanguage;
     final boardLang = _boardInSupportLanguage ? lang : 'en';
+    final teacherLine = _teacherLine(boardLang, _page);
+    if (!_lineQueued) {
+      // Start her jaw once the first frame is laid out, so the standee begins
+      // teaching instead of standing frozen until something else happens.
+      _lineQueued = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _spokenLine = teacherLine;
+        _syncMouth();
+      });
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF16241E),
@@ -126,8 +264,11 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                   child: _TopBar(
                     chapter: chapter,
                     boardLang: boardLang,
-                    onToggleLanguage: () => setState(() =>
-                        _boardInSupportLanguage = !_boardInSupportLanguage),
+                    onToggleLanguage: () => setState(() {
+                      _boardInSupportLanguage = !_boardInSupportLanguage;
+                      // New language, new sentence: she starts it over.
+                      _lineQueued = false;
+                    }),
                     onBack: () => Navigator.of(context).maybePop(),
                   ),
                 ),
@@ -151,8 +292,11 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
                       },
                       teacher: _TeacherStage(
                         pose: _poses[_page],
-                        line: _teacherLine(boardLang, _page),
+                        line: teacherLine,
                         clipId: 'teach_${_page + 1}_$boardLang',
+                        eyeBand: _poseEyeBand[_page],
+                        mouthFrame: _mouth?.mouth,
+                        blinking: _blinking,
                       ),
                     ),
                   ),
@@ -183,10 +327,32 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
   /// One standee per page: pointer on the rule, book while reading the
   /// examples, open palms for "your turn".
   static const List<TeacherPose> _poses = [
-    TeacherPose('assets/characters/teacher_pointer.webp', 479 / 703),
-    TeacherPose('assets/characters/teacher_book.webp', 428 / 714),
-    TeacherPose('assets/characters/teacher_invite.webp', 328 / 708),
+    TeacherPose(
+      'assets/characters/teacher_pointer.webp',
+      479 / 703,
+      talkHalf: 'assets/characters/teacher_pointer_talk_half.webp',
+      talkOpen: 'assets/characters/teacher_pointer_talk_open.webp',
+      blink: 'assets/characters/teacher_pointer_blink.webp',
+    ),
+    TeacherPose(
+      'assets/characters/teacher_book.webp',
+      428 / 714,
+      talkHalf: 'assets/characters/teacher_book_talk_half.webp',
+      talkOpen: 'assets/characters/teacher_book_talk_open.webp',
+      blink: 'assets/characters/teacher_book_blink.webp',
+    ),
+    TeacherPose(
+      'assets/characters/teacher_invite.webp',
+      328 / 708,
+      talkHalf: 'assets/characters/teacher_invite_talk_half.webp',
+      talkOpen: 'assets/characters/teacher_invite_talk_open.webp',
+      blink: 'assets/characters/teacher_invite_blink.webp',
+    ),
   ];
+
+  /// Height fraction of the eyelid band inside each pose, measured from the
+  /// sprites, so a blink never reaches down into a talking mouth.
+  static const List<double> _poseEyeBand = [0.136, 0.132, 0.122];
 
   /// One sentence per page, in the language the learner reads in. The long
   /// explanation belongs on the board; this is the teacher talking over it.
@@ -987,20 +1153,61 @@ class _ChalkUnderline extends StatelessWidget {
 
 /// One standee and its art aspect.
 class TeacherPose {
-  const TeacherPose(this.asset, this.aspect);
+  const TeacherPose(
+    this.asset,
+    this.aspect, {
+    required this.talkHalf,
+    required this.talkOpen,
+    required this.blink,
+  });
 
   final String asset;
   final double aspect;
+
+  /// Pixel-registered mouth and eyelid frames for this pose, so Mrs. Sen's jaw
+  /// moves while she explains the board instead of standing frozen beside a
+  /// speaking bubble. Built by `tool/build_teacher_pose_frames.py`.
+  final String talkHalf;
+  final String talkOpen;
+  final String blink;
+
+  /// Body frame carrying only the jaw shape; eyelids are overlaid separately.
+  String baseFor(MouthFrame mouth) {
+    switch (mouth) {
+      case MouthFrame.open:
+        return talkOpen;
+      case MouthFrame.half:
+        return talkHalf;
+      case MouthFrame.closed:
+        return asset;
+    }
+  }
 }
 
 /// Keep the silhouette and the speech bubble out of the writing's hit area.
 class _TeacherStage extends StatelessWidget {
-  const _TeacherStage(
-      {required this.pose, required this.line, required this.clipId});
+  const _TeacherStage({
+    required this.pose,
+    required this.line,
+    required this.clipId,
+    required this.eyeBand,
+    required this.mouthFrame,
+    required this.blinking,
+  });
 
   final TeacherPose pose;
   final String line;
   final String clipId;
+
+  /// Height fraction of the eyelid band inside [pose]'s sprite.
+  final double eyeBand;
+
+  /// Mouth shape measured from whatever audio is sounding, or null when she is
+  /// not speaking at all.
+  final MouthFrame? mouthFrame;
+
+  /// True for the ~150 ms of an eyelid closure.
+  final bool blinking;
 
   @override
   Widget build(BuildContext context) {
@@ -1015,7 +1222,12 @@ class _TeacherStage extends StatelessWidget {
               child: IdleBob(
                 period: 5000,
                 amplitude: 0.005,
-                child: _Teacher(pose: pose),
+                child: _Teacher(
+                  pose: pose,
+                  eyeBand: eyeBand,
+                  mouthFrame: mouthFrame,
+                  blinking: blinking,
+                ),
               )),
         );
         final speech = _TeacherSays(text: line, clipId: clipId);
@@ -1033,28 +1245,30 @@ class _TeacherStage extends StatelessWidget {
 }
 
 class _Teacher extends StatelessWidget {
-  const _Teacher({required this.pose});
+  const _Teacher({
+    required this.pose,
+    required this.eyeBand,
+    required this.mouthFrame,
+    required this.blinking,
+  });
 
   final TeacherPose pose;
+  final double eyeBand;
+
+  /// Current jaw shape; null keeps the resting smile of the standee.
+  final MouthFrame? mouthFrame;
+
+  final bool blinking;
 
   @override
   Widget build(BuildContext context) {
-    final art = Image.asset(
-      pose.asset,
-      fit: BoxFit.contain,
-      alignment: Alignment.bottomRight,
-      filterQuality: FilterQuality.high,
-      gaplessPlayback: true,
-      excludeFromSemantics: true,
-      errorBuilder: (_, __, ___) => Image.asset(
-        'assets/characters/teacher_full.webp',
-        fit: BoxFit.contain,
-        alignment: Alignment.bottomRight,
-        filterQuality: FilterQuality.high,
-        gaplessPlayback: true,
-        excludeFromSemantics: true,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-      ),
+    final mouth = mouthFrame ?? MouthFrame.closed;
+    final bodyPath = pose.baseFor(mouth);
+    final art = _PoseImage(
+      path: bodyPath,
+      fallback: pose.asset,
+      eyeBand: eyeBand,
+      blinking: blinking,
     );
     return Stack(
       fit: StackFit.expand,
@@ -1067,15 +1281,70 @@ class _Teacher extends StatelessWidget {
             imageFilter: ImageFilter.blur(
                 sigmaX: 7, sigmaY: 7, tileMode: TileMode.decal),
             child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                    Colors.black.withValues(alpha: 0.32), BlendMode.srcIn),
-                child: art),
+              colorFilter: ColorFilter.mode(
+                  Colors.black.withValues(alpha: 0.32), BlendMode.srcIn),
+              child: _PoseImage(
+                path: bodyPath,
+                fallback: pose.asset,
+                eyeBand: eyeBand,
+                blinking: false,
+              ),
+            ),
           ),
         ),
         art,
       ],
     );
   }
+}
+
+/// One standee frame with, while she talks, only the eyelid band taken from the
+/// blink frame — the jaw keeps its vowel shape through the blink.
+class _PoseImage extends StatelessWidget {
+  const _PoseImage({
+    required this.path,
+    required this.fallback,
+    required this.eyeBand,
+    required this.blinking,
+  });
+
+  final String path;
+  final String fallback;
+  final double eyeBand;
+  final bool blinking;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget image(String asset) => Image.asset(
+          asset,
+          key: ValueKey<String>(asset),
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomRight,
+          filterQuality: FilterQuality.high,
+          gaplessPlayback: true,
+          excludeFromSemantics: true,
+          errorBuilder: (_, __, ___) =>
+              asset == fallback ? const SizedBox.shrink() : image(fallback),
+        );
+
+    final body = image(path);
+    if (!blinking) return body;
+    return Stack(
+      fit: StackFit.expand,
+      alignment: Alignment.bottomRight,
+      children: [
+        body,
+        Align(
+          alignment: Alignment.topRight,
+          heightFactor: eyeBand,
+          child: ClipRect(child: image(_blinkPathFor(path))),
+        ),
+      ],
+    );
+  }
+
+  static String _blinkPathFor(String bodyPath) => bodyPath.replaceFirst(
+      RegExp(r'(_talk_half|_talk_open)?\.webp$'), '_blink.webp');
 }
 
 class _TeacherSays extends StatelessWidget {
