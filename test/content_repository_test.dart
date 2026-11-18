@@ -50,6 +50,13 @@ void main() {
       }
     });
 
+    test('every chapter uses all four correct answer positions', () {
+      for (final chapter in repository.chapters) {
+        final positions = chapter.quiz.map((q) => q.correctIndex).toSet();
+        expect(positions, {0, 1, 2, 3}, reason: chapter.id);
+      }
+    });
+
     test('every chapter JSON passes validation', () {
       for (final chapter in repository.chapters) {
         // Validation runs on the parsed structure via a fresh model build.

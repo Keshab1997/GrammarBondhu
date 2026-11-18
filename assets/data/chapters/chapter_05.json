@@ -148,8 +148,8 @@
     {
       "question_id": "ch05_q1",
       "question": "Which is the correct sentence?",
-      "options": ["Rahul writes a letter.", "Writes Rahul a letter.", "A letter Rahul writes.", "Rahul a letter writes."],
-      "correct_index": 0,
+      "options": ["Writes Rahul a letter.", "A letter Rahul writes.", "Rahul writes a letter.", "Rahul a letter writes."],
+      "correct_index": 2,
       "explanation": {
         "en": "The order is Subject + Verb + Object: Rahul (subject) + writes (verb) + a letter (object).",
         "bn": "ক্রমটা Subject + Verb + Object: Rahul (subject) + writes (verb) + a letter (object)।",
@@ -159,8 +159,8 @@
     {
       "question_id": "ch05_q2",
       "question": "___ starts at ten.",
-      "options": ["The fair", "At ten", "Starts", "Us"],
-      "correct_index": 0,
+      "options": ["At ten", "The fair", "Starts", "Us"],
+      "correct_index": 1,
       "explanation": {
         "en": "Every sentence needs a subject first — 'The fair' is the subject here.",
         "bn": "প্রতিটি বাক্যের শুরুতে subject দরকার — এখানে 'The fair' হলো subject।",
@@ -170,8 +170,8 @@
     {
       "question_id": "ch05_q3",
       "question": "Choose the correct sentence:",
-      "options": ["We love our school.", "Love we our school.", "Our school we love.", "We our school love."],
-      "correct_index": 0,
+      "options": ["Love we our school.", "Our school we love.", "We our school love.", "We love our school."],
+      "correct_index": 3,
       "explanation": {
         "en": "Subject (We) comes first, then the verb (love), then the object (our school).",
         "bn": "Subject (We) আগে আসে, তারপর verb (love), তারপর object (our school)।",
@@ -192,8 +192,8 @@
     {
       "question_id": "ch05_q5",
       "question": "Choose the correct sentence:",
-      "options": ["She sings a song.", "Sings she a song.", "A song she sings.", "She a song sings."],
-      "correct_index": 0,
+      "options": ["Sings she a song.", "She sings a song.", "A song she sings.", "She a song sings."],
+      "correct_index": 1,
       "explanation": {
         "en": "Subject (She) + Verb (sings) + Object (a song) — the clear English order.",
         "bn": "Subject (She) + Verb (sings) + Object (a song) — স্পষ্ট ইংরেজি ক্রম।",
