@@ -21,6 +21,11 @@ jobs:
     uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.17.0
     with:
       flutter-channel: stable
+      # AGP 9.3.1 (what Flutter 3.50.0 asks for) is compiled against the JDK 21
+      # API set, and its lint task dies on JDK 17 with
+      # NoSuchMethodError: java.util.List.removeLast() while analysing
+      # firebase_core. Build with 21 so the toolchain matches itself.
+      java-version: "21"
       working-directory: "."
       build-apk: ${{ inputs.format == 'apk' }}
       build-aab: ${{ inputs.format == 'aab' }}
