@@ -5,6 +5,7 @@ import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
+import '../../core/utils/accessible_layout.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
 import '../../data/models/chapter.dart';
@@ -108,6 +109,11 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
                 children: [
                   if (Navigator.of(context).canPop())
                     IconButton(
+                      tooltip: 'Back',
+                      style: IconButton.styleFrom(
+                          minimumSize: const Size.square(
+                              AccessibleLayout.minTouchTarget),
+                          visualDensity: VisualDensity.standard),
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
@@ -199,29 +205,26 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Material + InkWell (same pattern as AppCard): the ink needs its own
-    // Material to paint on, and the colour lives on the Material so the
-    // splash is not hidden under the chip's fill.
-    return Material(
-      color: selected ? AppColors.primary : AppColors.primarySoft,
-      borderRadius: BorderRadius.circular(AppRadii.chip),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadii.chip),
-        child: Container(
+    return Semantics(
+      container: true,
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(
+          minimumSize: const Size.square(AccessibleLayout.minTouchTarget),
+          visualDensity: VisualDensity.standard,
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.chip),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: selected ? Colors.white : AppColors.primary,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          ),
+          foregroundColor: selected ? Colors.white : AppColors.primaryDark,
+          backgroundColor: selected ? AppColors.primary : AppColors.primarySoft,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.chip)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         ),
+        child: Text(label),
       ),
     );
   }
@@ -259,42 +262,75 @@ class _ChapterCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final topic = chapter.grammarTopic.of(supportLanguage);
     final level = chapter.difficultyLabel;
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final step = (resumeStep ?? 0).clamp(0, sceneCount) + 1;
+    final steps = sceneCount + 1;
+    final thumbnail = ChapterThumbnail(
+      assetPath: chapter.thumbnailAsset,
+      // The solid lock badge, not a faded fallback illustration, marks locks.
+      fallbackIcon: Icons.auto_stories_rounded,
+      size: 64,
+    );
+    return Material(
+      color: AppColors.surface,
+      elevation: 2,
+      shadowColor: AppColors.primary.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        side: inProgress
+            ? BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.35), width: 1.5)
+            : completed
+                ? BorderSide(color: AppColors.success.withValues(alpha: 0.30))
+                : BorderSide.none,
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Locked art is dimmed: a locked chapter shouldn't look as
-              // inviting as the one you can actually open.
-              // The chapter number lives on the artwork, where a reader scans
-              // for it, instead of inside the title string.
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Opacity(
-                    opacity: locked ? 0.62 : 1,
-                    child: ChapterThumbnail(
-                      assetPath: chapter.thumbnailAsset,
-                      fallbackIcon: locked
-                          ? Icons.lock_rounded
-                          : Icons.auto_stories_rounded,
-                      size: 64,
+                  if (locked)
+                    ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Color(0x4D1E293B), BlendMode.srcATop),
+                        child: thumbnail)
+                  else
+                    thumbnail,
+                  if (locked)
+                    Positioned(
+                      bottom: -2,
+                      right: -2,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.textPrimary,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(Icons.lock_rounded,
+                                size: 12, color: Colors.white)),
+                      ),
                     ),
-                  ),
                   Positioned(
                     left: -4,
                     top: -4,
                     child: Container(
-                      width: 22,
-                      height: 22,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 2),
+                      constraints:
+                          const BoxConstraints(minWidth: 22, minHeight: 22),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: locked ? AppColors.textMuted : AppColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        color: locked
+                            ? AppColors.textSecondary
+                            : AppColors.primary,
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: Text(
@@ -320,15 +356,13 @@ class _ChapterCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             chapter.title.en,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                             style: text.titleMedium,
                           ),
                         ),
                         if (!locked && !completed && !inProgress)
-                          _Badge(
+                          const _Badge(
                             label: 'NEW',
-                            color: AppColors.accentDark,
+                            color: Color(0xFF854D0E),
                           ),
                         if (completed)
                           const Icon(Icons.check_circle_rounded,
@@ -345,7 +379,8 @@ class _ChapterCard extends StatelessWidget {
                     if (level.isNotEmpty && level != 'Beginner')
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: _Badge(label: level, color: AppColors.primary),
+                        child:
+                            _Badge(label: level, color: AppColors.primaryDark),
                       ),
                     const SizedBox(height: 6),
                     if (completed)
@@ -355,26 +390,29 @@ class _ChapterCard extends StatelessWidget {
                         children: [
                           Text('Completed',
                               style: text.bodySmall?.copyWith(
-                                  color: AppColors.success,
+                                  color: const Color(0xFF065F46),
                                   fontWeight: FontWeight.w700)),
                           StarsDisplay(count: stars, size: 15),
                         ],
                       )
-                    else if (inProgress)
+                    else if (inProgress) ...[
                       Wrap(
                         spacing: AppSpacing.sm,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           const _Badge(
-                              label: 'IN PROGRESS', color: AppColors.primary),
+                              label: 'IN PROGRESS',
+                              color: AppColors.primaryDark),
                           Text(
-                            'Step ${(resumeStep ?? 0).clamp(0, sceneCount) + 1} of ${sceneCount + 1}',
+                            'Step $step of $steps',
                             style: text.bodySmall
                                 ?.copyWith(color: AppColors.primary),
                           ),
                         ],
-                      )
-                    else if (locked)
+                      ),
+                      const SizedBox(height: 6),
+                      AppProgressBar(value: step / steps, height: 5),
+                    ] else if (locked)
                       Row(
                         children: [
                           const Icon(Icons.lock_rounded,
@@ -383,8 +421,6 @@ class _ChapterCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               unlocksAfter ?? 'Locked',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                               style: text.bodySmall
                                   ?.copyWith(color: AppColors.textSecondary),
                             ),
@@ -394,7 +430,7 @@ class _ChapterCard extends StatelessWidget {
                     else
                       Text('Ready to start',
                           style: text.bodySmall
-                              ?.copyWith(color: AppColors.textMuted)),
+                              ?.copyWith(color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -406,7 +442,7 @@ class _ChapterCard extends StatelessWidget {
                 ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

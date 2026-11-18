@@ -73,7 +73,8 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _next(Chapter chapter) async {
     if (!_submitted || _submitting || _finishing) return;
-    if (_questionIndex < chapter.quiz.length - 1) {
+    final total = chapter.quiz.length;
+    if (_questionIndex < total - 1) {
       setState(() {
         _questionIndex += 1;
         _countedThisQuestion = false;
@@ -91,7 +92,7 @@ class _QuizScreenState extends State<QuizScreen> {
       result = await context.read<ProgressController>().recordQuizRun(
             chapter: chapter,
             correct: _correctCount,
-            total: chapter.quiz.length,
+            total: total,
           );
     } catch (_) {
       if (mounted) {
@@ -106,7 +107,11 @@ class _QuizScreenState extends State<QuizScreen> {
     if (result == null || !mounted) return;
     Navigator.of(context).pushReplacementNamed(
       ChapterCompletedScreen.routeName,
-      arguments: CompletedArgs(chapterId: chapter.id, result: result),
+      arguments: CompletedArgs(
+          chapterId: chapter.id,
+          result: result,
+          correct: _correctCount,
+          total: total),
     );
   }
 
@@ -138,6 +143,8 @@ class _QuizScreenState extends State<QuizScreen> {
           Image.asset(
             'assets/illustrations/quiz_time.webp',
             fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+            excludeFromSemantics: true,
             errorBuilder: (_, __, ___) => Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -153,7 +160,11 @@ class _QuizScreenState extends State<QuizScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xAA1B5FC1), Color(0xCC2F80ED)],
+                colors: [
+                  Color(0xEB172E60),
+                  Color(0x401B5FC1),
+                  Color(0x801E3A8A)
+                ],
               ),
             ),
           ),
@@ -166,6 +177,10 @@ class _QuizScreenState extends State<QuizScreen> {
                     children: [
                       IconButton(
                         tooltip: 'Close quiz',
+                        style: IconButton.styleFrom(
+                            minimumSize: const Size.square(
+                                AccessibleLayout.minTouchTarget),
+                            visualDensity: VisualDensity.standard),
                         onPressed: () => Navigator.of(context).maybePop(),
                         icon: const Icon(Icons.close_rounded,
                             color: Colors.white),
@@ -181,7 +196,7 @@ class _QuizScreenState extends State<QuizScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white24,
+                                color: AppColors.primaryDeeper,
                                 borderRadius:
                                     BorderRadius.circular(AppRadii.chip),
                               ),
@@ -198,21 +213,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     ],
                   ),
                 ),
-                // Where you are in the set, as a bar rather than another label.
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.md + 8),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(99),
-                    child: LinearProgressIndicator(
-                      value: (_questionIndex + 1) / chapter.quiz.length,
-                      minHeight: 6,
-                      backgroundColor: Colors.white24,
-                      valueColor:
-                          const AlwaysStoppedAnimation(AppColors.accent),
-                    ),
-                  ),
-                ),
+                _QuestionProgress(
+                    current: _questionIndex, total: chapter.quiz.length),
                 // The card used to be a full-height container with a Spacer,
                 // which left ~600 dp of blank white under four answer options.
                 // It now hugs the content, centres in the space that is left,
@@ -220,6 +222,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) => SingleChildScrollView(
+                      key: ValueKey(question.id),
                       padding: const EdgeInsets.all(AppSpacing.md),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
@@ -229,26 +232,47 @@ class _QuizScreenState extends State<QuizScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              constraints: const BoxConstraints(maxWidth: 560),
+                              padding: EdgeInsets.all(
+                                  AccessibleLayout.isCompact(context)
+                                      ? AppSpacing.md
+                                      : AppSpacing.lg),
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
+                                boxShadow: AppShadows.card,
+                                border: Border.all(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.12)),
                                 borderRadius:
                                     BorderRadius.circular(AppRadii.sheet),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  Center(
+                                      child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 4),
+                                    decoration: const ShapeDecoration(
+                                        color: AppColors.primarySoft,
+                                        shape: StadiumBorder()),
+                                    child: Text(chapter.grammarTopic.en,
+                                        textAlign: TextAlign.center,
+                                        style: text.bodySmall?.copyWith(
+                                            color: AppColors.primaryDark,
+                                            fontWeight: FontWeight.w700)),
+                                  )),
+                                  const SizedBox(height: AppSpacing.sm),
                                   Semantics(
                                     header: true,
                                     child: Text(
                                       question.question,
                                       style: text.headlineMedium
-                                          ?.copyWith(fontSize: 24),
+                                          ?.copyWith(fontSize: 24, height: 1.4),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
-                                  const SizedBox(height: AppSpacing.lg),
+                                  const SizedBox(height: AppSpacing.md),
                                   for (var i = 0;
                                       i < question.options.length;
                                       i++) ...[
@@ -292,7 +316,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                           : 'Tap Submit when you are ready',
                                       textAlign: TextAlign.center,
                                       style: text.bodyMedium?.copyWith(
-                                        color: AppColors.textMuted,
+                                        color: AppColors.textSecondary,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -343,6 +367,39 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
+/// The counter already announces the position. These marks make the same
+/// information glanceable without adding one focus stop per question.
+class _QuestionProgress extends StatelessWidget {
+  const _QuestionProgress({required this.current, required this.total});
+
+  final int current;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Row(children: [
+        for (var i = 0; i < total; i++)
+          Expanded(
+              child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            height: 6,
+            decoration: BoxDecoration(
+              color: i < current
+                  ? AppColors.primary
+                  : i == current
+                      ? AppColors.accentDark
+                      : AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          )),
+      ]),
+    ));
+  }
+}
+
 enum _OptionState { idle, selected, correct, wrong }
 
 class _OptionTile extends StatelessWidget {
@@ -363,7 +420,7 @@ class _OptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (background, border) = switch (state) {
-      _OptionState.idle => (AppColors.surface, AppColors.primarySoft),
+      _OptionState.idle => (AppColors.surface, const Color(0xFFCBD5E1)),
       _OptionState.selected => (AppColors.primarySoft, AppColors.primary),
       _OptionState.correct => (AppColors.successSoft, AppColors.success),
       _OptionState.wrong => (AppColors.errorSoft, AppColors.error),
@@ -379,9 +436,12 @@ class _OptionTile extends StatelessWidget {
       _ => null,
     };
     final letter = String.fromCharCode(65 + index);
+    final badgeSize = MediaQuery.textScalerOf(context).scale(14) + 18;
     return Semantics(
+      container: true,
       button: true,
       enabled: enabled,
+      onTap: enabled ? onTap : null,
       inMutuallyExclusiveGroup: true,
       // A radio-style list: `selected` while answering, and a checked/unchecked
       // verdict once the answer is in. After submitting, the picked option is
@@ -400,7 +460,8 @@ class _OptionTile extends StatelessWidget {
           color: background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadii.button),
-            side: BorderSide(color: border, width: 1.6),
+            side: BorderSide(
+                color: border, width: state == _OptionState.idle ? 1 : 2),
           ),
           child: InkWell(
             onTap: enabled ? onTap : null,
@@ -414,14 +475,14 @@ class _OptionTile extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: 13),
+                    horizontal: AppSpacing.md, vertical: 9),
                 child: Row(
                   children: [
                     // A/B/C/D marker: the list stops looking like four text
                     // fields and starts looking like a quiz.
                     Container(
-                      width: 30,
-                      height: 30,
+                      width: badgeSize,
+                      height: badgeSize,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -432,16 +493,20 @@ class _OptionTile extends StatelessWidget {
                           _OptionState.wrong => AppColors.error,
                         },
                       ),
-                      child: Text(
-                        letter,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                          color: state == _OptionState.idle
-                              ? AppColors.textSecondary
-                              : Colors.white,
-                        ),
-                      ),
+                      child: switch (state) {
+                        _OptionState.correct => const Icon(Icons.check_rounded,
+                            color: AppColors.textPrimary, size: 20),
+                        _OptionState.wrong => const Icon(Icons.close_rounded,
+                            color: AppColors.textPrimary, size: 20),
+                        _ => Text(letter,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                              color: state == _OptionState.selected
+                                  ? Colors.white
+                                  : AppColors.textSecondary,
+                            )),
+                      },
                     ),
                     const SizedBox(width: AppSpacing.sm + 4),
                     Expanded(
@@ -451,12 +516,6 @@ class _OptionTile extends StatelessWidget {
                             fontWeight: FontWeight.w700, fontSize: 16),
                       ),
                     ),
-                    if (state == _OptionState.correct)
-                      const Icon(Icons.check_circle_rounded,
-                          color: AppColors.success, size: 20),
-                    if (state == _OptionState.wrong)
-                      const Icon(Icons.cancel_rounded,
-                          color: AppColors.error, size: 20),
                   ],
                 ),
               ),
@@ -496,13 +555,14 @@ class _FeedbackCard extends StatelessWidget {
         ? 'Correct. $note'
         : 'Incorrect. The correct answer is $correctAnswer. $note';
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: soft,
-        borderRadius: BorderRadius.circular(AppRadii.card),
+        color: AppColors.surface,
+        border: Border.all(color: color.withValues(alpha: 0.55)),
+        borderRadius: BorderRadius.circular(AppRadii.chip),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
             liveRegion: true,
@@ -510,50 +570,56 @@ class _FeedbackCard extends StatelessWidget {
             excludeSemantics: true,
             label: spoken,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      isCorrect
-                          ? Icons.check_circle_rounded
-                          : Icons.cancel_rounded,
-                      color: color,
-                      size: 28,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    // The verdict word takes the rest of the line and wraps;
-                    // at 200% it is 224 px wider than the card, which is the
-                    // overflow this test caught after submitting.
-                    Flexible(
-                      child: Text(
-                        isCorrect ? 'Correct!' : 'Incorrect',
-                        style: text.titleLarge?.copyWith(color: color),
-                      ),
-                    ),
-                  ],
+                ColoredBox(
+                    color: soft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                      child: Row(children: [
+                        Icon(
+                            isCorrect
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
+                            color: color),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                            child: Text(isCorrect ? 'Correct!' : 'Incorrect',
+                                style: text.titleLarge
+                                    ?.copyWith(color: AppColors.textPrimary))),
+                      ]),
+                    )),
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!isCorrect) ...[
+                          Text("The correct answer is: '$correctAnswer'",
+                              style: text.bodyLarge
+                                  ?.copyWith(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: AppSpacing.xs),
+                        ],
+                        Text(note,
+                            style: text.bodyMedium?.copyWith(
+                                color: AppColors.textPrimary, height: 1.45)),
+                      ]),
                 ),
-                if (!isCorrect) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    "The correct answer is: '$correctAnswer'",
-                    style:
-                        text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.sm),
-                Text(note, style: text.bodyMedium?.copyWith(height: 1.45)),
               ],
             ),
           ),
-          // These are actions in their own right, not part of the spoken verdict.
-          if (explanation.bn != null || explanation.hi != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            ExplanationLanguagePicker(
-              selected: activeLang,
-              onChanged: onLanguageChanged,
-              translations: explanation,
-              englishLabel: 'EN',
+          // Keep actionable language choices outside the live verdict node.
+          if (explanation.has('bn') || explanation.has('hi')) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: ExplanationLanguagePicker(
+                selected: activeLang,
+                onChanged: onLanguageChanged,
+                translations: explanation,
+                englishLabel: 'EN',
+              ),
             ),
           ],
         ],
