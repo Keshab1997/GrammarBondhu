@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grammar_bondhu/core/utils/asset_lookup.dart';
 import 'package:grammar_bondhu/data/models/chapter.dart';
 import 'package:grammar_bondhu/data/models/localized_text.dart';
+import 'package:grammar_bondhu/data/models/progress.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 
 void _expectTrilingual(LocalizedText text, String field) {
@@ -39,9 +40,24 @@ void main() {
         'ch08',
         'ch09',
         'ch10',
+        'ch11',
+        'ch12',
+        'ch13',
+        'ch14',
+        'ch15',
       ]);
       expect(repository.manifest.entries.map((entry) => entry.order),
-          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+          List.generate(15, (index) => index + 1));
+    });
+
+    test('the intermediate tier begins after ten beginner chapters', () {
+      final chapters = repository.chapters;
+      expect(chapters.take(10).map((chapter) => chapter.difficulty),
+          everyElement('beginner'));
+      final intermediate = chapters.skip(10);
+      expect(intermediate, hasLength(5));
+      expect(intermediate.map((chapter) => chapter.difficulty),
+          everyElement('intermediate'));
     });
 
     test('every bundled chapter JSON passes validation', () async {
@@ -103,18 +119,30 @@ void main() {
         expect(chapter.lesson.examples, hasLength(4), reason: chapter.id);
         expect(chapter.scenes.expand((scene) => scene.choices), isNotEmpty,
             reason: chapter.id);
+        expect(
+          AssetLookup.illustrations.values,
+          contains(chapter.thumbnailAsset),
+          reason: chapter.id,
+        );
+        expect(
+          AssetLookup.backgrounds.values,
+          contains(chapter.backgroundAsset),
+          reason: chapter.id,
+        );
         for (final asset in [chapter.thumbnailAsset, chapter.backgroundAsset]) {
           expect(asset, isNotNull, reason: chapter.id);
           expect(File(asset!).existsSync(), isTrue,
               reason: '${chapter.id}: $asset');
         }
         for (final scene in chapter.scenes) {
-          expect(AssetLookup.backgrounds.containsKey(scene.backgroundId), isTrue,
-              reason: scene.sceneId);
+          final background = AssetLookup.backgrounds[scene.backgroundId];
+          expect(background, isNotNull, reason: scene.sceneId);
+          expect(File(background!).existsSync(), isTrue, reason: background);
           expect(scene.characterIds, isNotEmpty, reason: scene.sceneId);
           for (final character in scene.characterIds) {
-            expect(AssetLookup.characters.containsKey(character), isTrue,
-                reason: scene.sceneId);
+            final portrait = AssetLookup.characterPath(character);
+            expect(portrait, isNotNull, reason: scene.sceneId);
+            expect(File(portrait!).existsSync(), isTrue, reason: portrait);
           }
           for (final line in scene.dialogue) {
             expect(scene.characterIds, contains(line.characterId),
@@ -144,9 +172,15 @@ void main() {
       expect(repository.byId('ch02')!.title.en, 'A New Friend');
       expect(repository.nextAfter('ch01')!.id, 'ch02');
       expect(repository.nextAfter('ch05')!.id, 'ch06');
-      expect(repository.nextAfter('ch10'), isNull);
+      expect(repository.nextAfter('ch10')!.id, 'ch11');
+      expect(repository.nextAfter('ch14')!.id, 'ch15');
+      expect(repository.nextAfter('ch15'), isNull);
+      expect(repository.byId('ch15')!.title.en, 'Our Class Scrapbook');
       expect(repository.recommendedNext((id) => id == 'ch01').id, 'ch02');
-      expect(repository.recommendedNext((_) => true).id, 'ch10');
+      final beginnerIds = repository.chapters.take(10).map((c) => c.id).toSet();
+      expect(repository.recommendedNext(beginnerIds.contains).id, 'ch11');
+      expect(repository.recommendedNext((id) => id != 'ch15').id, 'ch15');
+      expect(repository.recommendedNext((_) => true).id, 'ch15');
     });
 
     test('curriculum provides enough XP for English Champion', () {
@@ -154,7 +188,10 @@ void main() {
         0,
         (total, chapter) => total + chapter.rewards.xp,
       );
-      expect(totalXp, greaterThanOrEqualTo(700));
+      expect(totalXp, 1300);
+      final progress = UserProgress(totalXp: totalXp);
+      expect(progress.level, greaterThanOrEqualTo(5));
+      expect(progress.levelTitle, 'English Champion');
     });
   });
 }

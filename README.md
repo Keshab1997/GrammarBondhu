@@ -9,8 +9,11 @@ provide translations and explanations.
 
 ## Features
 
-- 📖 **Story-driven chapters** — 10 chapters follow Rahul, Priya and Mrs. Sen
-  through school adventures, with dialogue and optional interactive choices:
+- 📖 **Story-driven chapters** — 15 chapters follow Rahul, Priya and Mrs. Sen
+  through school adventures, with dialogue and optional interactive choices.
+
+  **Beginner · Chapters 1–10**
+
   1. **The New Student** — am / is / are
   2. **A New Friend** — simple present
   3. **The Mystery of the Library** — articles and prepositions
@@ -21,6 +24,15 @@ provide translations and explanations.
   8. **The Science Exhibition** — adjectives and comparisons
   9. **The School Newspaper** — asking questions (Do / Does / Did and Wh- words)
   10. **Ready for Sports Day** — helpful modals (can / should / must)
+
+  **Intermediate · Chapters 11–15**
+
+  11. **Planning the Class Picnic** — future plans (will / going to)
+  12. **Packing the Picnic Basket** — quantity words (some / any / many / much)
+  13. **In the School Garden** — adverbs of manner and frequency
+  14. **The Rainy-Day Play** — joining ideas (and / but / because / so)
+  15. **Our Class Scrapbook** — present perfect (have / has + past participle)
+
 - 🌐 **Three languages** — English + Bengali + Hindi translations, in-story
   language toggle (EN / বাং / हि)
 - 📝 **Grammar lessons** — rules, examples, character illustrations

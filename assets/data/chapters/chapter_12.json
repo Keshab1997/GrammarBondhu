@@ -1,0 +1,220 @@
+{
+  "chapter_id": "ch12",
+  "title": {
+    "en": "Packing the Picnic Basket",
+    "bn": "চড়ুইভাতির ঝুড়ি গোছানো",
+    "hi": "पिकनिक की टोकरी भरना"
+  },
+  "description": {
+    "en": "The class checks sandwiches and drinking water so everyone has enough for the picnic.",
+    "bn": "চড়ুইভাতিতে যাতে সবার জন্য যথেষ্ট থাকে, তাই ক্লাসের সবাই স্যান্ডউইচ আর খাওয়ার জল দেখে নেয়।",
+    "hi": "कक्षा के बच्चे सैंडविच और पीने का पानी जाँचते हैं, ताकि पिकनिक में सबके लिए काफ़ी हो।"
+  },
+  "grammar_topic": {
+    "en": "Quantity Words (some / any / many / much)",
+    "bn": "পরিমাণ বোঝানোর শব্দ (some / any / many / much)",
+    "hi": "मात्रा बताने वाले शब्द (some / any / many / much)"
+  },
+  "difficulty": "intermediate",
+  "estimated_duration_minutes": 14,
+  "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_classroom.webp",
+  "rewards": { "xp": 100, "coins": 20, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch12_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "We have some sandwiches. How many do we need for the first group?",
+            "bn": "আমাদের কাছে কিছু স্যান্ডউইচ আছে। প্রথম দলের জন্য কটা লাগবে?",
+            "hi": "हमारे पास कुछ सैंडविच हैं। पहले समूह के लिए कितने चाहिए?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "Six. I can count them while you tick the list.",
+            "bn": "ছ’টা। তুমি তালিকায় টিক দাও, আমি গুনে নিই।",
+            "hi": "छह। तुम सूची पर निशान लगाओ, मैं गिन लेता हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch12_s2",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "How much water is in the jug? Is there any in the spare bottle?",
+            "bn": "জগে কতটা জল আছে? বাড়তি বোতলটায় জল আছে কি?",
+            "hi": "जग में कितना पानी है? क्या दूसरी बोतल में भी पानी है?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "There isn’t any water in the bottle. There’s some in the jug, but not enough for everyone.",
+            "bn": "বোতলে একটুও জল নেই। জগে কিছুটা আছে, তবে সবার জন্য যথেষ্ট নয়।",
+            "hi": "बोतल में बिल्कुल पानी नहीं है। जग में थोड़ा है, लेकिन सबके लिए काफ़ी नहीं है।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I’ll fill the bottle with drinking water before we leave.",
+            "bn": "বেরোনোর আগে বোতলে খাওয়ার জল ভরে নেব।",
+            "hi": "जाने से पहले मैं बोतल में पीने का पानी भर दूँगी।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch12_s3",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "We’ve got plenty of water and enough sandwiches. Would you like some water, Mrs. Sen?",
+            "bn": "আমাদের কাছে অনেকটা জল আর যথেষ্ট স্যান্ডউইচ আছে। মিসেস সেন, একটু জল দেব?",
+            "hi": "हमारे पास ख़ूब पानी और काफ़ी सैंडविच हैं। सेन मैम, थोड़ा पानी लेंगी?"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Yes, please. That little sign helped everyone find the picnic spot!",
+            "bn": "হ্যাঁ, দাও। ওই ছোট বোর্ডটা দেখে সবাই চড়ুইভাতির জায়গাটা খুঁজে পেয়েছে!",
+            "hi": "हाँ, ज़रूर। उस छोटे बोर्ड की मदद से सबको पिकनिक की जगह मिल गई!"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch12_c1",
+          "text": {
+            "en": "Offer Priya some water, too.",
+            "bn": "প্রিয়াকেও একটু জল দিতে চাই।",
+            "hi": "प्रिया को भी थोड़ा पानी देने की पेशकश करें।"
+          },
+          "response": {
+            "en": "Thanks! Let’s set the jug in the shade so everyone can reach it.",
+            "bn": "ধন্যবাদ! জগটা ছায়ায় রাখি, যাতে সবাই জল নিতে পারে।",
+            "hi": "शुक्रिया! चलो जग को छाँव में रखें, ताकि सब वहाँ से पानी ले सकें।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "What Can You Count?",
+      "bn": "কোনটা গুনতে পারো?",
+      "hi": "तुम क्या गिन सकते हो?"
+    },
+    "explanation": {
+      "en": "Use many with plural things you can count, such as sandwiches. Use much with things you don’t count one by one, such as water. You can count bottles, but you measure the water inside them. Some often goes in positive statements or offers. Any often goes in ordinary questions and negative statements: “Is there any water?” or “There isn’t any water.”",
+      "bn": "স্যান্ডউইচের মতো গোনা যায় এমন জিনিসের বহুবচনের সঙ্গে many বসে। জলের মতো যা এক এক করে গোনা যায় না, তার সঙ্গে much বসে। বোতল গুনতে পারো, কিন্তু বোতলের ভেতরের জল মাপতে হয়। ইতিবাচক বাক্যে বা কিছু দেওয়ার প্রস্তাবে প্রায়ই some বসে। সাধারণ প্রশ্নে আর নেতিবাচক বাক্যে প্রায়ই any বসে: “Is there any water?” বা “There isn’t any water.”",
+      "hi": "सैंडविच जैसी गिनी जा सकने वाली चीज़ों के बहुवचन के साथ many लगाओ। पानी जैसी चीज़, जिसे एक-एक करके नहीं गिनते, उसके साथ much लगाओ। बोतलें गिनी जा सकती हैं, लेकिन उनके अंदर का पानी मापा जाता है। सकारात्मक वाक्यों या कुछ देने की पेशकश में अक्सर some आता है। साधारण सवालों या नकारात्मक वाक्यों में अक्सर any आता है: “Is there any water?” या “There isn’t any water.”"
+    },
+    "examples": [
+      {
+        "sentence": "How many sandwiches did we pack?",
+        "note": {
+          "en": "You can count sandwiches one at a time, so use many.",
+          "bn": "স্যান্ডউইচ এক একটা করে গোনা যায়, তাই many বসে।",
+          "hi": "सैंडविच एक-एक करके गिन सकते हो, इसलिए many लगता है।"
+        }
+      },
+      {
+        "sentence": "How much water is in the jug?",
+        "note": {
+          "en": "Use much because the question is about water, not about bottles or jugs.",
+          "bn": "প্রশ্নটা জল নিয়ে, বোতল বা জগের সংখ্যা নিয়ে নয়, তাই much বসে।",
+          "hi": "सवाल पानी की मात्रा के बारे में है, बोतलों या जग की गिनती के बारे में नहीं, इसलिए much लगता है।"
+        }
+      },
+      {
+        "sentence": "There isn’t any water in the bottle.",
+        "note": {
+          "en": "Isn’t + any shows there is no water.",
+          "bn": "isn’t + any দিয়ে বোঝায় একটুও জল নেই।",
+          "hi": "Isn’t + any बताता है कि ज़रा भी पानी नहीं है।"
+        }
+      },
+      {
+        "sentence": "Would you like some water?",
+        "note": {
+          "en": "Some sounds natural when offering something.",
+          "bn": "কিছু দেওয়ার প্রস্তাব করতে some স্বাভাবিক শোনায়।",
+          "hi": "कुछ देने की पेशकश में some स्वाभाविक लगता है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch12_q1",
+      "question": "How ___ sandwiches are in the basket?",
+      "options": ["much", "any", "some", "many"],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Use how many to ask for the number of sandwiches.",
+        "bn": "স্যান্ডউইচের সংখ্যা জানতে how many বসাও।",
+        "hi": "सैंडविच की संख्या पूछने के लिए how many लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch12_q2",
+      "question": "How ___ water is in the jug?",
+      "options": ["much", "many", "some", "any"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use how much to ask about the amount of water.",
+        "bn": "জলের পরিমাণ জানতে how much বসাও।",
+        "hi": "पानी की मात्रा पूछने के लिए how much लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch12_q3",
+      "question": "The bottle is completely empty. Which sentence clearly says that?",
+      "options": ["There is some water in the bottle.", "There isn’t any water in the bottle.", "There are many bottles of water.", "There isn’t much water, but there’s a little."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Isn’t any means zero here, not a little.",
+        "bn": "এখানে isn’t any মানে একটুও নেই, অল্প আছে এমন নয়।",
+        "hi": "यहाँ isn’t any का मतलब बिल्कुल नहीं है, थोड़ा-सा नहीं।"
+      }
+    },
+    {
+      "question_id": "ch12_q4",
+      "question": "Which sentence offers Priya water to drink?",
+      "options": ["Priya brought some water.", "Is there any water left in the jug?", "Priya, would you like some water?", "How much water did Priya drink?"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "“Would you like some water?” offers a drink rather than asking what’s left.",
+        "bn": "“Would you like some water?” বলে জল দেওয়ার প্রস্তাব করা হয়, কতটা বাকি আছে তা জানতে চাওয়া হয় না।",
+        "hi": "“Would you like some water?” पानी पीने की पेशकश है, बचे हुए पानी के बारे में सवाल नहीं।"
+      }
+    },
+    {
+      "question_id": "ch12_q5",
+      "question": "Which sentence says there is a little water to share?",
+      "options": ["There are some water to share.", "There is some water to share.", "There is many water to share.", "There is not any water to share."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Some water means there is an amount to share; use is with water.",
+        "bn": "some water মানে ভাগ করে নেওয়ার মতো জল আছে। water-এর সঙ্গে is বসে।",
+        "hi": "Some water का मतलब है कि बाँटने के लिए थोड़ा पानी है। Water के साथ is लगाओ।"
+      }
+    }
+  ]
+}

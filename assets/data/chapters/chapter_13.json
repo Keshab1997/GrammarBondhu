@@ -1,0 +1,212 @@
+{
+  "chapter_id": "ch13",
+  "title": {
+    "en": "In the School Garden",
+    "bn": "স্কুলের বাগানে",
+    "hi": "स्कूल के बगीचे में"
+  },
+  "description": {
+    "en": "After the picnic, Rahul and Priya help in the garden and watch a shy visitor.",
+    "bn": "চড়ুইভাতির পর রাহুল আর প্রিয়া বাগানের কাজে হাত লাগায় আর এক লাজুক অতিথিকে দেখে।",
+    "hi": "पिकनिक के बाद राहुल और प्रिया बगीचे में हाथ बँटाते हैं और एक शर्मीले मेहमान को देखते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Adverbs (How & How Often)",
+    "bn": "ক্রিয়াবিশেষণ (কীভাবে ও কত ঘন ঘন)",
+    "hi": "क्रियाविशेषण (कैसे और कितनी बार)"
+  },
+  "difficulty": "intermediate",
+  "estimated_duration_minutes": 14,
+  "thumbnail_asset": "assets/illustrations/ch02_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_school_garden.webp",
+  "rewards": { "xp": 110, "coins": 22, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch13_s1",
+      "background_id": "bg_school_garden",
+      "character_ids": ["priya", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The picnic was fun! I always check for wrappers before I leave the garden.",
+            "bn": "চড়ুইভাতিতে খুব মজা হয়েছে! বাগান ছাড়ার আগে আমি সব সময় দেখে নিই কোনো মোড়ক পড়ে আছে কি না।",
+            "hi": "पिकनिक में बड़ा मज़ा आया! बगीचे से जाने से पहले मैं हमेशा देखती हूँ कि कहीं कोई रैपर तो नहीं पड़ा।"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I found one by the bean plants. I’ll pick it up carefully so I don’t bend a stem.",
+            "bn": "শিমগাছগুলোর পাশে একটা পেলাম। সাবধানে তুলব, যাতে কোনো ডাঁটা বেঁকে না যায়।",
+            "hi": "सेम के पौधों के पास एक मिला। मैं उसे सावधानी से उठाऊँगा, ताकि कोई तना न मुड़े।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch13_s2",
+      "background_id": "bg_school_garden",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "These beans grow well here. I often check them after lunch. Oh, look at that butterfly!",
+            "bn": "এই শিমগাছগুলো এখানে ভালো বাড়ে। দুপুরের খাবারের পর প্রায়ই ওগুলো দেখতে আসি। ওই দেখো, প্রজাপতি!",
+            "hi": "सेम के ये पौधे यहाँ अच्छे से बढ़ते हैं। मैं अक्सर दोपहर के खाने के बाद इन्हें देखने आती हूँ। अरे, उस तितली को देखो!"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Let’s watch quietly. I never touch a butterfly’s wings.",
+            "bn": "চলো, চুপচাপ দেখি। আমি কখনও প্রজাপতির ডানায় হাত দিই না।",
+            "hi": "चलो, चुपचाप देखते हैं। मैं तितली के पंखों को कभी नहीं छूती।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch13_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["rahul", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I watched quietly, and the butterfly landed right next to me. I’ve drawn it on the back of our picnic list.",
+            "bn": "আমি চুপচাপ দেখছিলাম, আর প্রজাপতিটা ঠিক আমার পাশেই বসল। চড়ুইভাতির তালিকার পেছনে ওটার ছবি এঁকেছি।",
+            "hi": "मैं चुपचाप देख रहा था, तो तितली मेरे ठीक पास आकर बैठी। मैंने उसका चित्र पिकनिक की सूची के पीछे बनाया है।"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Keep that drawing! If the rain comes back tomorrow, we can make up an indoor play about our garden.",
+            "bn": "ছবিটা রেখে দাও! কাল আবার বৃষ্টি হলে ঘরে বসেই আমাদের বাগান নিয়ে একটা নাটক বানাতে পারি।",
+            "hi": "चित्र सँभालकर रखो! अगर कल फिर बारिश हुई, तो हम अंदर बैठकर अपने बगीचे पर एक नाटक बना सकते हैं।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch13_c1",
+          "text": {
+            "en": "Add a line to the drawing: “The butterfly landed quietly.”",
+            "bn": "ছবির সঙ্গে একটা লাইন যোগ করি: “প্রজাপতিটা নিঃশব্দে এসে বসল।”",
+            "hi": "चित्र के साथ एक पंक्ति जोड़ें: “तितली चुपचाप आकर बैठी।”"
+          },
+          "response": {
+            "en": "That tells us how it landed. It’s a lovely detail to keep for our play.",
+            "bn": "এতে বোঝা যাচ্ছে, ও কীভাবে এসে বসল। নাটকের জন্য এই কথাটা মনে রাখা যাক।",
+            "hi": "इससे पता चलता है कि वह कैसे आकर बैठी। नाटक के लिए यह बात याद रखें।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "How Did It Happen? How Often?",
+      "bn": "কীভাবে ঘটল? কত ঘন ঘন ঘটে?",
+      "hi": "कैसे हुआ? कितनी बार होता है?"
+    },
+    "explanation": {
+      "en": "Adverbs such as carefully, quietly and well tell us how an action happens. They can go after the verb or its object: “Pick it up carefully.” Adverbs such as always, often and never tell us how often something happens. In simple present sentences they usually go before the main action verb: “I often check the plants.” With be as the main verb, they usually go after it: “The garden is often quiet.”",
+      "bn": "carefully, quietly আর well-এর মতো ক্রিয়াবিশেষণ বলে কাজটা কীভাবে হয়। এগুলো ক্রিয়া বা তার কর্মের পরে বসতে পারে: “Pick it up carefully.” always, often আর never বলে কাজটা কত ঘন ঘন হয়। সাধারণ বর্তমান কালে এগুলো সাধারণত মূল কাজের ক্রিয়ার আগে বসে: “I often check the plants.” be মূল ক্রিয়া হলে সাধারণত তার পরে বসে: “The garden is often quiet.”",
+      "hi": "carefully, quietly और well जैसे क्रियाविशेषण बताते हैं कि काम कैसे होता है। ये क्रिया या उसके कर्म के बाद आ सकते हैं: “Pick it up carefully.” always, often और never बताते हैं कि काम कितनी बार होता है। सामान्य वर्तमान काल में ये आम तौर पर मुख्य क्रिया से पहले आते हैं: “I often check the plants.” जब be मुख्य क्रिया हो, तो ये आम तौर पर उसके बाद आते हैं: “The garden is often quiet.”"
+    },
+    "examples": [
+      {
+        "sentence": "Rahul picked up the wrapper carefully.",
+        "note": {
+          "en": "Carefully tells us how Rahul picked it up.",
+          "bn": "carefully বলে রাহুল কীভাবে মোড়কটা তুলেছিল।",
+          "hi": "Carefully बताता है कि राहुल ने रैपर कैसे उठाया।"
+        }
+      },
+      {
+        "sentence": "The beans grow well here.",
+        "note": {
+          "en": "Well describes how the beans grow, not what the beans are like.",
+          "bn": "well বলে শিমগাছগুলো কীভাবে বাড়ে, গাছগুলো কেমন তা নয়।",
+          "hi": "Well बताता है कि सेम के पौधे कैसे बढ़ते हैं, यह नहीं कि पौधे कैसे हैं।"
+        }
+      },
+      {
+        "sentence": "I always check for wrappers.",
+        "note": {
+          "en": "Always means every time. Here it goes before check.",
+          "bn": "always মানে প্রতিবার। এখানে check-এর আগে বসেছে।",
+          "hi": "Always का मतलब हर बार है। यहाँ यह check से पहले आता है।"
+        }
+      },
+      {
+        "sentence": "Priya never touches butterfly wings.",
+        "note": {
+          "en": "Never means not even once. Here it goes before touches.",
+          "bn": "never মানে একবারও নয়। এখানে touches-এর আগে বসেছে।",
+          "hi": "Never का मतलब एक बार भी नहीं है। यहाँ यह touches से पहले आता है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch13_q1",
+      "question": "Which word tells us how Priya watched in “Priya watched the butterfly quietly”?",
+      "options": ["Priya", "quietly", "watched", "butterfly"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Quietly describes the way Priya watched: without making noise.",
+        "bn": "quietly বলে প্রিয়া কীভাবে দেখেছিল: কোনো শব্দ না করে।",
+        "hi": "Quietly बताता है कि प्रिया ने कैसे देखा: बिना आवाज़ किए।"
+      }
+    },
+    {
+      "question_id": "ch13_q2",
+      "question": "Which word means “every time” in “I ___ check for wrappers before I leave”?",
+      "options": ["carefully", "never", "often", "always"],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Always means every time; often means many times but not necessarily every time.",
+        "bn": "always মানে প্রতিবার; often মানে অনেকবার, তবে প্রতিবার নাও হতে পারে।",
+        "hi": "Always का मतलब हर बार है; often का मतलब कई बार है, ज़रूरी नहीं कि हर बार।"
+      }
+    },
+    {
+      "question_id": "ch13_q3",
+      "question": "Choose the sentence that uses an adverb to tell how the beans grow.",
+      "options": ["The beans grow well.", "The beans grow good.", "The beans are green.", "The beans grow here."],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Well tells us how they grow. Here tells us where.",
+        "bn": "well বলে গাছগুলো কীভাবে বাড়ে। here বলে কোথায়।",
+        "hi": "Well बताता है कि पौधे कैसे बढ़ते हैं। Here बताता है कि वे कहाँ बढ़ते हैं।"
+      }
+    },
+    {
+      "question_id": "ch13_q4",
+      "question": "Priya has not touched a butterfly’s wings even once. Which sentence says that?",
+      "options": ["Priya always touches butterfly wings.", "Priya sometimes touches butterfly wings.", "Priya never touches butterfly wings.", "Priya often touches butterfly wings."],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Never means it has not happened even once.",
+        "bn": "never মানে কাজটা একবারও ঘটেনি।",
+        "hi": "Never का मतलब है कि ऐसा एक बार भी नहीं हुआ।"
+      }
+    },
+    {
+      "question_id": "ch13_q5",
+      "question": "Which sentence puts the frequency adverb “often” directly before the main verb “check”?",
+      "options": ["I check often after lunch.", "I often check after lunch.", "Often I check after lunch.", "I check after lunch often."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "“I often check after lunch” puts often right before check, a common position.",
+        "bn": "“I often check after lunch”-এ often ঠিক check-এর আগে বসেছে। এটা একটা প্রচলিত অবস্থান।",
+        "hi": "“I often check after lunch” में often ठीक check से पहले है। यहाँ इसे रखना आम है।"
+      }
+    }
+  ]
+}

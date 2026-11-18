@@ -1,0 +1,212 @@
+{
+  "chapter_id": "ch14",
+  "title": {
+    "en": "The Rainy-Day Play",
+    "bn": "বৃষ্টির দিনের নাটক",
+    "hi": "बारिश के दिन का नाटक"
+  },
+  "description": {
+    "en": "Rain keeps the class indoors, so Rahul and Priya turn their garden drawing into a short play.",
+    "bn": "বৃষ্টিতে ক্লাসের সবাই ঘরেই থাকে। তাই রাহুল আর প্রিয়া বাগানের ছবি নিয়ে একটা ছোট নাটক বানায়।",
+    "hi": "बारिश की वजह से बच्चे कक्षा में ही रहते हैं, तो राहुल और प्रिया बगीचे के अपने चित्र से एक छोटा नाटक बनाते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Joining Ideas (and / but / because / so)",
+    "bn": "ভাব জোড়া লাগানো (and / but / because / so)",
+    "hi": "बातों को जोड़ना (and / but / because / so)"
+  },
+  "difficulty": "intermediate",
+  "estimated_duration_minutes": 14,
+  "thumbnail_asset": "assets/illustrations/ch04_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_classroom.webp",
+  "rewards": { "xp": 110, "coins": 22, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch14_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "It’s raining, so we’ll have our play indoors. What could happen to the butterfly from your drawing?",
+            "bn": "বৃষ্টি হচ্ছে, তাই ঘরেই নাটক করব। তোমাদের ছবির প্রজাপতিটার কী হতে পারে?",
+            "hi": "बारिश हो रही है, इसलिए हम नाटक अंदर करेंगे। तुम्हारे चित्र की तितली के साथ क्या हो सकता है?"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "It wants to fly, but its wings are wet. It could wait under a leaf.",
+            "bn": "ও উড়তে চায়, কিন্তু ওর ডানা ভেজা। একটা পাতার নিচে অপেক্ষা করতে পারে।",
+            "hi": "वह उड़ना चाहती है, लेकिन उसके पंख गीले हैं। वह किसी पत्ते के नीचे इंतज़ार कर सकती है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch14_s2",
+      "background_id": "bg_library",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I’ll cut out a paper leaf, and you can make the butterfly. We can practise quietly here.",
+            "bn": "আমি কাগজ কেটে একটা পাতা বানাব, আর তুমি প্রজাপতিটা বানাতে পারো। এখানে চুপচাপ মহড়া দিতে পারি।",
+            "hi": "मैं काग़ज़ से एक पत्ता काटूँगा, और तुम तितली बना सकती हो। यहाँ हम चुपचाप अभ्यास कर सकते हैं।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Let’s make the leaf big because it needs to shelter the butterfly.",
+            "bn": "পাতাটা বড় করি, কারণ ওটার নিচে প্রজাপতিটাকে আশ্রয় নিতে হবে।",
+            "hi": "चलो पत्ता बड़ा बनाएँ, क्योंकि उसके नीचे तितली को आसरा लेना है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch14_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The rain stopped, so the butterfly came out. That’s our last line!",
+            "bn": "বৃষ্টি থামল, তাই প্রজাপতিটা বেরিয়ে এল। এটাই আমাদের শেষ সংলাপ!",
+            "hi": "बारिश रुक गई, इसलिए तितली बाहर आ गई। यह हमारी आख़िरी पंक्ति है!"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "You made the ending clear. Let’s save the script and the butterfly drawing for our class scrapbook.",
+            "bn": "শেষটা তোমরা বেশ স্পষ্ট করে বলেছ। ক্লাসের স্মৃতির খাতার জন্য নাটকের লেখা আর প্রজাপতির ছবিটা রেখে দিই।",
+            "hi": "तुमने अंत साफ़-साफ़ बताया। चलो नाटक की लिखी हुई कहानी और तितली का चित्र कक्षा की यादों की किताब के लिए रख लें।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch14_c1",
+          "text": {
+            "en": "Add a line explaining why the butterfly waited.",
+            "bn": "প্রজাপতিটা কেন অপেক্ষা করল, তা বোঝাতে একটা লাইন যোগ করি।",
+            "hi": "एक पंक्ति जोड़कर बताएँ कि तितली ने इंतज़ार क्यों किया।"
+          },
+          "response": {
+            "en": "Try “It waited because its wings were wet.” Because introduces the reason.",
+            "bn": "এভাবে বলো: “It waited because its wings were wet.” because-এর পরেই কারণটা এসেছে।",
+            "hi": "ऐसे कहो: “It waited because its wings were wet.” Because के बाद वजह बताई गई है।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Add, Contrast, Explain or Show What Happened Next",
+      "bn": "যোগ, অমিল, কারণ আর ফল",
+      "hi": "बात जोड़ना, अंतर, वजह और नतीजा"
+    },
+    "explanation": {
+      "en": "Use and to add an idea, and but to show a contrast. Because introduces a reason: “We stayed inside because it rained.” So introduces a result: “It rained, so we stayed inside.” Notice the order: the reason follows because, but the result follows so.",
+      "bn": "আরেকটা ভাব যোগ করতে and, আর উল্টো বা অমিল ভাব জুড়তে but বসাও। because-এর পরে কারণ আসে: “We stayed inside because it rained.” so-এর পরে ফল আসে: “It rained, so we stayed inside.” খেয়াল করো, because-এর পরে কারণ, কিন্তু so-এর পরে ফল।",
+      "hi": "एक और बात जोड़ने के लिए and लगाओ। अलग या उलटी बात दिखाने के लिए but लगाओ। Because के बाद वजह आती है: “We stayed inside because it rained.” So के बाद नतीजा आता है: “It rained, so we stayed inside.” ध्यान दो: वजह because के बाद है, लेकिन नतीजा so के बाद है।"
+    },
+    "examples": [
+      {
+        "sentence": "Rahul made a leaf, and Priya made a butterfly.",
+        "note": {
+          "en": "And adds Priya’s task to Rahul’s task.",
+          "bn": "and দিয়ে রাহুলের কাজের সঙ্গে প্রিয়ার কাজটাও যোগ করা হয়েছে।",
+          "hi": "And राहुल के काम के साथ प्रिया का काम जोड़ता है।"
+        }
+      },
+      {
+        "sentence": "The butterfly wanted to fly, but its wings were wet.",
+        "note": {
+          "en": "But contrasts what it wanted with what stopped it.",
+          "bn": "but দিয়ে প্রজাপতির ইচ্ছা আর যে বাধায় ও উড়তে পারল না, দুটো পাশাপাশি দেখানো হয়েছে।",
+          "hi": "But तितली की इच्छा और उसे रोकने वाली बात के बीच का अंतर दिखाता है।"
+        }
+      },
+      {
+        "sentence": "The butterfly waited because its wings were wet.",
+        "note": {
+          "en": "Because introduces the reason it waited.",
+          "bn": "because-এর পরে প্রজাপতিটার অপেক্ষা করার কারণ এসেছে।",
+          "hi": "Because के बाद तितली के इंतज़ार की वजह आती है।"
+        }
+      },
+      {
+        "sentence": "The rain stopped, so the butterfly came out.",
+        "note": {
+          "en": "So introduces what happened as a result.",
+          "bn": "so-এর পরে বৃষ্টি থামার ফলটা এসেছে।",
+          "hi": "So के बाद बताया गया है कि बारिश रुकने का क्या नतीजा हुआ।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch14_q1",
+      "question": "Which word introduces the reason in “We stayed inside because it was raining”?",
+      "options": ["inside", "we", "because", "raining"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Because introduces “it was raining,” the reason the group stayed inside.",
+        "bn": "because-এর পরে “it was raining” এসেছে। বৃষ্টি হচ্ছিল বলেই সবাই ঘরে ছিল।",
+        "hi": "Because के बाद “it was raining” है। बारिश ही उनके अंदर रहने की वजह थी।"
+      }
+    },
+    {
+      "question_id": "ch14_q2",
+      "question": "Join the ideas to show a contrast: “The butterfly wanted to fly, ___ its wings were wet.”",
+      "options": ["but", "because", "so", "and"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "But contrasts the butterfly’s wish to fly with the wet wings that stop it.",
+        "bn": "but প্রজাপতির উড়তে চাওয়া আর ভেজা ডানার বাধার মধ্যে অমিলটা বোঝায়।",
+        "hi": "But तितली की उड़ने की इच्छा और उसके गीले पंखों की रुकावट के बीच का अंतर दिखाता है।"
+      }
+    },
+    {
+      "question_id": "ch14_q3",
+      "question": "Which sentence uses so to introduce a result?",
+      "options": ["It rained, but we went outside.", "We stayed inside because it rained.", "It rained, and the windows got wet.", "It rained, so we performed inside."],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Performing inside is the result of the rain, and so introduces it.",
+        "bn": "ঘরের ভেতরে নাটক করাটা বৃষ্টির ফল। so দিয়ে সেই ফলটা বলা হয়েছে।",
+        "hi": "अंदर नाटक करना बारिश का नतीजा है। So उस नतीजे को जोड़ता है।"
+      }
+    },
+    {
+      "question_id": "ch14_q4",
+      "question": "Simply add Priya’s task: “Rahul made a leaf, ___ Priya made a butterfly.”",
+      "options": ["but", "and", "because", "so"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "And adds another idea: “Rahul made a leaf, and Priya made a butterfly.”",
+        "bn": "and শুধু আরেকটা ভাব যোগ করে: “Rahul made a leaf, and Priya made a butterfly.”",
+        "hi": "And बस एक और बात जोड़ता है: “Rahul made a leaf, and Priya made a butterfly.”"
+      }
+    },
+    {
+      "question_id": "ch14_q5",
+      "question": "Which sentence gives wet wings as the reason the butterfly waited?",
+      "options": ["The butterfly waited, so its wings got wet.", "The wings were wet, but the butterfly flew.", "The butterfly waited because its wings were wet.", "The butterfly waited because the sun was too bright."],
+      "correct_index": 2,
+      "explanation": {
+        "en": "The words after because give the reason: its wings were wet.",
+        "bn": "because-এর পরের কথাগুলোই কারণ বলে: ওর ডানা ভেজা ছিল।",
+        "hi": "Because के बाद वजह बताई गई है: उसके पंख गीले थे।"
+      }
+    }
+  ]
+}
