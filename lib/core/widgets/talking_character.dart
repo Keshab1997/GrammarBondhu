@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -196,7 +198,7 @@ class _TalkingCharacterState extends State<TalkingCharacter>
             fit: BoxFit.contain,
             alignment: Alignment.bottomCenter,
             gaplessPlayback: true,
-            filterQuality: FilterQuality.medium,
+            filterQuality: FilterQuality.high,
             errorBuilder: (_, __, ___) =>
                 _FallbackBody(name: name, height: widget.height),
           );
@@ -219,57 +221,89 @@ class _TalkingCharacterState extends State<TalkingCharacter>
       );
     }
 
-    // A touch of warmth on whoever is talking. Dimming the listener alone left
-    // the speaker looking like anyone else; the highlight does the pointing.
-    if (widget.isSpeaker) {
-      art = ShaderMask(
-        blendMode: BlendMode.srcATop,
-        shaderCallback: (rect) => const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x14FFF3D6), Color(0x00FFF3D6)],
-          stops: [0.0, 0.45],
-        ).createShader(Offset.zero & rect.size),
-        child: art,
-      );
-    }
+    // Focus by lighting, NEVER by lowering opacity: semi-transparency lets
+    // desks, chairs, and trees bleed straight through the listener's face and
+    // clothes. `srcATop` tints RGB while keeping every body pixel 100% solid.
+    art = ShaderMask(
+      blendMode: BlendMode.srcATop,
+      shaderCallback: (rect) => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: widget.isSpeaker
+            ? const [Color(0x16FFF5DE), Color(0x00FFF5DE)]
+            : const [Color(0x0D0F172A), Color(0x050F172A)],
+        stops: widget.isSpeaker ? const [0.0, 0.48] : const [0.0, 1.0],
+      ).createShader(Offset.zero & rect.size),
+      child: art,
+    );
 
+    final shadowPath =
+        frames?.closed ?? AssetLookup.fullBodyPath(widget.characterId);
     final phase = (widget.characterId.hashCode.abs() % 1000) / 1000.0;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 220),
-      opacity: widget.isSpeaker ? 1 : 0.82,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        scale: widget.isSpeaker ? 1 : 0.97,
-        alignment: Alignment.bottomCenter,
-        child: IdleBob(
-          period: widget.isSpeaker ? 3600 : 4600,
-          phase: phase,
-          amplitude: widget.isTalking ? 0.004 : 0.006,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              // Contact shadow: without it the feet float over the scene.
-              Container(
-                width: widget.height * 0.26,
-                height: widget.height * 0.035,
-                margin: EdgeInsets.only(bottom: widget.height * 0.004),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 14,
-                    ),
+    return AnimatedScale(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      scale: widget.isSpeaker ? 1.0 : 0.96,
+      alignment: Alignment.bottomCenter,
+      child: IdleBob(
+        period: widget.isSpeaker ? 3600 : 4600,
+        phase: phase,
+        amplitude: widget.isTalking ? 0.004 : 0.005,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
+          children: [
+            // Contact shadow: anchors the shoes firmly onto the scene floor.
+            Container(
+              width: widget.height * 0.28,
+              height: widget.height * 0.036,
+              margin: EdgeInsets.only(bottom: widget.height * 0.004),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.black.withValues(alpha: 0.42),
+                    Colors.black.withValues(alpha: 0.0),
                   ],
                 ),
               ),
-              art,
-            ],
-          ),
+            ),
+            // True contour-matched soft drop shadow so bright desks, walls, and
+            // garden leaves never merge with either the speaker or listener.
+            if (shadowPath != null)
+              IgnorePointer(
+                child: ExcludeSemantics(
+                  child: Transform.translate(
+                    offset: const Offset(0, 3),
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(
+                        sigmaX: 7,
+                        sigmaY: 7,
+                        tileMode: TileMode.decal,
+                      ),
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withValues(
+                            alpha: widget.isSpeaker ? 0.30 : 0.26,
+                          ),
+                          BlendMode.srcIn,
+                        ),
+                        child: Image.asset(
+                          shadowPath,
+                          height: widget.height,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.bottomCenter,
+                          gaplessPlayback: true,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            art,
+          ],
         ),
       ),
     );

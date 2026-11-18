@@ -346,5 +346,48 @@ void main() {
         semantics.dispose();
       }
     });
+
+    testWidgets(
+        'listening characters stay 100% opaque and keep stable stage positions',
+        (tester) async {
+      final h = await _pumpLiveStory(tester, chapterId: 'ch01', startScene: 1);
+
+      final chars = find.byType(TalkingCharacter);
+      expect(chars, findsNWidgets(2));
+
+      // Neither speaker nor listener may be wrapped in a partial-opacity fade
+      // that lets background furniture bleed through their face or clothes.
+      for (final element in chars.evaluate()) {
+        final opacities = find.descendant(
+          of: find.byWidget(element.widget),
+          matching: find.byType(Opacity),
+        );
+        for (final op in opacities.evaluate()) {
+          expect((op.widget as Opacity).opacity, 1.0);
+        }
+        final animated = find.descendant(
+          of: find.byWidget(element.widget),
+          matching: find.byType(AnimatedOpacity),
+        );
+        for (final ao in animated.evaluate()) {
+          expect((ao.widget as AnimatedOpacity).opacity, 1.0);
+        }
+      }
+
+      final rahulKey = find.byKey(const ValueKey<String>('stage_char_rahul'));
+      final teacherKey =
+          find.byKey(const ValueKey<String>('stage_char_teacher'));
+      final rahulLeftBefore = tester.getTopLeft(rahulKey).dx;
+      final teacherLeftBefore = tester.getTopLeft(teacherKey).dx;
+
+      // Advance from Mrs. Sen's line to Rahul's reply: both stay in their own
+      // horizontal half instead of teleport-swapping across the room.
+      h.port.finishCurrentClip();
+      await tester.pump(const Duration(milliseconds: 950));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(tester.getTopLeft(rahulKey).dx, rahulLeftBefore);
+      expect(tester.getTopLeft(teacherKey).dx, teacherLeftBefore);
+    });
   });
 }

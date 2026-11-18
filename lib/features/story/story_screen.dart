@@ -12,6 +12,7 @@ import '../../core/utils/accessible_layout.dart';
 import '../../core/utils/asset_lookup.dart';
 import '../../core/utils/speech_cadence.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../core/widgets/asset_images.dart';
 import '../../core/widgets/listen_button.dart';
 import '../../core/widgets/talking_character.dart';
 import '../../data/models/chapter.dart';
@@ -454,37 +455,47 @@ class _StoryScreenState extends State<StoryScreen> {
                       )
                     else
                       Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              isSpeakerTalking
-                                  ? Icons.graphic_eq_rounded
-                                  : Icons.touch_app_rounded,
-                              size: 15,
-                              color: Colors.white.withValues(alpha: 0.95),
-                            ),
-                            const SizedBox(width: 6),
-                            // Long scales wrap the hint onto a second line
-                            // instead of running 125 px past the edge.
-                            Flexible(
-                              child: Text(
-                                hintLabel,
-                                textAlign: TextAlign.center,
-                                style: text.bodyMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  shadows: const [
-                                    Shadow(
-                                        color: Color(0x99000000),
-                                        blurRadius: 6),
-                                  ],
-                                ),
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.md,
+                            AppSpacing.xs, AppSpacing.md, AppSpacing.sm + 2),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.42),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.16),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  isSpeakerTalking
+                                      ? Icons.graphic_eq_rounded
+                                      : Icons.touch_app_rounded,
+                                  size: 15,
+                                  color: Colors.white.withValues(alpha: 0.96),
+                                ),
+                                const SizedBox(width: 6),
+                                // Long scales wrap the hint onto a second line
+                                // instead of running past the screen edge.
+                                Flexible(
+                                  child: Text(
+                                    hintLabel,
+                                    textAlign: TextAlign.center,
+                                    style: text.bodyMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                   ],
@@ -529,6 +540,10 @@ class _StoryScreenState extends State<StoryScreen> {
                                         child: _SceneProgress(
                                           scene: _sceneIndex + 1,
                                           scenes: chapter.scenes.length,
+                                          lineProgress: scene.dialogue.isEmpty
+                                              ? 1.0
+                                              : (_lineIndex + 1) /
+                                                  scene.dialogue.length,
                                         ),
                                       ),
                                       const SizedBox(width: AppSpacing.xs),
@@ -557,6 +572,10 @@ class _StoryScreenState extends State<StoryScreen> {
                                     child: _SceneProgress(
                                       scene: _sceneIndex + 1,
                                       scenes: chapter.scenes.length,
+                                      lineProgress: scene.dialogue.isEmpty
+                                          ? 1.0
+                                          : (_lineIndex + 1) /
+                                              scene.dialogue.length,
                                     ),
                                   ),
                                   const SizedBox(width: AppSpacing.xs),
@@ -592,9 +611,10 @@ class _StoryScreenState extends State<StoryScreen> {
 /// Lays the cast out along the bottom of the screen and floats the speaker's
 /// bubble above their head.
 ///
-/// Positions are computed once from the layout's own size, so the bubble can be
-/// anchored to a head instead of to the screen edge: one character stands
-/// centre, two stand left/right with the speaker a little forward and larger.
+/// Each character keeps a consistent spot across the scene so two people talk
+/// face-to-face instead of trading places between lines; the active speaker
+/// steps slightly taller under a warm key light while listeners stay 100% solid
+/// and crisp beside them.
 class _Stage extends StatelessWidget {
   const _Stage({
     required this.cast,
@@ -619,10 +639,9 @@ class _Stage extends StatelessWidget {
   /// Character height as a fraction of the stage, and where they stand.
   static const _baseHeightFactor = 0.52;
 
-  /// How much of the frame the blurred props occupy. Full-bleed props read as a
-  /// sticker over the art; keeping them to the bottom band makes them a
-  /// foreground the camera is shooting past.
-  static const _foregroundHeightFactor = 0.44;
+  /// Low foreground depth band: frames the bottom corners below the cast's
+  /// knees so blurred desks/foliage add depth without clouding any character.
+  static const _foregroundHeightFactor = 0.22;
 
   @override
   Widget build(BuildContext context) {
@@ -631,13 +650,17 @@ class _Stage extends StatelessWidget {
         final h = constraints.maxHeight;
         final w = constraints.maxWidth;
 
-        // Speaker goes first so they always get the central slot.
-        final ordered = <String>[
-          speakerId,
-          ...cast.where((c) => c != speakerId),
-        ];
+        // Keep each character anchored to their own stage position throughout
+        // the scene so turns feel like a real conversation, not teleporting.
+        final ordered = <String>[];
+        for (final id in cast) {
+          if (!ordered.contains(id)) ordered.add(id);
+        }
+        if (!ordered.contains(speakerId)) {
+          ordered.insert(0, speakerId);
+        }
 
-        final slots = _slotsFor(ordered.length, w, h);
+        final slots = _slotsFor(ordered, speakerId, w, h);
         final placements = <_Placement>[];
         for (var i = 0; i < ordered.length; i++) {
           final id = ordered[i];
@@ -653,21 +676,33 @@ class _Stage extends StatelessWidget {
           (p) => p.isSpeaker,
           orElse: () => placements.first,
         );
+        final tallest = placements.fold<double>(
+          speaker.height,
+          (acc, p) => math.max(acc, p.height),
+        );
 
-        // Bubble sits above the speaker's head, clamped to the screen so it can
-        // never run off the top.
-        final bubbleWidth = math.min(w * 0.78, 420.0);
-        final headY = h - speaker.height - _stageBottomInset(context);
+        // Bubble sits cleanly above the cast heads and grows upward.
+        final bubbleWidth = math.min(w * 0.80, 420.0);
+        final headY = h - tallest - _stageBottomInset(context);
+        final targetTail =
+            tailX(speaker.dx + speaker.width / 2, w, bubbleWidth);
 
         return Stack(
           children: [
-            for (final p in placements)
+            // Draw listeners first and the active speaker on top so emphasis
+            // layering stays crisp even on narrow 320 dp phones.
+            for (final p in [
+              ...placements.where((p) => !p.isSpeaker),
+              ...placements.where((p) => p.isSpeaker),
+            ])
               Positioned(
+                key: ValueKey<String>('stage_slot_${p.id}'),
                 left: p.dx,
                 // A floor strip so shoes are never cut by the screen edge and
-                // the "Tap to continue" hint does not sit on their feet.
+                // the advance hint pill does not sit on their feet.
                 bottom: _stageBottomInset(context),
                 child: TalkingCharacter(
+                  key: ValueKey<String>('stage_char_${p.id}'),
                   characterId: p.id,
                   height: p.height,
                   isSpeaker: p.isSpeaker,
@@ -677,9 +712,7 @@ class _Stage extends StatelessWidget {
                   loopSpeech: p.isSpeaker && loopSpeech,
                 ),
               ),
-            // Blurred props in front of the cast. This is the whole trick: an
-            // out-of-focus foreground edge turns a flat plate plus two cut-outs
-            // into a room the characters are actually standing in.
+            // Low out-of-focus foreground framing along the bottom edge.
             Positioned(
               left: 0,
               right: 0,
@@ -690,8 +723,7 @@ class _Stage extends StatelessWidget {
               ),
             ),
             // Anchored by its *bottom*, not its top: the bubble grows upward
-            // from the speaker's head. Anchoring the top let a long line grow
-            // down over the speaker's face.
+            // from above the cast so long lines never cover anyone's face.
             Positioned(
               bottom: math.max(
                 h - headY + 4,
@@ -699,17 +731,25 @@ class _Stage extends StatelessWidget {
               ),
               left: (w - bubbleWidth) / 2,
               width: bubbleWidth,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  bubble,
-                  // Pointer down toward the head of whoever is talking.
-                  _BubbleTail(
-                    color: AppColors.surface,
-                    align:
-                        tailX(speaker.dx + speaker.width / 2, w, bubbleWidth),
-                  ),
-                ],
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: 1.0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    bubble,
+                    // Pointer glides smoothly to whoever is currently talking.
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(end: targetTail),
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, align, _) => _BubbleTail(
+                        color: AppColors.surface,
+                        align: align,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -726,34 +766,39 @@ class _Stage extends StatelessWidget {
   static double tailX(
       double headCentre, double stageWidth, double bubbleWidth) {
     final bubbleLeft = (stageWidth - bubbleWidth) / 2;
-    return ((headCentre - bubbleLeft) / bubbleWidth).clamp(0.09, 0.91);
+    return ((headCentre - bubbleLeft) / bubbleWidth).clamp(0.10, 0.90);
   }
 
-  /// Where each cast member stands. The speaker takes the taller slot; the
-  /// others step back and to the side. Slots never overlap: two full bodies
-  /// drawn on top of each other read as one tangled shape, not a conversation.
-  static List<_Slot> _slotsFor(int count, double w, double h) {
-    // Height as a fraction of the stage, leaving a floor strip at the bottom.
+  /// Assigns stable left/centre/right slots while keeping both speaker and
+  /// listener generous in size so nobody shrinks into the background.
+  static List<_Slot> _slotsFor(
+    List<String> ordered,
+    String speakerId,
+    double w,
+    double h,
+  ) {
     final base = h * _baseHeightFactor;
-    switch (count) {
+    switch (ordered.length) {
       case 1:
         final height = base * 0.96;
         return [_Slot(dx: (w - height * 0.36) / 2, height: height)];
       case 2:
-        final speakerHeight = base * 1.0;
-        final otherHeight = base * 0.88;
-        // Speaker left of centre, other to the right, each inside its half.
+        final xPositions = [w * 0.04, w * 0.54];
         return [
-          _Slot(dx: w * 0.03, height: speakerHeight),
-          _Slot(dx: w * 0.55, height: otherHeight),
+          for (var i = 0; i < 2; i++)
+            _Slot(
+              dx: xPositions[i],
+              height: ordered[i] == speakerId ? base * 1.0 : base * 0.93,
+            ),
         ];
       default:
-        final speakerHeight = base * 0.96;
-        final otherHeight = base * 0.82;
+        final xPositions = [w * 0.02, w * 0.35, w * 0.67];
         return [
-          _Slot(dx: w * 0.02, height: speakerHeight),
-          _Slot(dx: w * 0.36, height: otherHeight),
-          _Slot(dx: w * 0.68, height: otherHeight),
+          for (var i = 0; i < ordered.length; i++)
+            _Slot(
+              dx: xPositions[math.min(i, xPositions.length - 1)],
+              height: ordered[i] == speakerId ? base * 0.95 : base * 0.88,
+            ),
         ];
     }
   }
@@ -818,11 +863,14 @@ class _DialogueBubble extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadii.card),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.12),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.24),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -832,13 +880,17 @@ class _DialogueBubble extends StatelessWidget {
         children: [
           Row(
             children: [
+              ExcludeSemantics(
+                child: CharacterAvatar(characterId: characterId, size: 24),
+              ),
+              const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   name,
                   style: text.bodySmall?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.4,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ),
@@ -858,33 +910,59 @@ class _DialogueBubble extends StatelessWidget {
               ListenButton(clipId: '${clipPrefix}_en', size: 26),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             line.text.en,
-            style: text.bodyLarge?.copyWith(height: 1.4),
+            style: text.bodyLarge?.copyWith(
+              height: 1.42,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           if (translation != null && translation != line.text.en) ...[
-            const Divider(height: AppSpacing.md),
-            Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    _translationLabel(translationLang),
-                    style: text.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.6,
-                      fontSize: 10,
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm + 2, 6, AppSpacing.sm, AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.10),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _translationLabel(translationLang),
+                          style: text.bodySmall?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      ListenButton(
+                          clipId: '${clipPrefix}_$translationLang', size: 24),
+                    ],
+                  ),
+                  Text(
+                    translation,
+                    style: text.bodyMedium?.copyWith(
+                      height: 1.42,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                ListenButton(
-                    clipId: '${clipPrefix}_$translationLang', size: 24),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 2),
-            Text(translation, style: text.bodyMedium?.copyWith(height: 1.4)),
           ],
         ],
       ),
@@ -904,9 +982,10 @@ class _BubbleTail extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        const tailSize = 16.0;
-        final left =
-            (width * align - tailSize).clamp(10.0, width - tailSize * 2.3);
+        const tailSize = 15.0;
+        final leanRight = align > 0.5;
+        final left = (width * align - tailSize * 0.8)
+            .clamp(12.0, width - tailSize * 2.2);
         return SizedBox(
           height: tailSize,
           width: width,
@@ -915,7 +994,7 @@ class _BubbleTail extends StatelessWidget {
               Positioned(
                 left: left,
                 child: ClipPath(
-                  clipper: _TailClipper(),
+                  clipper: _TailClipper(leanRight: leanRight),
                   child: Container(
                     width: tailSize * 1.6,
                     height: tailSize,
@@ -932,15 +1011,20 @@ class _BubbleTail extends StatelessWidget {
 }
 
 class _TailClipper extends CustomClipper<Path> {
+  const _TailClipper({required this.leanRight});
+
+  final bool leanRight;
+
   @override
   Path getClip(Size size) => Path()
-    ..moveTo(size.width * 0.30, 0)
-    ..lineTo(size.width * 0.70, 0)
-    ..lineTo(size.width * 0.18, size.height)
+    ..moveTo(size.width * 0.25, 0)
+    ..lineTo(size.width * 0.75, 0)
+    ..lineTo(size.width * (leanRight ? 0.82 : 0.18), size.height)
     ..close();
 
   @override
-  bool shouldReclip(_TailClipper oldClipper) => false;
+  bool shouldReclip(_TailClipper oldClipper) =>
+      oldClipper.leanRight != leanRight;
 }
 
 // ---------------------------------------------------------------------------
@@ -948,14 +1032,22 @@ class _TailClipper extends CustomClipper<Path> {
 // ---------------------------------------------------------------------------
 
 class _SceneProgress extends StatelessWidget {
-  const _SceneProgress({required this.scene, required this.scenes});
+  const _SceneProgress({
+    required this.scene,
+    required this.scenes,
+    this.lineProgress = 1.0,
+  });
 
   final int scene;
   final int scenes;
+  final double lineProgress;
 
   @override
   Widget build(BuildContext context) {
-    final fraction = scenes == 0 ? 0.0 : (scene - 1) / scenes;
+    final total = math.max(1, scenes);
+    final activeIndex = (scene - 1).clamp(0, total - 1);
+    final fill = lineProgress.clamp(0.18, 1.0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -965,18 +1057,36 @@ class _SceneProgress extends StatelessWidget {
             color: Colors.white,
             fontSize: 12,
             fontWeight: FontWeight.w800,
-            shadows: [Shadow(color: Color(0x99000000), blurRadius: 6)],
+            shadows: [Shadow(color: Color(0xAA000000), blurRadius: 6)],
           ),
         ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            value: fraction.clamp(0.0, 1.0),
-            minHeight: 4,
-            backgroundColor: Colors.white.withValues(alpha: 0.30),
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
-          ),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            for (var i = 0; i < total; i++) ...[
+              if (i > 0) const SizedBox(width: 4),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: SizedBox(
+                    height: 5,
+                    child: LinearProgressIndicator(
+                      value: i < activeIndex
+                          ? 1.0
+                          : i == activeIndex
+                              ? fill
+                              : 0.0,
+                      minHeight: 5,
+                      backgroundColor: Colors.white.withValues(alpha: 0.28),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.accent,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ],
     );
@@ -1208,14 +1318,47 @@ class _ChoiceList extends StatelessWidget {
   final String lang;
   final ValueChanged<StoryChoice> onChosen;
 
+  static String _promptFor(String lang) => switch (lang) {
+        'bn' => 'তোমার পালা · একটি বেছে নাও',
+        'hi' => 'आपकी बारी · एक चुनें',
+        _ => 'YOUR TURN · CHOOSE A REPLY',
+      };
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final text = Theme.of(context).textTheme;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.sm),
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+          AppSpacing.sm + 4, AppSpacing.sm + 2, AppSpacing.sm + 4, 4),
+      decoration: BoxDecoration(
+        color: const Color(0xCC0B1B3A),
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.30),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(
+              _promptFor(lang),
+              textAlign: TextAlign.center,
+              style: text.bodySmall?.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.w800,
+                letterSpacing: lang == 'off' ? 0.6 : 0.1,
+              ),
+            ),
+          ),
           for (final choice in choices)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -1248,18 +1391,40 @@ class _ChoiceResponseBubble extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.successSoft,
         borderRadius: BorderRadius.circular(AppRadii.card),
+        border: Border.all(
+          color: AppColors.success.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.18),
-            blurRadius: 18,
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Text(
-        choice.response.of(lang == 'off' ? 'en' : lang),
-        style: text.bodyLarge
-            ?.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.check_circle_rounded,
+              size: 20,
+              color: AppColors.success,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              choice.response.of(lang == 'off' ? 'en' : lang),
+              style: text.bodyLarge?.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1271,7 +1436,7 @@ String _translationLabel(String lang) => lang == 'hi'
         ? 'BENGALI'
         : '';
 
-/// Out-of-focus props standing between the lens and the cast.
+/// Out-of-focus props framing the bottom floor edge in front of the cast.
 class _Foreground extends StatelessWidget {
   const _Foreground({required this.backgroundId});
 
@@ -1282,24 +1447,20 @@ class _Foreground extends StatelessWidget {
     final path =
         backgroundId == null ? null : AssetLookup.foregroundPath(backgroundId!);
     if (path == null) return const SizedBox.shrink();
-    // The band the props sit in ends in a straight line; without a fade the
-    // tree trunk stops dead mid-air. A short top fade turns that cut into depth
-    // of field.
+    // Smooth top fade keeps blurred books/chairs strictly in the bottom floor
+    // band so they add cinema depth without clouding any character's body.
     return ShaderMask(
       blendMode: BlendMode.dstIn,
       shaderCallback: (rect) => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Color(0x00FFFFFF), Color(0xFFFFFFFF)],
-        stops: [0.0, 0.72],
+        stops: [0.0, 0.58],
       ).createShader(Offset.zero & rect.size),
       child: Image.asset(
         path,
         fit: BoxFit.cover,
         alignment: Alignment.bottomCenter,
-        // Just shy of opaque: the props should read as soft glass, never as a
-        // solid sticker over the art.
-        opacity: const AlwaysStoppedAnimation<double>(0.94),
         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       ),
     );
