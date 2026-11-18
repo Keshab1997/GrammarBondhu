@@ -74,6 +74,20 @@ class SettingsScreen extends StatelessWidget {
                     context.read<SettingsController>().setAutoPlayStory(v),
               ),
             ),
+            const _GroupHeader('Practice'),
+            _SettingsTile(
+              icon: Icons.lock_open_rounded,
+              color: AppColors.primary,
+              label: 'Open every chapter',
+              subtitle: 'Skip the finish-the-previous-lesson rule. Handy for '
+                  'testing a chapter that is still ahead of you.',
+              trailing: Switch(
+                value: s.unlockAllChapters,
+                activeThumbColor: AppColors.primary,
+                onChanged: (v) =>
+                    context.read<SettingsController>().setUnlockAllChapters(v),
+              ),
+            ),
             const _GroupHeader('Offline learning'),
             AppCard(
               child: Row(
@@ -413,11 +427,15 @@ class _SettingsTile extends StatelessWidget {
     required this.label,
     required this.trailing,
     this.onTap,
+    this.subtitle,
   });
 
   final IconData icon;
   final Color color;
   final String label;
+
+  /// Optional second line for a setting whose name alone is not enough.
+  final String? subtitle;
   final Widget trailing;
   final VoidCallback? onTap;
 
@@ -441,7 +459,24 @@ class _SettingsTile extends StatelessWidget {
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: AppSpacing.md),
-            Expanded(child: Text(label, style: text.bodyLarge)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label, style: text.bodyLarge),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        subtitle!,
+                        style: text.bodySmall
+                            ?.copyWith(color: AppColors.textSecondary),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             trailing,
           ],
         ),

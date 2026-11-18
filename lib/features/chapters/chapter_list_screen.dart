@@ -37,10 +37,15 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
     return 'Finish “${chapters[index - 1].title.en}” to unlock';
   }
 
-  /// A chapter unlocks when the previous one is completed.
+  /// A chapter unlocks when the previous one is completed — unless the learner
+  /// turned practice mode on, which opens the whole course at once.
   bool _isUnlocked(
-      List<Chapter> chapters, int index, ProgressController progress) {
-    if (index == 0) return true;
+    List<Chapter> chapters,
+    int index,
+    ProgressController progress, {
+    bool unlockAll = false,
+  }) {
+    if (index == 0 || unlockAll) return true;
     return progress.isCompleted(chapters[index - 1].id);
   }
 
@@ -51,11 +56,14 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
     final lang = context.select(
         (SettingsController? settings) => settings?.supportLanguage ?? 'en');
     final chapters = content.chapters;
+    final unlockAll = context
+        .select((SettingsController? s) => s?.unlockAllChapters ?? false);
 
     final cards = <Widget>[];
     for (var index = 0; index < chapters.length; index++) {
       final chapter = chapters[index];
-      final unlocked = _isUnlocked(chapters, index, progress);
+      final unlocked =
+          _isUnlocked(chapters, index, progress, unlockAll: unlockAll);
       final record = progress.chapterProgress(chapter.id);
       final isLocked = !unlocked;
 

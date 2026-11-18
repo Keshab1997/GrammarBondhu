@@ -12,6 +12,7 @@ class AppSettings {
     this.displayName,
     this.cloudAccountId,
     this.isGuest = true,
+    this.unlockAllChapters = false,
   });
 
   /// 'en' | 'bn' | 'hi' — 'en' means "show English only".
@@ -31,6 +32,10 @@ class AppSettings {
   String? cloudAccountId;
   bool isGuest;
 
+  /// Practice switch: skip the do-the-previous-chapter-first rule and open every
+  /// chapter. Off by default — the sequence is part of how the course teaches.
+  bool unlockAllChapters;
+
   static const supportedLanguages = ['en', 'bn', 'hi'];
 
   static bool isSupportedLanguage(String code) =>
@@ -47,6 +52,7 @@ class AppSettings {
       displayName: json['display_name'] as String?,
       cloudAccountId: json['cloud_account_id'] as String?,
       isGuest: json['is_guest'] as bool? ?? true,
+      unlockAllChapters: json['unlock_all_chapters'] as bool? ?? false,
     );
   }
 
@@ -59,5 +65,6 @@ class AppSettings {
         'display_name': displayName,
         'cloud_account_id': cloudAccountId,
         'is_guest': isGuest,
+        'unlock_all_chapters': unlockAllChapters,
       };
 }

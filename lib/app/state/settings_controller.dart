@@ -24,6 +24,9 @@ class SettingsController extends ChangeNotifier {
   /// Whether story scenes speak and advance automatically between lines.
   bool get autoPlayStory => _settings.autoPlayStory;
 
+  /// Every chapter open, regardless of what came before it.
+  bool get unlockAllChapters => _settings.unlockAllChapters;
+
   bool get cloudConnected =>
       !_settings.isGuest && (_settings.cloudAccountId?.isNotEmpty ?? false);
 
@@ -49,6 +52,13 @@ class SettingsController extends ChangeNotifier {
 
   Future<void> setNotificationsEnabled(bool value) async {
     _settings.notificationsEnabled = value;
+    notifyListeners();
+    await _store.saveSettings(_settings);
+  }
+
+  Future<void> setUnlockAllChapters(bool value) async {
+    if (_settings.unlockAllChapters == value) return;
+    _settings.unlockAllChapters = value;
     notifyListeners();
     await _store.saveSettings(_settings);
   }

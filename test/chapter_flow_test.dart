@@ -268,6 +268,45 @@ void main() {
     expect(find.text('Download'), findsNothing);
   });
 
+  testWidgets('practice mode opens every chapter, and closes again',
+      (tester) async {
+    await _pump(tester, const ChapterListScreen(), const Size(353, 784));
+
+    final list = tester.element(find.byType(ChapterListScreen));
+    final chapters = list.read<ContentController>().chapters;
+    final settings = list.read<SettingsController>();
+
+    // The course sequence is the default: only the first chapter is open.
+    expect(settings.unlockAllChapters, isFalse);
+    expect(find.textContaining('to unlock'), findsWidgets);
+
+    await settings.setUnlockAllChapters(true);
+    await tester.pumpAndSettle();
+    // Nothing ahead of the learner is padlocked any more.
+    expect(find.textContaining('to unlock'), findsNothing);
+
+    await tester.tap(find.text('Locked'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Every chapter is unlocked'), findsOneWidget);
+
+    // Opening the last chapter straight from the list works.
+    await tester.tap(find.text('All'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(chapters.last.title.en),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(chapters.last.title.en));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChapterDetailScreen), findsOneWidget);
+
+    // Turning it back off restores the rule instead of leaving everything open.
+    settings.setUnlockAllChapters(false);
+    await tester.pump();
+    expect(settings.unlockAllChapters, isFalse);
+  });
+
   testWidgets('chapter list filters by real chapter state', (tester) async {
     await _pump(tester, const ChapterListScreen(), const Size(353, 784));
 
