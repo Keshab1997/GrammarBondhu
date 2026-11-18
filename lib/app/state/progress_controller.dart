@@ -19,6 +19,7 @@ class ProgressController extends ChangeNotifier {
 
   ProgressCloudBackup? _cloudBackup;
   String? _cloudUserId;
+  int _cloudSession = 0;
   Future<void> _cloudQueue = Future<void>.value();
   bool _cloudSyncing = false;
   Object? _lastCloudSyncError;
@@ -35,38 +36,31 @@ class ProgressController extends ChangeNotifier {
   }) async {
     _cloudBackup = backup ?? ProgressCloudBackup();
     _cloudUserId = userId;
+    _resetCloudSync();
     await syncCloudNow();
   }
 
   /// Retries synchronization explicitly, e.g. from the Profile screen.
   Future<void> syncCloudNow() async {
-    final backup = _cloudBackup;
-    final userId = _cloudUserId;
-    if (backup == null || userId == null) {
+    if (!cloudConnected) {
       throw StateError('No cloud account is connected.');
     }
-    await _cloudQueue;
-    _cloudSyncing = true;
-    _lastCloudSyncError = null;
-    notifyListeners();
-    try {
-      final merged = await backup.synchronize(userId, _progress);
-      _progress = merged;
-      await _store.saveProgress(_progress);
-    } catch (error) {
-      _lastCloudSyncError = error;
-      rethrow;
-    } finally {
-      _cloudSyncing = false;
-      notifyListeners();
-    }
+    await _enqueueCloudSync(_cloudSession, reportError: true);
   }
 
   void disconnectCloudBackup() {
     _cloudBackup = null;
     _cloudUserId = null;
-    _lastCloudSyncError = null;
+    _resetCloudSync();
     notifyListeners();
+  }
+
+  void _resetCloudSync() {
+    // An old account's network request must not hold up the next connection.
+    _cloudSession++;
+    _cloudQueue = Future<void>.value();
+    _cloudSyncing = false;
+    _lastCloudSyncError = null;
   }
 
   ChapterProgress chapterProgress(String chapterId) =>
@@ -85,10 +79,11 @@ class ProgressController extends ChangeNotifier {
   /// Marks the learner as having opened [chapterId] at [sceneIndex].
   Future<void> openChapter(String chapterId, int sceneIndex,
       {DateTime? now}) async {
+    final moment = now ?? DateTime.now();
     _progress.chapter(chapterId)
       ..resumeSceneIndex = sceneIndex
-      ..lastOpenedAt = now ?? DateTime.now();
-    _progress.registerStudyDay(now ?? DateTime.now());
+      ..lastOpenedAt = moment;
+    _progress.registerStudyDay(moment);
     notifyListeners();
     await _persist();
   }
@@ -118,8 +113,8 @@ class ProgressController extends ChangeNotifier {
     if (firstCompletion) record.completed = true;
     if (stars > record.stars) record.stars = stars;
 
-    // XP and coins are granted once per improvement path: full amount on
-    // first completion, the difference when a better run beats the old best.
+    // The first completion grants full rewards. Replays grant only the
+    // difference beyond what the learner has already earned.
     // Finishing is never worth 0 XP — a completion floor keeps the
     // experience encouraging even after a rough first run.
     final completionXp = xp < 10 ? 10 : xp;
@@ -129,6 +124,9 @@ class ProgressController extends ChangeNotifier {
       final previousXp = record.xpEarned;
       final targetXp = xp;
       if (targetXp > previousXp) grantedXp = targetXp - previousXp;
+    }
+    if (!firstCompletion && coins > record.coinsEarned) {
+      grantedCoins = coins - record.coinsEarned;
     }
     record
       ..xpEarned += grantedXp
@@ -188,57 +186,95 @@ class ProgressController extends ChangeNotifier {
 
   /// Adds an incorrect quiz answer to the learner's local review list.
   Future<void> markQuestionForReview(
-      String chapterId, String questionId) async {
-    final changed =
-        _progress.chapter(chapterId).missedQuestionIds.add(questionId);
-    if (!changed) return;
-    notifyListeners();
-    await _persist();
-  }
+    String chapterId,
+    String questionId, {
+    DateTime? now,
+  }) =>
+      _updateReview(chapterId, questionId, missed: true, now: now);
 
   /// Removes a question after the learner marks it reviewed or answers it
   /// correctly on a later attempt.
   Future<void> clearQuestionForReview(
-      String chapterId, String questionId) async {
-    final chapter = _progress.chapters[chapterId];
-    if (chapter == null) return;
-    final changed = chapter.missedQuestionIds.remove(questionId);
-    if (!changed) return;
+    String chapterId,
+    String questionId, {
+    DateTime? now,
+  }) =>
+      _updateReview(chapterId, questionId, missed: false, now: now);
+
+  Future<void> _updateReview(
+    String chapterId,
+    String questionId, {
+    required bool missed,
+    DateTime? now,
+  }) async {
+    final chapter = _progress.chapter(chapterId);
+    if (missed) {
+      chapter.missedQuestionIds.add(questionId);
+    } else {
+      chapter.missedQuestionIds.remove(questionId);
+    }
+    // Record even an unchanged local status: another device may have made an
+    // opposite change before this answer, and not synced it here yet.
+    chapter.reviewUpdatedAt[questionId] = (now ?? DateTime.now()).toUtc();
     notifyListeners();
     await _persist();
   }
 
+  /// Resets device progress without modifying the backup or daily goal.
   Future<void> resetAll() async {
-    _progress = UserProgress();
+    if (cloudConnected) return;
+    _progress = UserProgress(dailyGoalQuestions: _progress.dailyGoalQuestions);
     notifyListeners();
-    await _persist();
+    await _store.saveProgress(_progress);
   }
 
   Future<void> _persist() async {
+    final session = _cloudSession;
     await _store.saveProgress(_progress);
-    if (!cloudConnected) return;
-    _cloudQueue = _cloudQueue.then((_) => _syncLatestCloudSnapshot());
-    unawaited(_cloudQueue);
+    if (session != _cloudSession || !cloudConnected) return;
+    unawaited(_enqueueCloudSync(session, reportError: false));
   }
 
-  /// Background sync stays off the learner's critical path: local progress is
-  /// saved first and a network failure never interrupts the lesson.
-  Future<void> _syncLatestCloudSnapshot() async {
+  Future<void> _enqueueCloudSync(int session, {required bool reportError}) {
+    final task = _cloudQueue.then(
+      (_) => _syncLatestCloudSnapshot(session, reportError: reportError),
+    );
+    // Explicit callers see failures, but a failed retry does not poison the
+    // queue for subsequent requests. Background callers never need to wait.
+    _cloudQueue = task.then<void>((_) {}, onError: (Object _) {});
+    return task;
+  }
+
+  Future<void> _syncLatestCloudSnapshot(
+    int session, {
+    required bool reportError,
+  }) async {
     final backup = _cloudBackup;
     final userId = _cloudUserId;
-    if (backup == null || userId == null) return;
+    if (session != _cloudSession || backup == null || userId == null) return;
     _cloudSyncing = true;
-    notifyListeners();
+    if (reportError) _lastCloudSyncError = null;
     try {
-      final merged = await backup.synchronize(userId, _progress);
+      notifyListeners();
+      if (session != _cloudSession) return;
+      // Freeze the upload so that an old request cannot observe edits made
+      // after it started. Merge its result with the live local state instead.
+      final snapshot = UserProgress.fromJson(_progress.toJson());
+      final merged = await backup.synchronize(userId, snapshot);
+      if (session != _cloudSession) return;
       _progress = UserProgress.mergeForCloud(_progress, merged);
       await _store.saveProgress(_progress);
-      _lastCloudSyncError = null;
+      if (session == _cloudSession) _lastCloudSyncError = null;
     } catch (error) {
-      _lastCloudSyncError = error;
+      if (session == _cloudSession) {
+        _lastCloudSyncError = error;
+        if (reportError) rethrow;
+      }
     } finally {
-      _cloudSyncing = false;
-      notifyListeners();
+      if (session == _cloudSession) {
+        _cloudSyncing = false;
+        notifyListeners();
+      }
     }
   }
 }
