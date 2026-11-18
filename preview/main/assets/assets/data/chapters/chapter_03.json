@@ -161,8 +161,8 @@
     {
       "question_id": "ch03_q1",
       "question": "I have ___ orange in my bag.",
-      "options": ["an", "a", "the", "no article"],
-      "correct_index": 0,
+      "options": ["a", "the", "no article", "an"],
+      "correct_index": 3,
       "explanation": {
         "en": "'Orange' starts with a vowel sound, so we use 'an'.",
         "bn": "'Orange' স্বরধ্বনি দিয়ে শুরু হয়, তাই আমরা 'an' ব্যবহার করি।",
@@ -172,8 +172,8 @@
     {
       "question_id": "ch03_q2",
       "question": "The cat is ___ the table.",
-      "options": ["under", "in", "at", "on to"],
-      "correct_index": 0,
+      "options": ["in", "under", "at", "on to"],
+      "correct_index": 1,
       "explanation": {
         "en": "'Under' means below the table.",
         "bn": "'under' মানে টেবিলের নিচে।",
@@ -183,8 +183,8 @@
     {
       "question_id": "ch03_q3",
       "question": "Please put the book ___ the shelf.",
-      "options": ["on", "in", "under", "at"],
-      "correct_index": 0,
+      "options": ["in", "under", "on", "at"],
+      "correct_index": 2,
       "explanation": {
         "en": "A book rests on the shelf — above and touching it.",
         "bn": "বইটা তাকের উপর থাকে — উপরে ছোঁয়া।",
@@ -205,8 +205,8 @@
     {
       "question_id": "ch03_q5",
       "question": "We meet ___ the school gate every morning.",
-      "options": ["at", "on", "under", "in"],
-      "correct_index": 0,
+      "options": ["on", "under", "in", "at"],
+      "correct_index": 3,
       "explanation": {
         "en": "Use 'at' for an exact point or place, like the school gate.",
         "bn": "স্কুল গেটের মতো নির্দিষ্ট জায়গার জন্য 'at' ব্যবহার করো।",
