@@ -132,6 +132,29 @@ class AssetLookup {
     'locked_chapter': 'assets/illustrations/locked_chapter.webp',
   };
 
+  /// One grammar-topic badge per chapter, drawn for that chapter alone.
+  /// The grammar-topic badge for [chapterId], or null when that chapter has no
+  /// art yet (the chapter page then keeps its shared glyph).
+  static String? topicIcon(String chapterId) => topicIcons[chapterId];
+
+  static const Map<String, String> topicIcons = {
+    'ch01': 'assets/icons/topic_ch01.webp',
+    'ch02': 'assets/icons/topic_ch02.webp',
+    'ch03': 'assets/icons/topic_ch03.webp',
+    'ch04': 'assets/icons/topic_ch04.webp',
+    'ch05': 'assets/icons/topic_ch05.webp',
+    'ch06': 'assets/icons/topic_ch06.webp',
+    'ch07': 'assets/icons/topic_ch07.webp',
+    'ch08': 'assets/icons/topic_ch08.webp',
+    'ch09': 'assets/icons/topic_ch09.webp',
+    'ch10': 'assets/icons/topic_ch10.webp',
+    'ch11': 'assets/icons/topic_ch11.webp',
+    'ch12': 'assets/icons/topic_ch12.webp',
+    'ch13': 'assets/icons/topic_ch13.webp',
+    'ch14': 'assets/icons/topic_ch14.webp',
+    'ch15': 'assets/icons/topic_ch15.webp',
+  };
+
   static const Map<String, String> branding = {
     'logo_with_char': 'assets/branding/logo_with_char.webp',
   };

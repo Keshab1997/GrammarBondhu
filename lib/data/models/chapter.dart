@@ -1,3 +1,4 @@
+import '../../core/utils/asset_lookup.dart';
 import 'localized_text.dart';
 
 /// Everything the app needs to run one story chapter.
@@ -73,7 +74,10 @@ class Chapter {
       quiz: quiz,
       thumbnailAsset: json['thumbnail_asset'] as String?,
       backgroundAsset: json['background_asset'] as String?,
-      topicIconAsset: json['topic_icon_asset'] as String?,
+      // Resolved rather than trusted: a chapter JSON that asks for another
+      // chapter's badge still renders its own.
+      topicIconAsset:
+          AssetLookup.topicIcon(id) ?? (json['topic_icon_asset'] as String?),
     );
   }
 

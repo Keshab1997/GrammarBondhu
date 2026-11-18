@@ -113,6 +113,27 @@ void main() {
       }
     });
 
+    test('every chapter has its own cover and its own topic badge', () {
+      final covers = <String>{};
+      final badges = <String>{};
+      for (final chapter in repository.chapters) {
+        final cover = chapter.thumbnailAsset;
+        expect(cover, 'assets/illustrations/${chapter.id}_thumb.webp',
+            reason: '${chapter.id} must not borrow another chapter\'s cover');
+        expect(covers.add(cover!), isTrue,
+            reason: '${chapter.id} shares a cover with another chapter');
+
+        final badge = chapter.topicIconAsset;
+        expect(badge, 'assets/icons/topic_${chapter.id}.webp',
+            reason: '${chapter.id} must not borrow another chapter\'s badge');
+        expect(badges.add(badge!), isTrue,
+            reason: '${chapter.id} shares a badge with another chapter');
+        expect(File(badge).existsSync(), isTrue, reason: badge);
+      }
+      expect(covers, hasLength(15));
+      expect(badges, hasLength(15));
+    });
+
     test('each story uses registered assets and has an interactive choice', () {
       for (final chapter in repository.chapters) {
         expect(chapter.scenes, hasLength(3), reason: chapter.id);
