@@ -22,3 +22,5 @@
 **Report:** Post on https://github.com/Keshab1997/GrammarBondhu/issues/6 mentioning `@Keshab1997` (or report in worker chat with `MENTION PENDING` if commenting is unavailable).
 
 Use the current agent-bootstrap `captain/FASTLANE.md` (not `tool/agent_loop.py` direct-to-`main`). Keep the real `arena/*` branch. After a verified `PUSHED`, include the brief link, checkpoint block, and commit link. If blocked, report `AGENT C BLOCKED` with the reason; do not switch branches, re-pair, run CI, or open/merge/close a PR.
+
+> **Captain Gate Revision (gb-b1 r2):** Arena GitHub-attached worker sandboxes block outbound TLS to `storage.googleapis.com`, so cold Flutter SDK downloads cannot run inside the worker chat. The pinned `task.json` gate is updated to `{"kind": "preflight"}` (`tool/preflight.py` + scope/secret/diff checks). Captain runs the full Flutter `3.50.0` `dart format`, `flutter analyze`, and `flutter test` battery on your pushed checkpoint before anything lands on `main`.

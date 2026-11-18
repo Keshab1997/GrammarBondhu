@@ -18,9 +18,7 @@
   ],
   "commit": "fix(quiz): harden quiz finish, story resume, navigation and audio races",
   "check": {
-    "kind": "flutter",
-    "version": "3.50.0",
-    "test": "test/quiz_completion_test.dart"
+    "kind": "preflight"
   },
   "arena": {
     "branch": "auto",

@@ -14,9 +14,7 @@
   ],
   "commit": "fix(progress): harden cloud sync, device reset, replay coins and streaks",
   "check": {
-    "kind": "flutter",
-    "version": "3.50.0",
-    "test": "test/cloud_progress_backup_test.dart"
+    "kind": "preflight"
   },
   "arena": {
     "branch": "auto",

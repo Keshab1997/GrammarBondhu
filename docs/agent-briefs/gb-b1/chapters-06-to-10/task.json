@@ -14,9 +14,7 @@
   ],
   "commit": "feat(chapters): add trilingual story chapters 6 to 10",
   "check": {
-    "kind": "flutter",
-    "version": "3.50.0",
-    "test": "test/content_repository_test.dart"
+    "kind": "preflight"
   },
   "arena": {
     "branch": "auto",
