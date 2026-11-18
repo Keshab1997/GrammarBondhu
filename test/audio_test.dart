@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
+import 'package:grammar_bondhu/app/theme/app_theme.dart';
 import 'package:grammar_bondhu/core/widgets/listen_button.dart';
+import 'package:grammar_bondhu/data/local/json_loader.dart';
 import 'package:grammar_bondhu/data/local/local_store.dart';
 import 'package:grammar_bondhu/data/repositories/content_repository.dart';
 import 'package:grammar_bondhu/features/audio/audio_catalog.g.dart';
@@ -373,11 +375,10 @@ void main() {
         (tester) async {
       final content = ContentController(ContentRepository());
       await content.load();
-      const voicedChapters = {'ch01', 'ch02', 'ch03', 'ch04', 'ch05'};
       final missing = <String>[];
 
+      // Every chapter in the 15-chapter course ships full EN + BN voice clips.
       for (final chapter in content.chapters) {
-        if (!voicedChapters.contains(chapter.id)) continue;
         for (var s = 0; s < chapter.scenes.length; s++) {
           final line = chapter.scenes[s].dialogue;
           for (var l = 0; l < line.length; l++) {
@@ -412,28 +413,48 @@ void main() {
 
     testWidgets('unvoiced chapters omit speaker buttons without errors',
         (tester) async {
+      // Simulate a newly drafted chapter before make_clips.py has rendered it.
+      final loader = _UnvoicedChapterLoader();
+      SharedPreferences.setMockInitialValues({});
+      final store = await LocalStore.open();
+      final settings = SettingsController(store, store.loadSettings());
+      final progress = ProgressController(store, store.loadProgress());
+      final content = ContentController(ContentRepository(loader));
+      await content.load();
       final port = FakeAudioPort();
-      final storyAudio = await _pumpScreen(
-        tester,
-        const StoryScreen(args: StoryArgs('ch06')),
-        const Size(353, 784),
-        port: port,
+      final audio = AudioController(port: port, settings: settings);
+      addTearDown(audio.dispose);
+
+      Widget shell(Widget home) => MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: content),
+              ChangeNotifierProvider.value(value: settings),
+              ChangeNotifierProvider.value(value: progress),
+            ],
+            child: AudioScope(
+              controller: audio,
+              child: MediaQuery(
+                data: const MediaQueryData(disableAnimations: true),
+                child: MaterialApp(theme: buildAppTheme(), home: home),
+              ),
+            ),
+          );
+
+      await tester.pumpWidget(
+        shell(const StoryScreen(args: StoryArgs('ch99'))),
       );
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
-      storyAudio.dispose();
 
-      final lessonAudio = await _pumpScreen(
-        tester,
-        const GrammarLessonScreen(chapterId: 'ch06'),
-        const Size(353, 784),
-        port: port,
+      await tester.pumpWidget(
+        shell(const GrammarLessonScreen(chapterId: 'ch99')),
       );
+      await tester.pumpAndSettle();
       // Lesson keeps the shared teacher greeting clip (teach_1) while hiding
       // the unbundled chapter-board speaker.
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
-      lessonAudio.dispose();
     });
 
     for (final size in const [Size(320, 640), Size(412, 915)]) {
@@ -463,4 +484,24 @@ void main() {
       });
     }
   });
+}
+
+class _UnvoicedChapterLoader extends JsonLoader {
+  @override
+  Future<Map<String, dynamic>> loadJsonMap(String assetPath) async {
+    if (assetPath.endsWith('manifest.json')) {
+      return {
+        'version': 1,
+        'chapters': [
+          {
+            'chapter_id': 'ch99',
+            'file': 'chapters/chapter_06.json',
+            'order': 1
+          },
+        ],
+      };
+    }
+    final json = await super.loadJsonMap(assetPath);
+    return {...json, 'chapter_id': 'ch99'};
+  }
 }

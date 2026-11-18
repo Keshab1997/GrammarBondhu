@@ -26,4 +26,4 @@ the same neural voices Azure ships, reached through the free `edge-tts` route;
 if you ever need the licensed endpoint, `--provider azure` with
 `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION` produces identical clips.
 
-Total: 69 clips, ~3 MB — bundled in the APK, so narration works offline.
+Total: 227 clips, ~11.5 MB across all 15 chapters (`ch01`–`ch15`, English + Bangla) — bundled in the APK, so narration and auto-play stories work offline.
