@@ -1,0 +1,220 @@
+{
+  "chapter_id": "ch06",
+  "title": {
+    "en": "Rainy Day at School",
+    "bn": "স্কুলে বৃষ্টির দিন",
+    "hi": "स्कूल में बारिश का दिन"
+  },
+  "description": {
+    "en": "Rain interrupts the garden visit, so Rahul and Priya start a weather notebook with Mrs. Sen.",
+    "bn": "বৃষ্টিতে বাগানে যাওয়া হলো না। তাই রাহুল আর প্রিয়া মিসেস সেনের সঙ্গে আবহাওয়ার খাতা বানাতে শুরু করে।",
+    "hi": "बारिश की वजह से बगीचे में जाना नहीं हो पाता, तो राहुल और प्रिया सेन मैम के साथ मौसम की डायरी बनाना शुरू करते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Present Continuous",
+    "bn": "ঘটমান বর্তমান কাল",
+    "hi": "अपूर्ण वर्तमान काल (Present Continuous)"
+  },
+  "difficulty": "beginner",
+  "estimated_duration_minutes": 12,
+  "thumbnail_asset": "assets/illustrations/ch01_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_school_gate.webp",
+  "rewards": { "xp": 80, "coins": 16, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch06_s1",
+      "background_id": "bg_school_gate",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "It is raining hard. I am holding my umbrella with both hands!",
+            "bn": "খুব বৃষ্টি হচ্ছে। আমি দুহাতে ছাতাটা ধরে আছি!",
+            "hi": "तेज़ बारिश हो रही है। मैंने छाता दोनों हाथों से पकड़ रखा है!"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The others are waiting by the door. Let’s go inside too.",
+            "bn": "বাকিরা দরজার কাছে অপেক্ষা করছে। চলো, আমরাও ভেতরে যাই।",
+            "hi": "बाकी बच्चे दरवाज़े के पास इंतज़ार कर रहे हैं। चलो, हम भी अंदर चलें।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch06_s2",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "We are staying dry in here. What is happening on the window?",
+            "bn": "এখানে থাকলে আমরা ভিজব না। জানলার কাচে কী হচ্ছে?",
+            "hi": "यहाँ हम नहीं भीगेंगे। खिड़की के शीशे पर क्या हो रहा है?"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Drops are sliding down the glass. I am drawing them in this notebook.",
+            "bn": "জানলার কাচ বেয়ে ফোঁটাগুলো গড়িয়ে নামছে। আমি এই খাতায় সেগুলো আঁকছি।",
+            "hi": "बूँदें शीशे पर फिसल रही हैं। मैं उन्हें इस कॉपी में बना रही हूँ।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch06_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "rahul", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "The drawing is ready. Rahul, can you add a caption?",
+            "bn": "ছবি আঁকা হয়ে গেছে। রাহুল, নিচে ছবিটা নিয়ে একটা লাইন লিখবে?",
+            "hi": "चित्र तैयार है। राहुल, क्या तुम इसके नीचे एक पंक्ति लिख सकते हो?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I am writing the first caption: “Drops are racing down the window.”",
+            "bn": "আমি ছবির নিচে প্রথম লাইনটা লিখছি: “ফোঁটাগুলো জানলা বেয়ে ছুটে নামছে।”",
+            "hi": "मैं चित्र के नीचे पहली पंक्ति लिख रहा हूँ: “बूँदें खिड़की पर नीचे की ओर दौड़ रही हैं।”"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "You are making a weather notebook together. Let’s look at it again tomorrow.",
+            "bn": "তোমরা মিলে আবহাওয়ার খাতা বানাচ্ছ। চলো, কাল আবার খাতাটা দেখি।",
+            "hi": "तुम दोनों मिलकर मौसम की डायरी बना रहे हो। चलो, कल इसे फिर देखते हैं।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch06_c1",
+          "text": {
+            "en": "Add a final line: “The clouds are moving away.”",
+            "bn": "শেষে একটা লাইন যোগ করি: “মেঘগুলো সরে যাচ্ছে।”",
+            "hi": "आख़िर में एक पंक्ति जोड़ें: “बादल दूर जा रहे हैं।”"
+          },
+          "response": {
+            "en": "Good observation! The sky is clearing now.",
+            "bn": "বেশ লক্ষ করেছ! এখন আকাশ পরিষ্কার হচ্ছে।",
+            "hi": "बढ़िया, तुमने ठीक देखा! अब आसमान साफ़ हो रहा है।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "Actions Happening Now",
+      "bn": "এখন যা ঘটছে",
+      "hi": "अभी क्या हो रहा है?"
+    },
+    "explanation": {
+      "en": "For an action happening now, use am, is or are before the -ing form. Use am with I; is with he, she, it or one thing; and are with you, we, they or more than one thing. For example, rain becomes raining and slide becomes sliding.",
+      "bn": "এখন যে কাজটি চলছে, তা বোঝাতে ক্রিয়ার -ing রূপের আগে am, is বা are বসাও। I-এর সঙ্গে am; he, she, it বা একটি জিনিসের সঙ্গে is; আর you, we, they বা একাধিক জিনিসের সঙ্গে are বসে। যেমন: rain থেকে raining, আর slide থেকে sliding।",
+      "hi": "जो काम अभी चल रहा है, उसके लिए क्रिया के -ing रूप से पहले am, is या are लगाओ। I के साथ am; he, she, it या किसी एक चीज़ के साथ is; और you, we, they या एक से ज़्यादा चीज़ों के साथ are लगाओ। जैसे: rain से raining और slide से sliding।"
+    },
+    "examples": [
+      {
+        "sentence": "I am holding my umbrella.",
+        "note": {
+          "en": "Use am with I.",
+          "bn": "I-এর সঙ্গে am বসে।",
+          "hi": "I के साथ am लगता है।"
+        }
+      },
+      {
+        "sentence": "Priya is drawing the drops.",
+        "note": {
+          "en": "Priya is one person, so use is.",
+          "bn": "প্রিয়া একজন, তাই is বসে।",
+          "hi": "प्रिया एक व्यक्ति है, इसलिए is लगता है।"
+        }
+      },
+      {
+        "sentence": "The drops are sliding down the glass.",
+        "note": {
+          "en": "Drops is plural, so use are.",
+          "bn": "একাধিক ফোঁটা বোঝাতে drops-এর সঙ্গে are বসে।",
+          "hi": "Drops बहुवचन है, इसलिए are लगता है।"
+        }
+      },
+      {
+        "sentence": "We are writing captions.",
+        "note": {
+          "en": "Are + writing tells us what we are doing now.",
+          "bn": "are + writing দিয়ে বোঝা যায় আমরা এখন কী করছি।",
+          "hi": "Are + writing बताता है कि हम अभी क्या कर रहे हैं।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch06_q1",
+      "question": "I ___ holding my umbrella right now.",
+      "options": ["am", "is", "are", "be"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use am with I before holding.",
+        "bn": "I-এর সঙ্গে holding-এর আগে am বসে।",
+        "hi": "I के साथ holding से पहले am लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch06_q2",
+      "question": "Right now, Priya ___ drawing raindrops.",
+      "options": ["are", "is", "am", "be"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Priya is one person, so use is drawing.",
+        "bn": "প্রিয়া একজন, তাই is drawing হবে।",
+        "hi": "प्रिया एक व्यक्ति है, इसलिए is drawing सही है।"
+      }
+    },
+    {
+      "question_id": "ch06_q3",
+      "question": "The children ___ waiting inside right now.",
+      "options": ["is", "am", "are", "be"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Children is plural, so use are waiting.",
+        "bn": "children মানে একাধিক শিশু, তাই are waiting হবে।",
+        "hi": "Children बहुवचन है, इसलिए are waiting सही है।"
+      }
+    },
+    {
+      "question_id": "ch06_q4",
+      "question": "Look! The drops are ___ down the glass.",
+      "options": ["slide", "slides", "slided", "sliding"],
+      "correct_index": 3,
+      "explanation": {
+        "en": "After are, use the -ing form: slide becomes sliding.",
+        "bn": "are-এর পরে -ing রূপ চাই: slide থেকে sliding হয়।",
+        "hi": "Are के बाद -ing रूप चाहिए: slide से sliding बनता है।"
+      }
+    },
+    {
+      "question_id": "ch06_q5",
+      "question": "Choose the present continuous sentence.",
+      "options": ["We write captions every week.", "We are writing captions now.", "We wrote captions yesterday.", "We will write captions tomorrow."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Are writing shows an action in progress now.",
+        "bn": "are writing দিয়ে বোঝায় কাজটা এখন চলছে।",
+        "hi": "Are writing बताता है कि काम अभी चल रहा है।"
+      }
+    }
+  ]
+}
