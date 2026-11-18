@@ -1,0 +1,20 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "B",
+  "task": "learning-flow-ui-polish",
+  "allowed": [
+    "lib/features/chapters/chapter_detail_screen.dart",
+    "lib/features/chapters/chapter_list_screen.dart",
+    "lib/features/completion/chapter_completed_screen.dart",
+    "lib/features/grammar/grammar_lesson_screen.dart",
+    "lib/features/quiz/quiz_screen.dart"
+  ],
+  "commit": "feat(ui): polish grammar board, chapter flow, quiz and completion UX",
+  "arena": {
+    "branch": "arena/77b265ce-grammarbondhu",
+    "base_sha": "a48530cc7041b7a45f61b41790ae6d8bece0f0e7"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}

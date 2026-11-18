@@ -1,0 +1,18 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "A",
+  "task": "home-progress-rewards-ui-polish",
+  "allowed": [
+    "lib/features/home/home_screen.dart",
+    "lib/features/progress/progress_screen.dart",
+    "lib/features/rewards/rewards_screen.dart"
+  ],
+  "commit": "feat(ui): polish home, progress and rewards visual hierarchy and contrast",
+  "arena": {
+    "branch": "arena/f3a73e45-grammarbondhu",
+    "base_sha": "0d829f00f6b40a6bb3589f049ce7f1df76dd6703"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}

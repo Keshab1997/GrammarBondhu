@@ -1,0 +1,19 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "C",
+  "task": "design-system-and-entry-ui-polish",
+  "allowed": [
+    "lib/core/widgets/app_widgets.dart",
+    "lib/core/widgets/asset_images.dart",
+    "lib/features/auth/login_screen.dart",
+    "lib/features/splash/splash_screen.dart"
+  ],
+  "commit": "feat(ui): elevate shared cards, solid character art, splash and sign-in UX",
+  "arena": {
+    "branch": "arena/eead898e-grammarbondhu",
+    "base_sha": "2b5c9114705e7780d607556247227ab2684670c4"
+  },
+  "check": {
+    "kind": "preflight"
+  }
+}
