@@ -28,7 +28,7 @@
   "scenes": [
     {
       "scene_id": "ch01_s1",
-      "background_id": "bg_school_gate",
+      "background_id": "ch01_gate",
       "character_ids": [
         "rahul"
       ],

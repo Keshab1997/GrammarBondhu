@@ -28,7 +28,7 @@
   "scenes": [
     {
       "scene_id": "ch02_s1",
-      "background_id": "bg_school_garden",
+      "background_id": "ch02_garden",
       "character_ids": [
         "rahul",
         "priya"
@@ -54,7 +54,7 @@
     },
     {
       "scene_id": "ch02_s2",
-      "background_id": "bg_school_garden",
+      "background_id": "ch02_garden",
       "character_ids": [
         "priya",
         "rahul"

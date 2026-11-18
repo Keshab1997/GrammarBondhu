@@ -89,7 +89,7 @@
     },
     {
       "scene_id": "ch12_s3",
-      "background_id": "bg_school_garden",
+      "background_id": "ch12_garden",
       "character_ids": [
         "rahul",
         "teacher"
