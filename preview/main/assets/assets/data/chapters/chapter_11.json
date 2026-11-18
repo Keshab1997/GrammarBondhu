@@ -1,0 +1,220 @@
+{
+  "chapter_id": "ch11",
+  "title": {
+    "en": "Planning the Class Picnic",
+    "bn": "ক্লাসের চড়ুইভাতির পরিকল্পনা",
+    "hi": "कक्षा की पिकनिक की तैयारी"
+  },
+  "description": {
+    "en": "After Sports Day, the class plans a picnic in the school garden. Rahul and Priya find new ways to help.",
+    "bn": "ক্রীড়া দিবসের পর সবাই মিলে স্কুলের বাগানে চড়ুইভাতির পরিকল্পনা করে। রাহুল আর প্রিয়া সাহায্য করার নতুন উপায় খুঁজে পায়।",
+    "hi": "खेल दिवस के बाद कक्षा के बच्चे स्कूल के बगीचे में पिकनिक की योजना बनाते हैं। राहुल और प्रिया मदद करने के नए तरीके ढूँढ़ते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Future Plans (will / going to)",
+    "bn": "ভবিষ্যতের পরিকল্পনা (will / going to)",
+    "hi": "आगे की योजनाएँ (will / going to)"
+  },
+  "difficulty": "intermediate",
+  "estimated_duration_minutes": 14,
+  "thumbnail_asset": "assets/illustrations/ch05_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_classroom.webp",
+  "rewards": { "xp": 100, "coins": 20, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch11_s1",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Your Sports Day checklist worked so well that we’re going to make one for Friday’s picnic, too.",
+            "bn": "ক্রীড়া দিবসে তোমাদের তালিকাটা এত কাজে লেগেছিল যে শুক্রবারের চড়ুইভাতির জন্যও আমরা একটা তালিকা বানাব।",
+            "hi": "खेल दिवस पर तुम्हारी सूची इतनी काम आई कि शुक्रवार की पिकनिक के लिए भी हम एक सूची बनाने वाले हैं।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Rahul and I already talked about it. I’m going to bring a mat, and he’s going to make a sign.",
+            "bn": "রাহুল আর আমি আগেই কথা বলেছি। আমি একটা মাদুর আনব, আর ও একটা দিকনির্দেশের বোর্ড বানাবে।",
+            "hi": "राहुल और मैंने पहले ही बात कर ली है। मैं एक चटाई लाने वाली हूँ और वह रास्ता बताने वाला बोर्ड बनाने वाला है।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch11_s2",
+      "background_id": "bg_school_garden",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "We’re going to sit under this tree. There’s enough shade for everyone.",
+            "bn": "আমরা এই গাছটার নিচে বসব। এখানে সবার বসার মতো ছায়া আছে।",
+            "hi": "हम इस पेड़ के नीचे बैठने वाले हैं। यहाँ सबके लिए काफ़ी छाँव है।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "Oh, my hands are full. The picnic list is slipping!",
+            "bn": "ওহ্, আমার দুহাতেই জিনিস! চড়ুইভাতির তালিকাটা পড়ে যাচ্ছে!",
+            "hi": "अरे, मेरे दोनों हाथ भरे हैं। पिकनिक की सूची हाथ से छूट रही है!"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I’ll hold it for you!",
+            "bn": "আমি ধরে দিচ্ছি!",
+            "hi": "मैं पकड़ लेता हूँ!"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch11_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "priya"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "We’re going to pack the basket tomorrow. I’ve written the list, but I still need someone to read it out.",
+            "bn": "কাল আমরা ঝুড়ি গোছাব। তালিকাটা লিখেছি, কিন্তু সেটা পড়ে শোনানোর জন্য এখনও কাউকে দরকার।",
+            "hi": "हम कल टोकरी भरने वाले हैं। मैंने सूची लिख ली है, लेकिन उसे पढ़कर सुनाने के लिए अभी किसी की ज़रूरत है।"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I’ll read it out. We can tick things off as we pack.",
+            "bn": "আমি পড়ে শোনাব। জিনিসগুলো গোছাতে গোছাতে আমরা তালিকায় টিক দিতে পারি।",
+            "hi": "मैं पढ़कर सुना दूँगी। सामान रखते हुए हम सूची पर निशान लगा सकते हैं।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch11_c1",
+          "text": {
+            "en": "Offer on the spot: “I’ll bring the empty basket over.”",
+            "bn": "তখনই সাহায্যের প্রস্তাব দিই: “আমি খালি ঝুড়িটা নিয়ে আসছি।”",
+            "hi": "उसी समय मदद की पेशकश करें: “मैं खाली टोकरी ले आता हूँ।”"
+          },
+          "response": {
+            "en": "Thanks! Now we can put the list right beside the basket.",
+            "bn": "ধন্যবাদ! এবার তালিকাটা ঝুড়ির পাশেই রাখতে পারি।",
+            "hi": "शुक्रिया! अब हम सूची टोकरी के ठीक पास रख सकते हैं।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "A Plan or an Offer?",
+      "bn": "আগের পরিকল্পনা, না তখনই সাহায্যের প্রস্তাব?",
+      "hi": "पहले की योजना या उसी समय मदद की पेशकश?"
+    },
+    "explanation": {
+      "en": "To show a plan you have already made, use am, is or are + going to + the base verb: “We are going to bring a mat.” When offering to help right now, you can use will + the base verb: “I’ll carry it.” I’ll is short for I will. These are useful patterns, not rules that make every other future form wrong.",
+      "bn": "আগে থেকে ঠিক করা পরিকল্পনা বোঝাতে am, is বা are-এর পরে going to এবং ক্রিয়ার মূল রূপ বসাও: “We are going to bring a mat.” তখনই সাহায্যের প্রস্তাব দিতে will-এর পরে ক্রিয়ার মূল রূপ বসাতে পারো: “I’ll carry it.” I’ll হলো I will-এর সংক্ষিপ্ত রূপ। ভবিষ্যতের কথা বলার আরও উপায় আছে; এই দুটি রূপ এই পরিস্থিতিগুলোতে কাজে লাগে।",
+      "hi": "पहले से बनी योजना बताने के लिए am, is या are के बाद going to और फिर क्रिया का मूल रूप रखो: “We are going to bring a mat.” उसी समय मदद की पेशकश करनी हो तो will के बाद क्रिया का मूल रूप रख सकते हो: “I’ll carry it.” I’ll, I will का छोटा रूप है। भविष्य की बात कहने के और भी तरीके हैं; ये दो रूप इन स्थितियों में काम आते हैं।"
+    },
+    "examples": [
+      {
+        "sentence": "I am going to bring a mat.",
+        "note": {
+          "en": "Priya decided earlier. Use am going to with I.",
+          "bn": "প্রিয়া আগেই ঠিক করেছে। I-এর সঙ্গে am going to বসে।",
+          "hi": "प्रिया पहले ही तय कर चुकी है। I के साथ am going to लगता है।"
+        }
+      },
+      {
+        "sentence": "Rahul is going to make a sign.",
+        "note": {
+          "en": "Use is going to for a plan Rahul has already made.",
+          "bn": "রাহুল আগেই পরিকল্পনা করেছে, তাই is going to ব্যবহার করা হয়েছে।",
+          "hi": "राहुल की पहले से बनी योजना के लिए is going to लगाया गया है।"
+        }
+      },
+      {
+        "sentence": "We are going to sit under this tree.",
+        "note": {
+          "en": "Use are going to with we, followed by the base verb sit.",
+          "bn": "we-এর সঙ্গে are going to, তারপর sit-এর মূল রূপ বসে।",
+          "hi": "We के साथ are going to और फिर sit का मूल रूप रखो।"
+        }
+      },
+      {
+        "sentence": "I’ll hold the list for you.",
+        "note": {
+          "en": "Rahul offers to help as soon as he sees the list slipping.",
+          "bn": "তালিকাটা পড়ে যাচ্ছে দেখে রাহুল তখনই সাহায্যের প্রস্তাব দেয়।",
+          "hi": "सूची छूटती देखकर राहुल उसी समय मदद की पेशकश करता है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch11_q1",
+      "question": "Friday’s picnic is already planned. Complete the going to sentence: “We ___ going to eat in the garden.”",
+      "options": ["are", "is", "am", "will"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Use are with we in a going to plan.",
+        "bn": "পরিকল্পনার going to রূপে we-এর সঙ্গে are বসে।",
+        "hi": "Going to वाली योजना में we के साथ are लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch11_q2",
+      "question": "The list is slipping! Which option correctly makes an immediate offer with will?",
+      "options": ["I will to catch it.", "I will catch it.", "I will caught it.", "I will catches it."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Use the base verb catch right after will.",
+        "bn": "will-এর ঠিক পরে catch-এর মূল রূপ বসে।",
+        "hi": "Will के ठीक बाद catch का मूल रूप लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch11_q3",
+      "question": "Priya decided yesterday. Complete the plan: “She is going to ___ a mat on Friday.”",
+      "options": ["brought", "brings", "bring", "bringing"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "After is going to, use the base verb bring.",
+        "bn": "is going to-এর পরে bring-এর মূল রূপ বসে।",
+        "hi": "Is going to के बाद bring का मूल रूप लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch11_q4",
+      "question": "Which sentence uses the short form of I will?",
+      "options": ["I’m bringing the basket.", "I’ve brought the basket.", "I’d bring the basket.", "I’ll bring the basket."],
+      "correct_index": 3,
+      "explanation": {
+        "en": "I’ll is short for I will; it still takes the base verb bring.",
+        "bn": "I’ll হলো I will-এর সংক্ষিপ্ত রূপ; এর পরেও bring-এর মূল রূপ বসে।",
+        "hi": "I’ll, I will का छोटा रूप है। इसके बाद भी bring का मूल रूप लगता है।"
+      }
+    },
+    {
+      "question_id": "ch11_q5",
+      "question": "Which reply directly offers to help when someone says, “This basket is too heavy”?",
+      "options": ["I carried it yesterday.", "I’ll carry it for you.", "I have a basket at home.", "I’m going to draw a sign."],
+      "correct_index": 1,
+      "explanation": {
+        "en": "“I’ll carry it for you” responds to the problem with an offer right now.",
+        "bn": "“I’ll carry it for you” বলে তখনই সমস্যাটা সমাধান করতে সাহায্যের প্রস্তাব দেওয়া হচ্ছে।",
+        "hi": "“I’ll carry it for you” कहकर उसी समय समस्या हल करने में मदद की पेशकश की जाती है।"
+      }
+    }
+  ]
+}

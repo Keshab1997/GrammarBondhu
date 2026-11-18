@@ -1,0 +1,212 @@
+{
+  "chapter_id": "ch15",
+  "title": {
+    "en": "Our Class Scrapbook",
+    "bn": "আমাদের ক্লাসের স্মৃতির খাতা",
+    "hi": "हमारी कक्षा की यादों की किताब"
+  },
+  "description": {
+    "en": "Rahul, Priya and Mrs. Sen make a scrapbook of the things the class has made, tried and learned together.",
+    "bn": "ক্লাসের সবাই মিলে যা যা বানিয়েছে, করে দেখেছে আর শিখেছে, তা নিয়ে রাহুল, প্রিয়া আর মিসেস সেন একটা স্মৃতির খাতা বানায়।",
+    "hi": "कक्षा ने मिलकर जो कुछ बनाया, आज़माया और सीखा है, उसे राहुल, प्रिया और सेन मैम यादों की एक किताब में सहेजते हैं।"
+  },
+  "grammar_topic": {
+    "en": "Present Perfect (have / has + done)",
+    "bn": "পুরাঘটিত বর্তমান কাল (have / has + done)",
+    "hi": "पूर्ण वर्तमान काल (have / has + done)"
+  },
+  "difficulty": "intermediate",
+  "estimated_duration_minutes": 14,
+  "thumbnail_asset": "assets/illustrations/ch03_thumb.webp",
+  "background_asset": "assets/backgrounds/bg_library.webp",
+  "rewards": { "xp": 120, "coins": 24, "max_stars": 3 },
+  "scenes": [
+    {
+      "scene_id": "ch15_s1",
+      "background_id": "bg_library",
+      "character_ids": ["rahul", "priya"],
+      "dialogue": [
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "We’ve made a weather notebook and a plant chart. Look how much our bean plants have grown!",
+            "bn": "আমরা আবহাওয়ার খাতা আর গাছের চার্ট বানিয়েছি। দেখো, আমাদের শিমগাছগুলো কতটা বড় হয়েছে!",
+            "hi": "हमने मौसम की डायरी और पौधों का चार्ट बनाया है। देखो, हमारे सेम के पौधे कितने बढ़ गए हैं!"
+          }
+        },
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "I’ve written a caption for the chart. Let’s put our school newspaper story next to it.",
+            "bn": "চার্টের জন্য একটা লাইন লিখেছি। স্কুলের খবরের কাগজে যে লেখাটা বেরিয়েছিল, সেটা ওর পাশে রাখি।",
+            "hi": "मैंने चार्ट के लिए एक पंक्ति लिखी है। चलो स्कूल के अख़बार में छपी अपनी ख़बर उसके बगल में रखें।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch15_s2",
+      "background_id": "bg_classroom",
+      "character_ids": ["teacher", "rahul"],
+      "dialogue": [
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "Priya has made a pocket for the Sports Day map. What else belongs in it?",
+            "bn": "প্রিয়া ক্রীড়া দিবসের মানচিত্র রাখার জন্য কাগজের একটা পকেট বানিয়েছে। ওর মধ্যে আর কী রাখা যায়?",
+            "hi": "प्रिया ने खेल दिवस का नक्शा रखने के लिए काग़ज़ की एक जेब बनाई है। उसमें और क्या रख सकते हैं?"
+          }
+        },
+        {
+          "character_id": "rahul",
+          "text": {
+            "en": "I’ve saved our picnic list. My butterfly drawing is on the back. We can slip in the play script, too.",
+            "bn": "চড়ুইভাতির তালিকাটা রেখে দিয়েছি। পেছনে আমার আঁকা প্রজাপতি আছে। নাটকের লেখাটাও ভাঁজ করে ঢুকিয়ে দিতে পারি।",
+            "hi": "मैंने पिकनिक की सूची सँभालकर रखी है। उसके पीछे मेरी बनाई तितली है। हम नाटक की लिखी हुई कहानी भी उसमें रख सकते हैं।"
+          }
+        }
+      ]
+    },
+    {
+      "scene_id": "ch15_s3",
+      "background_id": "bg_classroom",
+      "character_ids": ["priya", "teacher"],
+      "dialogue": [
+        {
+          "character_id": "priya",
+          "text": {
+            "en": "We’ve nearly filled the scrapbook! Let’s leave the last page for the next class to start a story of its own.",
+            "bn": "স্মৃতির খাতাটা প্রায় ভরে ফেলেছি! শেষ পাতাটা রেখে দিই, যাতে পরের ক্লাস নিজেদের একটা গল্প শুরু করতে পারে।",
+            "hi": "हमने यादों की किताब लगभग भर दी है! आख़िरी पन्ना छोड़ दें, ताकि अगली कक्षा अपनी कहानी शुरू कर सके।"
+          }
+        },
+        {
+          "character_id": "teacher",
+          "text": {
+            "en": "You’ve learned a lot of English together. And you’ve made sure nobody had to learn alone.",
+            "bn": "তোমরা একসঙ্গে অনেক ইংরেজি শিখেছ। আর কাউকে একা একা শিখতে হয়নি, সেটাও তোমরাই দেখেছ।",
+            "hi": "तुमने साथ मिलकर बहुत अंग्रेज़ी सीखी है। और तुमने ध्यान रखा कि किसी को भी अकेले न सीखना पड़े।"
+          }
+        }
+      ],
+      "choices": [
+        {
+          "id": "ch15_c1",
+          "text": {
+            "en": "Write a note on the last page: “We’ve left this page for you.”",
+            "bn": "শেষ পাতায় লিখি: “এই পাতাটা আমরা তোমাদের জন্য রেখে দিয়েছি।”",
+            "hi": "आख़िरी पन्ने पर लिखें: “हमने यह पन्ना तुम्हारे लिए छोड़ा है।”"
+          },
+          "response": {
+            "en": "What a warm welcome. Their story can begin right where ours ends.",
+            "bn": "কী সুন্দর স্বাগত! আমাদের গল্প যেখানে শেষ, ওদের গল্প সেখান থেকেই শুরু হতে পারে।",
+            "hi": "कितना प्यारा स्वागत है! जहाँ हमारी कहानी ख़त्म होती है, वहीं से उनकी शुरू हो सकती है।"
+          }
+        }
+      ]
+    }
+  ],
+  "lesson": {
+    "title": {
+      "en": "What Have We Done So Far?",
+      "bn": "এখন পর্যন্ত আমরা কী কী করেছি?",
+      "hi": "हमने अब तक क्या किया है?"
+    },
+    "explanation": {
+      "en": "Use have or has + a past participle to talk about earlier actions that matter now: “We have made a scrapbook.” Use have with I, you, we or they, and has with he, she or it. Learn forms such as made, written and grown; learned ends in -ed. If you say when something happened at a finished time, such as last Friday, use the simple past: “We made the chart last Friday.”",
+      "bn": "আগে করা কোনো কাজের সঙ্গে বর্তমানের যোগ থাকলে have বা has-এর পরে ক্রিয়ার past participle রূপ বসাও: “We have made a scrapbook.” I, you, we, they-এর সঙ্গে have; he, she, it-এর সঙ্গে has বসে। made, written আর grown-এর মতো রূপগুলো শিখে রাখো; learned-এর শেষে -ed আছে। last Friday-এর মতো অতীতের নির্দিষ্ট সময় বললে সাধারণ অতীত কাল ব্যবহার করো: “We made the chart last Friday.”",
+      "hi": "पहले किए गए किसी काम का संबंध अभी से हो, तो have या has के बाद क्रिया का past participle रूप लगाओ: “We have made a scrapbook.” I, you, we और they के साथ have; he, she और it के साथ has लगाओ। Made, written और grown जैसे रूप याद रखो; learned के अंत में -ed है। अगर last Friday जैसा बीत चुका समय बताओ, तो सामान्य भूतकाल लगाओ: “We made the chart last Friday.”"
+    },
+    "examples": [
+      {
+        "sentence": "We have made a weather notebook.",
+        "note": {
+          "en": "Use have with we and made as the past participle of make.",
+          "bn": "we-এর সঙ্গে have বসে। made হলো make-এর past participle।",
+          "hi": "We के साथ have लगता है। Made, make का past participle है।"
+        }
+      },
+      {
+        "sentence": "Priya has written a caption.",
+        "note": {
+          "en": "Use has with one person. Written is the form used after has, not wrote.",
+          "bn": "একজনের কথা বলছি, তাই has বসে। has-এর পরে wrote নয়, written বসে।",
+          "hi": "एक व्यक्ति की बात है, इसलिए has लगाओ। Has के बाद wrote नहीं, written लगता है।"
+        }
+      },
+      {
+        "sentence": "Our bean plants have grown.",
+        "note": {
+          "en": "The plants grew before now, and we can see the difference today.",
+          "bn": "গাছগুলো আগেই বেড়েছে, আর এখন আমরা সেই বদল দেখতে পাচ্ছি।",
+          "hi": "पौधे पहले बढ़े हैं और आज हम उनका बदलाव देख सकते हैं।"
+        }
+      },
+      {
+        "sentence": "We have learned a lot together.",
+        "note": {
+          "en": "Learned is the -ed form used after have here.",
+          "bn": "এখানে have-এর পরে -ed যুক্ত learned বসেছে।",
+          "hi": "यहाँ have के बाद -ed वाला learned रूप आया है।"
+        }
+      }
+    ]
+  },
+  "quiz": [
+    {
+      "question_id": "ch15_q1",
+      "question": "The caption is ready now. Complete the present perfect: “Priya ___ written a caption.”",
+      "options": ["have", "is", "has", "was"],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Use has with Priya, then the past participle written.",
+        "bn": "প্রিয়ার সঙ্গে has, তারপর past participle written বসে।",
+        "hi": "प्रिया के साथ has और उसके बाद past participle written लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch15_q2",
+      "question": "Complete the present perfect sentence: “Look how much the bean plants have ___!”",
+      "options": ["grown", "grew", "grow", "growing"],
+      "correct_index": 0,
+      "explanation": {
+        "en": "Grown is the past participle of grow, so it goes after have.",
+        "bn": "grown হলো grow-এর past participle, তাই have-এর পরে বসে।",
+        "hi": "Grown, grow का past participle है, इसलिए यह have के बाद लगता है।"
+      }
+    },
+    {
+      "question_id": "ch15_q3",
+      "question": "Which sentence tells us about the scrapbook in the present perfect, without naming a finished time?",
+      "options": ["We make a scrapbook every year.", "We made a scrapbook last Friday.", "We will make a scrapbook next Friday.", "We have made a scrapbook."],
+      "correct_index": 3,
+      "explanation": {
+        "en": "Have made is present perfect. It tells us the scrapbook is ready without saying when it was made.",
+        "bn": "have made হলো present perfect। এতে বোঝায় খাতাটা তৈরি, তবে কখন তৈরি হয়েছে তা বলা নেই।",
+        "hi": "Have made present perfect है। इससे पता चलता है कि किताब तैयार है, लेकिन यह नहीं बताया गया कि उसे कब बनाया गया।"
+      }
+    },
+    {
+      "question_id": "ch15_q4",
+      "question": "Complete the caption about a finished time: “Last Friday, we ___ the plant chart.”",
+      "options": ["have made", "made", "have make", "has made"],
+      "correct_index": 1,
+      "explanation": {
+        "en": "Last Friday names a finished time, so use the simple past made.",
+        "bn": "last Friday দিয়ে অতীতের নির্দিষ্ট সময় বলা হচ্ছে, তাই সাধারণ অতীতের made বসবে।",
+        "hi": "Last Friday बीत चुका समय बताता है, इसलिए सामान्य भूतकाल वाला made लगाओ।"
+      }
+    },
+    {
+      "question_id": "ch15_q5",
+      "question": "Which sentence uses have learned correctly to describe what we know now?",
+      "options": ["We has learned a lot together.", "We have learn a lot together.", "We have learned a lot together.", "We have learning a lot together."],
+      "correct_index": 2,
+      "explanation": {
+        "en": "Use have with we, followed by the past participle learned.",
+        "bn": "we-এর সঙ্গে have, তারপর past participle learned বসে।",
+        "hi": "We के साथ have और उसके बाद past participle learned लगाओ।"
+      }
+    }
+  ]
+}

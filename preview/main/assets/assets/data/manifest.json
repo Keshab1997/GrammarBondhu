@@ -12,6 +12,11 @@
     { "chapter_id": "ch07", "file": "chapters/chapter_07.json", "order": 7 },
     { "chapter_id": "ch08", "file": "chapters/chapter_08.json", "order": 8 },
     { "chapter_id": "ch09", "file": "chapters/chapter_09.json", "order": 9 },
-    { "chapter_id": "ch10", "file": "chapters/chapter_10.json", "order": 10 }
+    { "chapter_id": "ch10", "file": "chapters/chapter_10.json", "order": 10 },
+    { "chapter_id": "ch11", "file": "chapters/chapter_11.json", "order": 11 },
+    { "chapter_id": "ch12", "file": "chapters/chapter_12.json", "order": 12 },
+    { "chapter_id": "ch13", "file": "chapters/chapter_13.json", "order": 13 },
+    { "chapter_id": "ch14", "file": "chapters/chapter_14.json", "order": 14 },
+    { "chapter_id": "ch15", "file": "chapters/chapter_15.json", "order": 15 }
   ]
 }
