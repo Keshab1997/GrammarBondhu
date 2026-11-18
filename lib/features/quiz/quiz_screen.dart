@@ -27,38 +27,40 @@ class _QuizScreenState extends State<QuizScreen> {
   int? _selected;
   bool _submitted = false;
   bool _submitting = false;
+  bool _finishing = false;
+  bool _countedThisQuestion = false;
   int _correctCount = 0;
 
+  bool get _optionsLocked => _submitting || _submitted || _finishing;
+
   Future<void> _submit(Chapter chapter) async {
-    if (_selected == null || _submitted || _submitting) return;
+    if (_selected == null || _optionsLocked) return;
     final question = chapter.quiz[_questionIndex];
     final correct = _selected == question.correctIndex;
     setState(() => _submitting = true);
     try {
-      final progress = context.read<ProgressController>();
-      if (correct) {
-        await progress.clearQuestionForReview(chapter.id, question.id);
-      } else {
-        await progress.markQuestionForReview(chapter.id, question.id);
-      }
-      // Counted here, on the submitted answer, not when the quiz ends: the
-      // learner's daily progress should move the moment they answer, and a
-      // quiz left half-finished must not erase what was already answered.
-      // `_submitted` is still false on this path, so re-tapping Submit cannot
-      // double count.
-      await progress.registerQuestionAnswered();
-      if (!mounted) return;
-      setState(() {
-        _submitted = true;
-        _submitting = false;
+      // A retry is practice. Keep the first answer's score, review entry and
+      // daily credit, even if the learner gets it right on a second try.
+      if (!_countedThisQuestion) {
+        final progress = context.read<ProgressController>();
+        if (correct) {
+          await progress.clearQuestionForReview(chapter.id, question.id);
+        } else {
+          await progress.markQuestionForReview(chapter.id, question.id);
+        }
+        await progress.registerQuestionAnswered();
+        if (!mounted) return;
+        _countedThisQuestion = true;
         if (correct) _correctCount += 1;
-      });
+      }
+      setState(() => _submitted = true);
     } finally {
-      if (mounted && _submitting) setState(() => _submitting = false);
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
   void _tryAgain() {
+    if (!_submitted || _submitting || _finishing) return;
     setState(() {
       _selected = null;
       _submitted = false;
@@ -66,21 +68,37 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _next(Chapter chapter) async {
+    if (!_submitted || _submitting || _finishing) return;
     if (_questionIndex < chapter.quiz.length - 1) {
       setState(() {
         _questionIndex += 1;
+        _countedThisQuestion = false;
         _selected = null;
         _submitted = false;
       });
       return;
     }
-    // Quiz finished — record the run and celebrate.
-    final result = await context.read<ProgressController>().recordQuizRun(
-          chapter: chapter,
-          correct: _correctCount,
-          total: chapter.quiz.length,
+    // Lock before the first await, not just on the next frame when the
+    // button is rebuilt. On success keep it locked through route replacement.
+    setState(() => _finishing = true);
+    QuizRunResult? result;
+    try {
+      result = await context.read<ProgressController>().recordQuizRun(
+            chapter: chapter,
+            correct: _correctCount,
+            total: chapter.quiz.length,
+          );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Could not save your quiz. Please try again.')),
         );
-    if (!mounted) return;
+      }
+    } finally {
+      if (result == null && mounted) setState(() => _finishing = false);
+    }
+    if (result == null || !mounted) return;
     Navigator.of(context).pushReplacementNamed(
       ChapterCompletedScreen.routeName,
       arguments: CompletedArgs(chapterId: chapter.id, result: result),
@@ -93,10 +111,14 @@ class _QuizScreenState extends State<QuizScreen> {
     final content = context.watch<ContentController>();
     final settings = context.watch<SettingsController>();
     final chapter = content.byId(widget.chapterId);
-    if (chapter == null) {
+    if (chapter == null || chapter.quiz.isEmpty) {
       return Scaffold(
-          appBar: AppBar(),
-          body: const Center(child: Text('Chapter not found')));
+        appBar: AppBar(),
+        body: Center(
+            child: Text(chapter == null
+                ? 'Chapter not found'
+                : 'No quiz questions in this chapter yet.')),
+      );
     }
 
     final question = chapter.quiz[_questionIndex];
@@ -237,9 +259,12 @@ class _QuizScreenState extends State<QuizScreen> {
                                               : i == _selected
                                                   ? _OptionState.wrong
                                                   : _OptionState.idle,
-                                      enabled: !_submitted,
-                                      onTap: () =>
-                                          setState(() => _selected = i),
+                                      enabled: !_optionsLocked,
+                                      onTap: () {
+                                        if (!_optionsLocked) {
+                                          setState(() => _selected = i);
+                                        }
+                                      },
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                   ],
@@ -249,7 +274,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                       label: 'Submit',
                                       variant: AppButtonVariant.success,
                                       onPressed:
-                                          _selected == null || _submitting
+                                          _selected == null || _optionsLocked
                                               ? null
                                               : () => _submit(chapter),
                                     ),
@@ -281,7 +306,8 @@ class _QuizScreenState extends State<QuizScreen> {
                                       AppButton(
                                         label: 'Try Again',
                                         variant: AppButtonVariant.outline,
-                                        onPressed: _tryAgain,
+                                        onPressed:
+                                            _finishing ? null : _tryAgain,
                                       ),
                                     const SizedBox(height: AppSpacing.sm),
                                     AppButton(
@@ -290,7 +316,9 @@ class _QuizScreenState extends State<QuizScreen> {
                                           ? 'Next Question'
                                           : 'Finish Quiz',
                                       variant: AppButtonVariant.blue,
-                                      onPressed: () => _next(chapter),
+                                      onPressed: _finishing
+                                          ? null
+                                          : () => _next(chapter),
                                     ),
                                   ],
                                 ],

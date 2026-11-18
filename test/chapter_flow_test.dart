@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grammar_bondhu/app/router.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
@@ -9,6 +10,10 @@ import 'package:grammar_bondhu/core/utils/asset_lookup.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_detail_screen.dart';
 import 'package:grammar_bondhu/features/grammar/grammar_lesson_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
+import 'package:grammar_bondhu/features/home/home_shell.dart';
+import 'package:grammar_bondhu/features/profile/profile_screen.dart';
+import 'package:grammar_bondhu/features/rewards/rewards_screen.dart';
+import 'package:grammar_bondhu/features/settings/offline_download_screen.dart';
 import 'package:grammar_bondhu/features/story/story_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,8 +53,7 @@ Future<void> _pump(WidgetTester tester, Widget screen, Size size) async {
         child: MaterialApp(
           home: screen,
           theme: ThemeData(useMaterial3: true),
-          onUnknownRoute: (settings) =>
-              MaterialPageRoute<void>(builder: (_) => const SizedBox.shrink()),
+          onGenerateRoute: AppRouter.onGenerateRoute,
         ),
       ),
     ),
@@ -176,6 +180,93 @@ void main() {
     });
   }
 
+  testWidgets('Resume opens the next unread scene, then the grammar lesson',
+      (tester) async {
+    await _pump(tester, const ChapterDetailScreen(chapterId: 'ch01'),
+        const Size(353, 784));
+    final detail = tester.element(find.byType(ChapterDetailScreen));
+    final chapter = detail.read<ContentController>().byId('ch01')!;
+    final progress = detail.read<ProgressController>();
+    final scenes = chapter.scenes;
+
+    Future<void> finishScene(int index) async {
+      for (final _ in scenes[index].dialogue) {
+        // The stage advances on tap, whether or not the scene offers choices.
+        await tester.tapAt(const Offset(176, 120));
+        await tester.pumpAndSettle();
+      }
+      expect(progress.chapterProgress(chapter.id).resumeSceneIndex, index + 1);
+    }
+
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    await finishScene(0);
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Scene 2 of ${scenes.length}'), findsOneWidget);
+    await tester.tap(find.text('Resume'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<StoryScreen>(find.byType(StoryScreen)).args.startScene,
+        1);
+    expect(find.text(scenes[1].dialogue.first.text.en), findsOneWidget);
+
+    for (var i = 1; i < scenes.length; i++) {
+      await finishScene(i);
+    }
+    expect(find.byType(GrammarLessonScreen), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Ready for the grammar lesson'), findsOneWidget);
+    expect(find.textContaining('Scene ${scenes.length + 1}'), findsNothing);
+    await tester.tap(find.text('Resume'));
+    await tester.pumpAndSettle();
+    final lesson = tester.element(find.byType(GrammarLessonScreen));
+    expect(ModalRoute.of(lesson)!.settings.name, GrammarLessonScreen.routeName);
+    expect(ModalRoute.of(lesson)!.settings.arguments, chapter.id);
+  });
+
+  for (final standalone in [false, true]) {
+    testWidgets(
+        'Profile → Achievements opens Rewards (standalone: $standalone)',
+        (tester) async {
+      await _pump(
+          tester,
+          standalone
+              ? const Scaffold(body: ProfileScreen())
+              : const HomeShell(initialTab: 99),
+          const Size(412, 915));
+      final profile = find.byType(ProfileScreen);
+      final achievements =
+          find.descendant(of: profile, matching: find.text('Achievements'));
+      await tester.scrollUntilVisible(achievements, 240,
+          scrollable:
+              find.descendant(of: profile, matching: find.byType(Scrollable)));
+      await tester.tap(achievements);
+      await tester.pumpAndSettle();
+      final rewards = tester.element(find.byType(RewardsScreen));
+      expect(Navigator.of(rewards).canPop(), standalone);
+      if (standalone) {
+        final route = ModalRoute.of(rewards)!.settings;
+        expect(route.name, HomeShell.routeName);
+        expect(route.arguments, 2);
+      } else {
+        // An in-shell jump keeps the original route, even on repeated jumps.
+        expect(HomeShell.selectTab(rewards, -1), isTrue);
+        await tester.pumpAndSettle();
+        expect(tester.widget<IndexedStack>(find.byType(IndexedStack)).index, 0);
+      }
+    });
+  }
+
+  testWidgets('offline chapters are included, not waiting to download',
+      (tester) async {
+    await _pump(tester, const OfflineDownloadScreen(), const Size(353, 784));
+    expect(find.textContaining('no download needed'), findsOneWidget);
+    expect(find.text('Included'), findsWidgets);
+    expect(find.byIcon(Icons.check_circle_rounded), findsWidgets);
+    expect(find.text('Download'), findsNothing);
+  });
+
   testWidgets('chapter list filters by real chapter state', (tester) async {
     await _pump(tester, const ChapterListScreen(), const Size(353, 784));
 
@@ -186,8 +277,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('to unlock'), findsNWidgets(4));
 
+    await tester.tap(find.text('Started'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No chapters in progress'), findsOneWidget);
+
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
     expect(find.textContaining('to unlock'), findsNothing);
+    expect(find.textContaining('No completed chapters'), findsOneWidget);
+
+    final list = tester.element(find.byType(ChapterListScreen));
+    final chapters = list.read<ContentController>().chapters;
+    final progress = list.read<ProgressController>();
+    for (final chapter in chapters) {
+      await progress.recordQuizRun(chapter: chapter, correct: 1, total: 1);
+    }
+    await tester.tap(find.text('Locked'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Every chapter is unlocked'), findsOneWidget);
+    await tester.tap(find.text('All'));
+    await tester.pumpAndSettle();
+    expect(find.text(chapters.first.title.en), findsOneWidget);
   });
 }

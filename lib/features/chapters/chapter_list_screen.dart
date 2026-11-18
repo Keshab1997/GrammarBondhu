@@ -48,6 +48,44 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
     final progress = context.watch<ProgressController>();
     final chapters = content.chapters;
 
+    final cards = <Widget>[];
+    for (var index = 0; index < chapters.length; index++) {
+      final chapter = chapters[index];
+      final unlocked = _isUnlocked(chapters, index, progress);
+      final record = progress.chapterProgress(chapter.id);
+      final isLocked = !unlocked;
+
+      final inProgress = unlocked && record.started && !record.completed;
+      final matches = switch (_filter) {
+        _ChapterFilter.all => true,
+        _ChapterFilter.inProgress => inProgress,
+        _ChapterFilter.completed => record.completed,
+        _ChapterFilter.locked => isLocked,
+      };
+      if (!matches) continue;
+
+      cards.add(Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: _ChapterCard(
+          chapter: chapter,
+          number: index + 1,
+          locked: isLocked,
+          completed: record.completed,
+          inProgress: inProgress,
+          stars: record.stars,
+          resumeStep: record.resumeSceneIndex,
+          sceneCount: chapter.scenes.length,
+          unlocksAfter: isLocked ? _unlockHint(chapters, index) : null,
+          onTap: isLocked
+              ? null
+              : () => Navigator.of(context).pushNamed(
+                    ChapterDetailScreen.routeName,
+                    arguments: chapter.id,
+                  ),
+        ),
+      ));
+    }
+
     // Own Scaffold/Material: this screen is both a tab inside HomeShell
     // and a standalone route (/chapters, from the Home quick action), and
     // a route's LookupBoundary hides any Material above it — the filter
@@ -120,48 +158,24 @@ class _ChapterListScreenState extends State<ChapterListScreen> {
             Expanded(
               child: chapters.isEmpty
                   ? const Center(child: Text('Chapters are loading…'))
-                  : ListView.builder(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                      itemCount: chapters.length,
-                      itemBuilder: (context, index) {
-                        final chapter = chapters[index];
-                        final unlocked = _isUnlocked(chapters, index, progress);
-                        final record = progress.chapterProgress(chapter.id);
-                        final isLocked = !unlocked;
-
-                        final inProgress =
-                            unlocked && record.started && !record.completed;
-                        final matches = switch (_filter) {
-                          _ChapterFilter.all => true,
-                          _ChapterFilter.inProgress => inProgress,
-                          _ChapterFilter.completed => record.completed,
-                          _ChapterFilter.locked => isLocked,
-                        };
-                        if (!matches) return const SizedBox.shrink();
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _ChapterCard(
-                            chapter: chapter,
-                            number: index + 1,
-                            locked: isLocked,
-                            completed: record.completed,
-                            inProgress: inProgress,
-                            stars: record.stars,
-                            resumeStep: record.resumeSceneIndex,
-                            sceneCount: chapter.scenes.length,
-                            unlocksAfter:
-                                isLocked ? _unlockHint(chapters, index) : null,
-                            onTap: isLocked
-                                ? null
-                                : () => Navigator.of(context).pushNamed(
-                                      ChapterDetailScreen.routeName,
-                                      arguments: chapter.id,
-                                    ),
-                          ),
-                        );
-                      },
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md, 0, AppSpacing.md, 108),
+                      children: cards.isNotEmpty
+                          ? cards
+                          : [
+                              AppCard(
+                                  child: Text(switch (_filter) {
+                                _ChapterFilter.inProgress =>
+                                  'No chapters in progress. Choose one from All to get started.',
+                                _ChapterFilter.completed =>
+                                  'No completed chapters yet. Finish a quiz to see it here.',
+                                _ChapterFilter.locked =>
+                                  'Every chapter is unlocked. Pick one from All to practise.',
+                                _ChapterFilter.all =>
+                                  'No chapters available yet.',
+                              })),
+                            ],
                     ),
             ),
           ],

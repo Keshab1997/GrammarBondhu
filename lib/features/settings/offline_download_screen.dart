@@ -6,22 +6,11 @@ import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/asset_images.dart';
 
-/// Screen 16 — manage locally available chapter content.
-///
-/// v1 ships all chapters inside the app bundle, so every chapter is already
-/// offline. The per-chapter action is kept ready for future downloadable
-/// content packs (honest label: "Bundled with app").
-class OfflineDownloadScreen extends StatefulWidget {
+/// Screen 16 — chapters already available offline in the app bundle.
+class OfflineDownloadScreen extends StatelessWidget {
   const OfflineDownloadScreen({super.key});
 
   static const routeName = '/downloads';
-
-  @override
-  State<OfflineDownloadScreen> createState() => _OfflineDownloadScreenState();
-}
-
-class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
-  final _downloaded = <String>{};
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +23,7 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text('Download Chapter'),
+        title: const Text('Offline chapters'),
       ),
       body: SafeArea(
         child: ListView(
@@ -50,7 +39,7 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.primarySoft,
-                    child: const Icon(Icons.download_rounded,
+                    child: const Icon(Icons.offline_pin_rounded,
                         size: 64, color: AppColors.primary),
                   ),
                 ),
@@ -58,8 +47,8 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'All chapters include story images, grammar lessons and quiz data. '
-              'They work fully offline.',
+              'Every chapter is included with the app. Stories, audio, grammar '
+              'lessons and quizzes work offline — no download needed.',
               style: text.bodyMedium,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -80,30 +69,12 @@ class _OfflineDownloadScreenState extends State<OfflineDownloadScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(chapter.title.en, style: text.titleMedium),
-                            Text('Images + Audio + JSON Data',
-                                style: text.bodyMedium),
+                            Text('Included', style: text.bodyMedium),
                           ],
                         ),
                       ),
-                      if (_downloaded.contains(chapter.id))
-                        const Icon(Icons.check_circle_rounded,
-                            color: AppColors.success)
-                      else
-                        AppButton(
-                          label: 'Download',
-                          variant: AppButtonVariant.blue,
-                          expand: false,
-                          onPressed: () {
-                            setState(() => _downloaded.add(chapter.id));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${chapter.title.en} is bundled with the app — ready offline.',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                      const Icon(Icons.check_circle_rounded,
+                          color: AppColors.success),
                     ],
                   ),
                 ),
