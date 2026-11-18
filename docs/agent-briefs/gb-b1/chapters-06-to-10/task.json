@@ -1,0 +1,25 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "C",
+  "task": "chapters-06-to-10",
+  "allowed": [
+    "assets/data/manifest.json",
+    "assets/data/chapters/chapter_06.json",
+    "assets/data/chapters/chapter_07.json",
+    "assets/data/chapters/chapter_08.json",
+    "assets/data/chapters/chapter_09.json",
+    "assets/data/chapters/chapter_10.json",
+    "README.md",
+    "test/content_repository_test.dart"
+  ],
+  "commit": "feat(chapters): add trilingual story chapters 6 to 10",
+  "check": {
+    "kind": "flutter",
+    "version": "3.50.0",
+    "test": "test/content_repository_test.dart"
+  },
+  "arena": {
+    "branch": "auto",
+    "base_sha": "e648e6a2dcd3b7de04352659ccadb091b9e2db2e"
+  }
+}

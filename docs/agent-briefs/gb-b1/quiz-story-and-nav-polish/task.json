@@ -1,0 +1,29 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "B",
+  "task": "quiz-story-and-nav-polish",
+  "allowed": [
+    "lib/features/quiz/quiz_screen.dart",
+    "lib/features/story/story_screen.dart",
+    "lib/features/chapters/chapter_detail_screen.dart",
+    "lib/features/chapters/chapter_list_screen.dart",
+    "lib/features/completion/chapter_completed_screen.dart",
+    "lib/features/home/home_shell.dart",
+    "lib/features/profile/profile_screen.dart",
+    "lib/features/settings/offline_download_screen.dart",
+    "lib/features/audio/audio_controller.dart",
+    "test/quiz_completion_test.dart",
+    "test/chapter_flow_test.dart",
+    "test/audio_test.dart"
+  ],
+  "commit": "fix(quiz): harden quiz finish, story resume, navigation and audio races",
+  "check": {
+    "kind": "flutter",
+    "version": "3.50.0",
+    "test": "test/quiz_completion_test.dart"
+  },
+  "arena": {
+    "branch": "auto",
+    "base_sha": "e648e6a2dcd3b7de04352659ccadb091b9e2db2e"
+  }
+}

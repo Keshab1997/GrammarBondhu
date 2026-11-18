@@ -1,0 +1,25 @@
+{
+  "repo": "Keshab1997/GrammarBondhu",
+  "worker": "A",
+  "task": "progress-sync-and-rewards",
+  "allowed": [
+    "lib/data/models/progress.dart",
+    "lib/app/state/progress_controller.dart",
+    "lib/features/settings/settings_screen.dart",
+    "lib/features/progress/progress_screen.dart",
+    "lib/features/rewards/rewards_screen.dart",
+    "test/cloud_progress_backup_test.dart",
+    "test/progress_review_test.dart",
+    "test/progress_store_test.dart"
+  ],
+  "commit": "fix(progress): harden cloud sync, device reset, replay coins and streaks",
+  "check": {
+    "kind": "flutter",
+    "version": "3.50.0",
+    "test": "test/cloud_progress_backup_test.dart"
+  },
+  "arena": {
+    "branch": "auto",
+    "base_sha": "e648e6a2dcd3b7de04352659ccadb091b9e2db2e"
+  }
+}
