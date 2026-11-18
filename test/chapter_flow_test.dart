@@ -12,6 +12,7 @@ import 'package:grammar_bondhu/features/grammar/grammar_lesson_screen.dart';
 import 'package:grammar_bondhu/features/chapters/chapter_list_screen.dart';
 import 'package:grammar_bondhu/features/home/home_shell.dart';
 import 'package:grammar_bondhu/features/profile/profile_screen.dart';
+import 'package:grammar_bondhu/features/progress/progress_screen.dart';
 import 'package:grammar_bondhu/features/rewards/rewards_screen.dart';
 import 'package:grammar_bondhu/features/settings/offline_download_screen.dart';
 import 'package:grammar_bondhu/features/story/story_screen.dart';
@@ -307,5 +308,95 @@ void main() {
     await tester.tap(find.text('All'));
     await tester.pumpAndSettle();
     expect(find.text(chapters.first.title.en), findsOneWidget);
+  });
+
+  testWidgets(
+      'grammar lesson shows dynamic chapter examples and tap-to-reveal answers',
+      (tester) async {
+    await _pump(
+      tester,
+      const GrammarLessonScreen(chapterId: 'ch11'),
+      const Size(390, 844),
+    );
+    final ctx = tester.element(find.byType(GrammarLessonScreen));
+    final ch11 = ctx.read<ContentController>().byId('ch11')!;
+
+    // Page 1 shows ch11's own grammar rule, never ch01's hardcoded am/is/are.
+    expect(find.text(ch11.lesson.title.en), findsOneWidget);
+
+    // Page 2 shows ch11's real example sentences and trilingual notes.
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(ch11.lesson.examples.first.sentence),
+      findsOneWidget,
+    );
+    expect(find.text('Rahul is my friend.'), findsNothing);
+
+    // Page 3 hides the answer key until the learner taps "Show answers".
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Answers:'), findsNothing);
+    expect(find.text('Show answers'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Show answers'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show answers'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hide answers'), findsOneWidget);
+    expect(
+      find.textContaining('Answers: ${ch11.quiz.first.correctAnswer}'),
+      findsOneWidget,
+    );
+
+    // Switching the board language flips the answer toggle to Bengali cleanly.
+    await tester.tap(find.text('বাংলা'));
+    await tester.pumpAndSettle();
+    expect(find.text('উত্তর লুকাও'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('progress screen renders chapter XP bars cleanly with semantics',
+      (tester) async {
+    final semantics = tester.ensureSemantics();
+    try {
+      await _pump(
+        tester,
+        ProgressScreen(now: DateTime(2026, 11, 18, 10)),
+        const Size(390, 844),
+      );
+      final ctx = tester.element(find.byType(ProgressScreen));
+      final content = ctx.read<ContentController>();
+      final progress = ctx.read<ProgressController>();
+      await progress.recordQuizRun(
+        chapter: content.byId('ch01')!,
+        correct: 5,
+        total: 5,
+        now: DateTime(2026, 11, 18, 9),
+      );
+      await progress.recordQuizRun(
+        chapter: content.byId('ch02')!,
+        correct: 4,
+        total: 5,
+        now: DateTime(2026, 11, 18, 10),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      for (final tab in ['Chapters', 'Stats', 'Review', 'Overview']) {
+        await tester.tap(find.text(tab).first);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      }
+      await tester.scrollUntilVisible(
+        find.text(content.byId('ch01')!.title.en),
+        180,
+        scrollable: find.byType(Scrollable).last,
+      );
+      expect(find.text(content.byId('ch01')!.title.en), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 }

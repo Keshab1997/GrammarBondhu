@@ -798,22 +798,24 @@ class _BoardPage extends StatelessWidget {
             ),
           ),
           if (revealAnswers)
-            Semantics(
-                liveRegion: true,
-                child: Container(
-                  margin: const EdgeInsets.only(top: AppSpacing.sm),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.20),
-                      borderRadius: BorderRadius.circular(AppRadii.chip)),
-                  child: Text(
-                      '${_t('Answers: ', 'উত্তর: ', 'जवाब: ')}$answerKey',
-                      style: chalk(15,
-                          color: AppColors.accent,
-                          alpha: 1,
-                          w: FontWeight.w700)),
-                )),
+            _RevealIntoView(
+              child: Semantics(
+                  liveRegion: true,
+                  child: Container(
+                    margin: const EdgeInsets.only(top: AppSpacing.sm),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.20),
+                        borderRadius: BorderRadius.circular(AppRadii.chip)),
+                    child: Text(
+                        '${_t('Answers: ', 'উত্তর: ', 'जवाब: ')}$answerKey',
+                        style: chalk(15,
+                            color: AppColors.accent,
+                            alpha: 1,
+                            w: FontWeight.w700)),
+                  )),
+            ),
         ],
       ]);
     }
@@ -882,6 +884,37 @@ class _BoardPage extends StatelessWidget {
     ('he / she / it', 'is', 'সে', 'वह'),
     ('you / we / they', 'are', 'তুমি / আমরা / তারা', 'तुम / हम / वे'),
   ];
+}
+
+/// Scrolls a newly revealed answer pill into view on the board slate so it is
+/// never tucked below the scroll fold above Mrs. Sen.
+class _RevealIntoView extends StatefulWidget {
+  const _RevealIntoView({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_RevealIntoView> createState() => _RevealIntoViewState();
+}
+
+class _RevealIntoViewState extends State<_RevealIntoView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final instant = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+      Scrollable.ensureVisible(
+        context,
+        alignment: 1.0,
+        duration: instant ? Duration.zero : const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Reveals its child between two points of the chalk animation.
