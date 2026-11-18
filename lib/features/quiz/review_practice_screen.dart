@@ -9,6 +9,7 @@ import '../../core/utils/accessible_layout.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../data/models/chapter.dart';
 import '../../data/models/progress.dart';
+import '../settings/language_selection_screen.dart';
 
 typedef _PracticeItem = ({Chapter chapter, QuizQuestion question});
 
@@ -47,6 +48,7 @@ class _ReviewPracticeScreenState extends State<ReviewPracticeScreen> {
   int _index = 0;
   int _clearedCount = 0;
   int? _selected;
+  String? _explanationLang;
   bool _submitting = false;
   bool _submitted = false;
 
@@ -77,6 +79,7 @@ class _ReviewPracticeScreenState extends State<ReviewPracticeScreen> {
       _index = 0;
       _clearedCount = 0;
       _selected = null;
+      _explanationLang = null;
       _submitted = false;
     });
     if (_scroll.hasClients) _scroll.jumpTo(0);
@@ -87,6 +90,7 @@ class _ReviewPracticeScreenState extends State<ReviewPracticeScreen> {
     setState(() {
       _index += 1;
       _selected = null;
+      _explanationLang = null;
       _submitted = false;
     });
     if (_scroll.hasClients) _scroll.jumpTo(0);
@@ -168,7 +172,8 @@ class _ReviewPracticeScreenState extends State<ReviewPracticeScreen> {
   List<Widget> _question(BuildContext context, _PracticeItem item) {
     final text = Theme.of(context).textTheme;
     final (:chapter, :question) = item;
-    final language = context.watch<SettingsController>().supportLanguage;
+    final language =
+        _explanationLang ?? context.watch<SettingsController>().supportLanguage;
     final isLast = _index == _deck.length - 1;
     final correct = _selected == question.correctIndex;
     return [
@@ -203,14 +208,44 @@ class _ReviewPracticeScreenState extends State<ReviewPracticeScreen> {
       ],
       const SizedBox(height: AppSpacing.sm),
       if (_submitted) ...[
-        Semantics(
-          container: true,
-          liveRegion: true,
-          child: _message(
-            context,
-            heading: correct ? 'Correct!' : 'Not quite. Keep practising!',
-            detail: question.explanation.of(language),
-            color: correct ? AppColors.successSoft : AppColors.errorSoft,
+        AppCard(
+          color: correct ? AppColors.successSoft : AppColors.errorSoft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Semantics(
+                container: true,
+                liveRegion: true,
+                excludeSemantics: true,
+                label:
+                    '${correct ? 'Correct!' : 'Not quite. Keep practising!'} '
+                    '${question.explanation.of(language)}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      correct ? 'Correct!' : 'Not quite. Keep practising!',
+                      style: text.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      question.explanation.of(language),
+                      style: text.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              if (question.explanation.bn != null ||
+                  question.explanation.hi != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                ExplanationLanguagePicker(
+                  selected: language,
+                  onChanged: (code) => setState(() => _explanationLang = code),
+                  translations: question.explanation,
+                  englishLabel: 'EN',
+                ),
+              ],
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.md),

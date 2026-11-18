@@ -9,6 +9,7 @@ import '../features/home/home_shell.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/quiz/quiz_screen.dart';
+import '../features/quiz/review_practice_screen.dart';
 import '../features/settings/language_selection_screen.dart';
 import '../features/settings/offline_download_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -68,6 +69,8 @@ class AppRouter {
               : QuizScreen(chapterId: chapterId),
           settings,
         );
+      case ReviewPracticeScreen.routeName:
+        return _page(const ReviewPracticeScreen(), settings);
       case ChapterCompletedScreen.routeName:
         final args = settings.arguments;
         return _page(
@@ -77,7 +80,8 @@ class AppRouter {
           settings,
         );
       case ProgressScreen.routeName:
-        return _page(const ProgressScreen(), settings);
+        final tab = settings.arguments is int ? settings.arguments! as int : 0;
+        return _page(ProgressScreen(initialTab: tab), settings);
       case SettingsScreen.routeName:
         return _page(const SettingsScreen(), settings);
       case LanguageSelectionScreen.routeName:

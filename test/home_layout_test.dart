@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grammar_bondhu/app/router.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
@@ -54,6 +55,7 @@ Future<({ContentController content, ProgressController progress})> _pumpHome(
       ],
       child: MaterialApp(
         home: const HomeShell(),
+        onGenerateRoute: AppRouter.onGenerateRoute,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(textScale),

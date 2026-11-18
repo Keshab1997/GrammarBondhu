@@ -360,8 +360,9 @@ Bengali and Hindi explanations. Its current core promises are:
 - **Guest-first.** Learners can start without an account; onboarding must not
   require sign-in.
 - **On-device by default.** Progress and preferences are stored locally, and
-  all 10 trilingual chapters (`ch01`–`ch10`, 760 XP total) are bundled with the
-  app. Bundled English and Bengali narration covers `ch01`–`ch05` plus shared
+  all 15 trilingual chapters (`ch01`–`ch10` beginner, `ch11`–`ch15`
+  intermediate; 75 quiz questions, 1,300 XP total) are bundled with the app.
+  Bundled English and Bengali narration covers `ch01`–`ch05` plus shared
   teacher cues; chapters or languages without a bundled clip hide the speaker
   button cleanly instead of failing.
 - **Cloud backup is optional and user-initiated.** Optional Google sign-in and

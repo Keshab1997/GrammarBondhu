@@ -33,12 +33,15 @@ provide translations and explanations.
   14. **The Rainy-Day Play** — joining ideas (and / but / because / so)
   15. **Our Class Scrapbook** — present perfect (have / has + past participle)
 
-- 🌐 **Three languages** — English + Bengali + Hindi translations, in-story
-  language toggle (EN / বাং / हि)
+- 🌐 **Three languages** — English + Bengali + Hindi translations, interactive
+  onboarding language picker, live explanation preview in Settings, and
+  in-story / in-lesson / in-quiz language toggles (EN / বাংলা / हिन्दी)
 - 📝 **Grammar lessons** — rules, examples, character illustrations
-- 🎯 **Quizzes** — 5 MCQs per chapter with kind, explanatory feedback
-  (correct answer + why, in your language)
-- 🏆 **Rewards** — XP, coins, stars, streaks, daily goal, achievements
+- 🎯 **Quizzes & Mistake Practice** — 5 MCQs per chapter with kind, trilingual
+  feedback, plus a focused Mistake Practice deck to clear missed questions
+  without farming duplicate XP
+- 🏆 **Rewards** — XP, coins, stars, current & best streaks, daily goal, level
+  progress bar and 7 unlockable achievements
 - 💾 **Guest-first + offline** — bundled lessons and local progress work without
   an account; optional Google sign-in can sync progress through Firebase Firestore
 - ☁️ **Optional progress backup** — a signed-in learner's local and cloud

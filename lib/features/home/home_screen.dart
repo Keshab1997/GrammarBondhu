@@ -903,9 +903,7 @@ class _ReviewMistakesCard extends StatelessWidget {
         '$reviewCount ${reviewCount == 1 ? 'question' : 'questions'} waiting for another try';
 
     void practise() {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const ReviewPracticeScreen()),
-      );
+      Navigator.of(context).pushNamed(ReviewPracticeScreen.routeName);
     }
 
     return Semantics(

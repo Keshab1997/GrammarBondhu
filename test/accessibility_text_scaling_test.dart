@@ -162,6 +162,8 @@ void main() {
         ]) {
           final name = find.text(label);
           await tester.scrollUntilVisible(name, fromPreview ? -180 : 180);
+          await tester.ensureVisible(name);
+          await tester.pumpAndSettle();
           await tester.tap(name);
           await tester.pumpAndSettle();
           _expectLanguageButton(

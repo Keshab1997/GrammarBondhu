@@ -1,7 +1,8 @@
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grammar_bondhu/core/widgets/app_widgets.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
@@ -222,7 +223,7 @@ void main() {
       final chip = tester.getSemantics(
         find.bySemanticsLabel('20 questions a day'),
       );
-      expect(chip.hasFlag(SemanticsFlag.isSelected), isTrue);
+      expect(chip.flagsCollection.isSelected, Tristate.isTrue);
       expect(harness.progress.dailyGoalQuestions, 20);
       semantics.dispose();
     });
@@ -266,9 +267,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The card says the chosen number, not the default 5.
+      // The card says the chosen number, not the default 5. Scope to the Daily
+      // Goal card because the 15-chapter course card also shows "0/15".
+      final goalCard = find.widgetWithText(AppCard, 'Daily Goal');
       expect(find.text('Complete 15 quiz questions today'), findsOneWidget);
-      expect(find.text('0/15'), findsOneWidget);
+      expect(
+        find.descendant(of: goalCard, matching: find.text('0/15')),
+        findsOneWidget,
+      );
 
       // And changing the choice moves the card with it.
       await progress.setDailyGoal(3);
@@ -310,7 +316,11 @@ void main() {
 
         await tester.scrollUntilVisible(find.text('Daily Goal'), 200);
         await tester.pumpAndSettle();
-        expect(find.text('$count/$target'), findsOneWidget);
+        final goalCard = find.widgetWithText(AppCard, 'Daily Goal');
+        expect(
+          find.descendant(of: goalCard, matching: find.text('$count/$target')),
+          findsOneWidget,
+        );
         expect(
           find.text('Goal complete — nicely done!'),
           count == target ? findsOneWidget : findsNothing,

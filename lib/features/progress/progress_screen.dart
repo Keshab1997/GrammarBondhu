@@ -228,11 +228,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             AppButton(
                               label: 'Practise Mistakes',
                               icon: Icons.replay_rounded,
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const ReviewPracticeScreen(),
-                                ),
-                              ),
+                              onPressed: () => Navigator.of(context)
+                                  .pushNamed(ReviewPracticeScreen.routeName),
                             ),
                           ],
                         ),

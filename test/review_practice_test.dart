@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grammar_bondhu/app/router.dart';
 import 'package:grammar_bondhu/app/state/content_controller.dart';
 import 'package:grammar_bondhu/app/state/progress_controller.dart';
 import 'package:grammar_bondhu/app/state/settings_controller.dart';
@@ -46,6 +47,7 @@ Future<({ContentController content, LocalStore store})> _pump(
       ],
       child: MaterialApp(
         home: screen,
+        onGenerateRoute: AppRouter.onGenerateRoute,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(textScale),
@@ -81,98 +83,108 @@ void main() {
   testWidgets('practice keeps the deck stable and counts answers, not rewards',
       (tester) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    final harness = await _pump(
-      tester,
-      const ReviewPracticeScreen(),
-      seed: (chapters) {
-        final initial = UserProgress(totalXp: 80, coins: 12);
-        // Add them in reverse order: the deck follows the course, not the
-        // order in which the local snapshot happened to record the misses.
-        initial
-            .chapter(chapters[1].id)
-            .missedQuestionIds
-            .add(chapters[1].quiz.first.id);
-        initial.chapter(chapters[0].id)
-          ..completed = true
-          ..attempts = 1
-          ..xpEarned = 80
-          ..coinsEarned = 12
-          ..missedQuestionIds.add(chapters[0].quiz.first.id);
-        return initial;
-      },
-    );
-    final firstChapter = harness.content.chapters[0];
-    final secondChapter = harness.content.chapters[1];
-    final first = firstChapter.quiz.first;
-    final second = secondChapter.quiz.first;
+    try {
+      final harness = await _pump(
+        tester,
+        const ReviewPracticeScreen(),
+        seed: (chapters) {
+          final initial = UserProgress(totalXp: 80, coins: 12);
+          // Add them in reverse order: the deck follows the course, not the
+          // order in which the local snapshot happened to record the misses.
+          initial
+              .chapter(chapters[1].id)
+              .missedQuestionIds
+              .add(chapters[1].quiz.first.id);
+          initial.chapter(chapters[0].id)
+            ..completed = true
+            ..attempts = 1
+            ..xpEarned = 80
+            ..coinsEarned = 12
+            ..missedQuestionIds.add(chapters[0].quiz.first.id);
+          return initial;
+        },
+      );
+      final firstChapter = harness.content.chapters[0];
+      final secondChapter = harness.content.chapters[1];
+      final first = firstChapter.quiz.first;
+      final second = secondChapter.quiz.first;
 
-    expect(find.text('Question 1 of 2'), findsOneWidget);
-    expect(find.text(firstChapter.title.en), findsOneWidget);
-    expect(find.text(first.question), findsOneWidget);
-    final firstChoice =
-        find.bySemanticsLabel(_optionLabel(first, first.correctIndex));
-    await _tapText(tester, first.correctAnswer);
-    final selected = tester.getSemantics(firstChoice).flagsCollection;
-    expect(selected.isButton, isTrue);
-    expect(selected.isEnabled.toBoolOrNull(), isTrue);
-    expect(selected.isSelected.toBoolOrNull(), isTrue);
-    expect(tester.getSize(firstChoice).height, greaterThanOrEqualTo(48));
+      expect(find.text('Question 1 of 2'), findsOneWidget);
+      expect(find.text(firstChapter.title.en), findsOneWidget);
+      expect(find.text(first.question), findsOneWidget);
+      final firstChoice =
+          find.bySemanticsLabel(_optionLabel(first, first.correctIndex));
+      await _tapText(tester, first.correctAnswer);
+      final selected = tester.getSemantics(firstChoice).flagsCollection;
+      expect(selected.isButton, isTrue);
+      expect(selected.isEnabled.toBoolOrNull(), isTrue);
+      expect(selected.isSelected.toBoolOrNull(), isTrue);
+      expect(tester.getSize(firstChoice).height, greaterThanOrEqualTo(48));
 
-    final submit = find.text('Submit');
-    await tester.ensureVisible(submit);
-    await tester.tap(submit);
-    await tester.tap(submit); // Both taps arrive before the locked UI rebuilds.
-    await tester.pumpAndSettle();
-    expect(find.text(first.explanation.of('bn')), findsOneWidget);
-    final savedFirst = harness.store.loadProgress();
-    expect(savedFirst.chapter(firstChapter.id).missedQuestionIds, isEmpty);
-    expect(savedFirst.questionsAnsweredToday, 1);
-    expect(find.text('Question 1 of 2'), findsOneWidget);
+      final submit = find.text('Submit');
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
+      await tester
+          .tap(submit); // Both taps arrive before the locked UI rebuilds.
+      await tester.pumpAndSettle();
+      expect(find.text(first.explanation.of('bn')), findsOneWidget);
+      await _tapText(tester, 'हिन्दी');
+      expect(find.text(first.explanation.of('hi')), findsOneWidget);
+      expect(harness.store.loadSettings().supportLanguage, 'bn');
+      final savedFirst = harness.store.loadProgress();
+      expect(savedFirst.chapter(firstChapter.id).missedQuestionIds, isEmpty);
+      expect(savedFirst.questionsAnsweredToday, 1);
+      expect(find.text('Question 1 of 2'), findsOneWidget);
 
-    await _tapText(tester, 'Next Question');
-    expect(find.text('Question 2 of 2'), findsOneWidget);
-    expect(find.text(secondChapter.title.en), findsOneWidget);
-    expect(find.text(second.question), findsOneWidget);
-    final wrong = second.correctIndex == 0 ? 1 : 0;
-    await _tapText(tester, second.options[wrong]);
-    await _tapText(tester, 'Submit');
-    await tester.ensureVisible(find.text(second.options[wrong]));
-    await tester.pumpAndSettle();
-    final wrongLabel = '${_optionLabel(second, wrong)}, your answer, incorrect';
-    final reviewed =
-        tester.getSemantics(find.bySemanticsLabel(wrongLabel)).flagsCollection;
-    expect(reviewed.isEnabled.toBoolOrNull(), isFalse);
-    expect(
-        find.bySemanticsLabel(
-          '${_optionLabel(second, second.correctIndex)}, correct answer',
-        ),
-        findsOneWidget);
+      await _tapText(tester, 'Next Question');
+      expect(find.text('Question 2 of 2'), findsOneWidget);
+      expect(find.text(secondChapter.title.en), findsOneWidget);
+      expect(find.text(second.question), findsOneWidget);
+      final wrong = second.correctIndex == 0 ? 1 : 0;
+      await _tapText(tester, second.options[wrong]);
+      await _tapText(tester, 'Submit');
+      await tester.ensureVisible(find.text(second.options[wrong]));
+      await tester.pumpAndSettle();
+      final wrongLabel =
+          '${_optionLabel(second, wrong)}, your answer, incorrect';
+      final reviewed = tester
+          .getSemantics(find.bySemanticsLabel(wrongLabel))
+          .flagsCollection;
+      expect(reviewed.isEnabled.toBoolOrNull(), isFalse);
+      expect(
+          find.bySemanticsLabel(
+            '${_optionLabel(second, second.correctIndex)}, correct answer',
+          ),
+          findsOneWidget);
 
-    final savedBoth = harness.store.loadProgress();
-    expect(savedBoth.questionsAnsweredToday, 2);
-    expect(savedBoth.chapter(secondChapter.id).missedQuestionIds, {second.id});
-    expect(savedBoth.totalXp, 80);
-    expect(savedBoth.coins, 12);
-    expect(savedBoth.totalQuizAnswered, 1);
-    expect(savedBoth.chapter(secondChapter.id).completed, isFalse);
+      final savedBoth = harness.store.loadProgress();
+      expect(savedBoth.questionsAnsweredToday, 2);
+      expect(
+          savedBoth.chapter(secondChapter.id).missedQuestionIds, {second.id});
+      expect(savedBoth.totalXp, 80);
+      expect(savedBoth.coins, 12);
+      expect(savedBoth.totalQuizAnswered, 1);
+      expect(savedBoth.chapter(secondChapter.id).completed, isFalse);
 
-    await _tapText(tester, 'Finish Practice');
-    expect(find.text('Cleared 1 of 2'), findsOneWidget);
-    expect(find.text('1 left for next time'), findsOneWidget);
-    await _tapText(tester, 'Practise Remaining');
-    expect(find.text('Question 1 of 1'), findsOneWidget);
-    expect(find.text(second.question), findsOneWidget);
-    await _tapText(tester, second.correctAnswer);
-    await _tapText(tester, 'Submit');
-    await _tapText(tester, 'Finish Practice');
-    expect(find.text('Cleared 1 of 1'), findsOneWidget);
-    expect(find.text('Every mistake cleared!'), findsOneWidget);
-    expect(find.text('Practise Remaining'), findsNothing);
-    expect(find.text('Done'), findsOneWidget);
-    expect(harness.store.loadProgress().missedQuestionCount, 0);
-    expect(harness.store.loadProgress().questionsAnsweredToday, 3);
-    expect(tester.takeException(), isNull);
+      await _tapText(tester, 'Finish Practice');
+      expect(find.text('Cleared 1 of 2'), findsOneWidget);
+      expect(find.text('1 left for next time'), findsOneWidget);
+      await _tapText(tester, 'Practise Remaining');
+      expect(find.text('Question 1 of 1'), findsOneWidget);
+      expect(find.text(second.question), findsOneWidget);
+      await _tapText(tester, second.correctAnswer);
+      await _tapText(tester, 'Submit');
+      await _tapText(tester, 'Finish Practice');
+      expect(find.text('Cleared 1 of 1'), findsOneWidget);
+      expect(find.text('Every mistake cleared!'), findsOneWidget);
+      expect(find.text('Practise Remaining'), findsNothing);
+      expect(find.text('Done'), findsOneWidget);
+      expect(harness.store.loadProgress().missedQuestionCount, 0);
+      expect(harness.store.loadProgress().questionsAnsweredToday, 3);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 
   testWidgets('empty practice takes the learner back without a submission',
