@@ -28,7 +28,7 @@ jobs:
 
   ci:
     needs: toolchain
-    uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.17.0
+    uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.18.0
     with:
       # Pinned by .fvmrc: the app is verified on Flutter 3.50.0, and a stable
       # channel that moves under us is how the material deprecation broke this

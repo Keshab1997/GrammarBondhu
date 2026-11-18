@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.17.0
+    uses: Keshab1997/flutter-builder/.github/workflows/flutter-build.yml@v1.18.0
     with:
       flutter-channel: stable
       # AGP 9.3.1 (what Flutter 3.50.0 asks for) is compiled against the JDK 21
