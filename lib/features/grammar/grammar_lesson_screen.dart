@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/state/content_controller.dart';
 import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
+import '../../core/utils/accessible_layout.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../../core/widgets/idle_motion.dart';
 import '../../core/widgets/listen_button.dart';
@@ -116,43 +117,44 @@ class _GrammarLessonScreenState extends State<GrammarLessonScreen>
             children: [
               const _ClassroomWall(),
 
-              // The board, full width, standing behind the teacher.
-              Positioned(
-                left: AppSpacing.sm + 4,
-                right: AppSpacing.sm + 4,
-                top: MediaQuery.paddingOf(context).top + 64,
-                bottom: ctaTop + 8,
-                child: _Board(
-                  page: _page,
-                  pageCount: _pageCount,
-                  // Text keeps clear of the body standing in front of it.
-                  contentBottomInset: teacherHeight * 0.85,
-                  lesson: lesson,
-                  lang: boardLang,
-                  progress: _chalk,
-                  audioClipId: switch (_page) {
-                    // The rule is read in the board's own language; the
-                    // examples are always English, because that is the
-                    // sentence being taught; the last page is the learner's
-                    // turn, so the teacher speaks instead.
-                    0 => 'board_${widget.chapterId}_explain_$boardLang',
-                    1 => 'board_${widget.chapterId}_examples_en',
-                    _ => null,
-                  },
-                ),
-              ),
-
-              // Those little things a classroom is made of.
+              // Let the header reserve its actual height: at large text sizes
+              // it can take two lines without covering the top of the slate.
               Positioned(
                 left: AppSpacing.sm + 4,
                 right: AppSpacing.sm + 4,
                 top: MediaQuery.paddingOf(context).top,
-                child: _TopBar(
-                  chapter: chapter,
-                  boardLang: boardLang,
-                  onToggleLanguage: () => setState(
-                      () => _boardInSupportLanguage = !_boardInSupportLanguage),
-                  onBack: () => Navigator.of(context).maybePop(),
+                bottom: ctaTop + 8,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TopBar(
+                      chapter: chapter,
+                      boardLang: boardLang,
+                      onToggleLanguage: () => setState(() =>
+                          _boardInSupportLanguage = !_boardInSupportLanguage),
+                      onBack: () => Navigator.of(context).maybePop(),
+                    ),
+                    Expanded(
+                      child: _Board(
+                        page: _page,
+                        pageCount: _pageCount,
+                        // Text keeps clear of the body standing in front of it.
+                        contentBottomInset: teacherHeight * 0.85,
+                        lesson: lesson,
+                        lang: boardLang,
+                        progress: _chalk,
+                        audioClipId: switch (_page) {
+                          // The rule is read in the board's own language; the
+                          // examples are always English, because that is the
+                          // sentence being taught; the last page is the learner's
+                          // turn, so the teacher speaks instead.
+                          0 => 'board_${widget.chapterId}_explain_$boardLang',
+                          1 => 'board_${widget.chapterId}_examples_en',
+                          _ => null,
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -310,40 +312,43 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final close = _GlassButton(icon: Icons.arrow_back_rounded, onTap: onBack);
+    final toggle = _LanguagePill(boardLang: boardLang, onTap: onToggleLanguage);
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Grammar lesson',
+            style: text.titleMedium?.copyWith(color: Colors.white)),
+        Text(
+          chapter.title.en,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: text.bodySmall
+              ?.copyWith(color: Colors.white.withValues(alpha: 0.7)),
+        ),
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.sm, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
-      child: Row(
-        children: [
-          _GlassButton(icon: Icons.arrow_back_rounded, onTap: onBack),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
+      child: AccessibleLayout.needsReflow(context)
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Grammar lesson',
-                  style: text.titleMedium?.copyWith(color: Colors.white),
-                ),
-                Text(
-                  chapter.title.en,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: text.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [close, toggle]),
+                heading,
+              ],
+            )
+          : Row(
+              children: [
+                close,
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: heading),
+                toggle,
               ],
             ),
-          ),
-          // The board's language. Small, one tap, and it never hides the rule:
-          // English stays the default, the support script is opt-in.
-          _LanguagePill(
-            boardLang: boardLang,
-            onTap: onToggleLanguage,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -360,36 +365,49 @@ class _LanguagePill extends StatelessWidget {
     // Hindi vs Bangla comes from the app's support language, so the pill always
     // names the script the tap will produce.
     final support = context.watch<SettingsController>().supportLanguage;
-    final label =
-        boardLang == 'en' ? (support == 'hi' ? 'हिन्दी' : 'বাংলা') : 'EN';
-    return Material(
-      color: Colors.white.withValues(alpha: 0.16),
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        onTap: onTap,
+    if (support == 'en') return const SizedBox.shrink();
+    final (label, language) = switch (boardLang == 'en' ? support : 'en') {
+      'hi' => ('हिन्दी', 'Hindi'),
+      'bn' => ('বাংলা', 'Bengali'),
+      _ => ('EN', 'English'),
+    };
+    return Semantics(
+      container: true,
+      button: true,
+      label: 'Show lesson in $language',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(999),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-                color: Colors.white.withValues(alpha: 0.24), width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.translate_rounded,
-                  size: 13, color: Colors.white.withValues(alpha: 0.8)),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            constraints: const BoxConstraints(
+                minHeight: AccessibleLayout.minTouchTarget),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.24), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.translate_rounded,
+                    size: 13, color: Colors.white.withValues(alpha: 0.8)),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -405,16 +423,17 @@ class _GlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withValues(alpha: 0.16),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(9),
-          child: Icon(icon, size: 20, color: Colors.white),
-        ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: AccessibleLayout.minTouchTarget,
+        minHeight: AccessibleLayout.minTouchTarget,
+      ),
+      child: IconButton(
+        tooltip: 'Close lesson',
+        onPressed: onTap,
+        icon: Icon(icon, size: 20, color: Colors.white),
+        style: IconButton.styleFrom(
+            backgroundColor: Colors.white.withValues(alpha: 0.16)),
       ),
     );
   }

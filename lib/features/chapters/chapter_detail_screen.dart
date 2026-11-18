@@ -3,10 +3,24 @@ import 'package:provider/provider.dart';
 
 import '../../app/state/content_controller.dart';
 import '../../app/state/progress_controller.dart';
+import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
+import '../../data/models/chapter.dart';
 import '../grammar/grammar_lesson_screen.dart';
 import '../story/story_screen.dart';
+
+/// A consistent display label for the difficulty in both chapter views.
+extension ChapterDifficultyLabel on Chapter {
+  String get difficultyLabel {
+    final level = difficulty.trim().toLowerCase();
+    if (level.isEmpty) return '';
+    return level
+        .split(RegExp(r'\s+'))
+        .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+        .join(' ');
+  }
+}
 
 /// Screen 17 — chapter intro: what it is, what you will learn, and one way in.
 ///
@@ -26,6 +40,8 @@ class ChapterDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = context.watch<ContentController>();
     final progress = context.watch<ProgressController>();
+    final lang = context.select(
+        (SettingsController? settings) => settings?.supportLanguage ?? 'en');
     final chapter = content.byId(chapterId);
 
     if (chapter == null) {
@@ -79,10 +95,8 @@ class ChapterDetailScreen extends StatelessWidget {
                             AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
                         child: _SheetBody(
                           number: number,
-                          chapterTitle: chapter.title.en,
-                          grammarTopic: chapter.grammarTopic.en,
-                          sceneCount: chapter.scenes.length,
-                          quizCount: chapter.quiz.length,
+                          chapter: chapter,
+                          supportLanguage: lang,
                           bestScore: record.bestScorePercent,
                           completed: record.completed,
                           resumeIndex: resume,
@@ -230,13 +244,15 @@ class _Pill extends StatelessWidget {
             Icon(icon, size: 13, color: fg),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: TextStyle(
-              color: fg,
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.8,
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
         ],
@@ -281,20 +297,16 @@ class _CircleButton extends StatelessWidget {
 class _SheetBody extends StatelessWidget {
   const _SheetBody({
     required this.number,
-    required this.chapterTitle,
-    required this.grammarTopic,
-    required this.sceneCount,
-    required this.quizCount,
+    required this.chapter,
+    required this.supportLanguage,
     required this.bestScore,
     required this.completed,
     required this.resumeIndex,
   });
 
   final int number;
-  final String chapterTitle;
-  final String grammarTopic;
-  final int sceneCount;
-  final int quizCount;
+  final Chapter chapter;
+  final String supportLanguage;
   final int bestScore;
   final bool completed;
   final int? resumeIndex;
@@ -302,48 +314,64 @@ class _SheetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final sceneCount = chapter.scenes.length;
+    final localizedTitle = chapter.title.of(supportLanguage);
+    final localizedDescription = chapter.description.of(supportLanguage);
+    final secondary = text.bodyMedium?.copyWith(color: AppColors.textSecondary);
+    final level = chapter.difficultyLabel;
     final resume = resumeIndex;
     final readyForLesson = resume == sceneCount;
+    final progressNote = completed
+        ? 'Finished — replay the story or beat your best score.'
+        : readyForLesson
+            ? 'Story complete. Ready for the grammar lesson.'
+            : resume != null
+                ? 'Scene ${resume + 1} of $sceneCount. Pick up where you left off.'
+                : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // The sheet opens with the chapter it belongs to. It used to open with
         // the grammar chip over the hero's title, so the first thing read was
         // the least important thing on the screen.
-        Row(
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: [
             _Pill(
               label: 'CHAPTER $number',
               color: AppColors.primary,
               onLight: true,
             ),
-            if (completed) ...[
-              const SizedBox(width: AppSpacing.sm),
+            if (level.isNotEmpty)
+              _Pill(label: level, color: AppColors.primary, onLight: true),
+            if (completed)
               _Pill(
                 label: 'COMPLETED',
                 color: AppColors.success,
                 onLight: true,
                 icon: Icons.check_rounded,
               ),
-            ],
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          chapterTitle,
+          chapter.title.en,
           style: text.displaySmall?.copyWith(fontSize: 30, height: 1.15),
         ),
-        const SizedBox(height: 6),
-        Text(
-          completed
-              ? 'Finished — replay the story or beat your best score.'
-              : readyForLesson
-                  ? 'Story complete. Ready for the grammar lesson.'
-                  : resume != null
-                      ? 'Scene ${resume + 1} of $sceneCount. Pick up where you left off.'
-                      : 'A short story, one grammar point, and five questions.',
-          style: text.bodyMedium,
-        ),
+        if (supportLanguage != 'en' && localizedTitle != chapter.title.en)
+          Text(localizedTitle,
+              style:
+                  text.titleMedium?.copyWith(color: AppColors.textSecondary)),
+        const SizedBox(height: AppSpacing.sm),
+        Text(chapter.description.en, style: text.bodyLarge),
+        if (supportLanguage != 'en' &&
+            localizedDescription != chapter.description.en)
+          Text(localizedDescription, style: secondary),
+        if (progressNote != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(progressNote, style: secondary),
+        ],
         const SizedBox(height: AppSpacing.lg),
         // What the learner is about to practise, in their own language of
         // progress: one grammar point, not a description of the app.
@@ -382,9 +410,7 @@ class _SheetBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      grammarTopic,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      chapter.grammarTopic.en,
                       style: text.titleMedium,
                     ),
                   ],
@@ -418,7 +444,7 @@ class _SheetBody extends StatelessWidget {
           icon: Icons.quiz_rounded,
           color: AppColors.accentDark,
           title: 'Quiz',
-          detail: '$quizCount questions',
+          detail: '${chapter.quiz.length} questions',
           status: completed
               ? 'Best $bestScore%'
               : resume != null
@@ -481,41 +507,47 @@ class _StepRow extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm + 2),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
               children: [
-                Text(title,
-                    style: text.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    )),
-                Text(detail,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        text.bodySmall?.copyWith(color: AppColors.textMuted)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: text.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        )),
+                    Text(detail,
+                        style: text.bodySmall
+                            ?.copyWith(color: AppColors.textMuted)),
+                  ],
+                ),
+                if (trailingStars > 0)
+                  StarsDisplay(count: trailingStars, size: 15),
+                if (status != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundAlt,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      status!,
+                      style: text.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          if (trailingStars > 0) StarsDisplay(count: trailingStars, size: 15),
-          if (status != null) ...[
-            const SizedBox(width: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundAlt,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                status!,
-                style: text.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

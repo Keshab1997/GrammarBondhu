@@ -5,6 +5,7 @@ import '../../app/state/settings_controller.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import '../home/home_shell.dart';
+import '../settings/language_selection_screen.dart';
 
 /// Screens 2–4 — the three onboarding pages with rich 3D illustrations.
 /// Smooth page-transform and animated dots, matching storyboard frames 2-4.
@@ -20,6 +21,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
+  bool _finishing = false;
 
   static const _pages = [
     _OnboardingPageData(
@@ -32,9 +34,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       image: 'assets/illustrations/onboarding_languages.webp',
       title: '3 Languages,\n1 Goal',
       body: 'English is the main language.\n'
-          'আপনি বাংলা বা হিন্দী ভাষায় অনুবাদ দেখতে পারবেন।\n'
+          'আপনি বাংলা বা হিন্দি ভাষায় অনুবাদ দেখতে পারবেন।\n'
           'आप हिन्दी या बांग्ला अनुवाद देख सकते हैं।',
-      languageRow: true,
+      showLanguages: true,
     ),
     _OnboardingPageData(
       image: 'assets/illustrations/onboarding_story_world.webp',
@@ -43,21 +45,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _next() async {
-    if (_page < _pages.length - 1) {
-      _controller.nextPage(
+    if (_finishing) return;
+    if (_page == _pages.length - 1) {
+      await _skip();
+    } else {
+      await _controller.nextPage(
         duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutCubic,
       );
-    } else {
-      await context.read<SettingsController>().completeOnboarding();
-      if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(HomeShell.routeName);
     }
   }
 
   Future<void> _skip() async {
-    await context.read<SettingsController>().completeOnboarding();
+    if (_finishing) return;
+    setState(() => _finishing = true);
+    try {
+      await context.read<SettingsController>().completeOnboarding();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _finishing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Could not save your preferences. Please try again.')),
+        );
+      }
+      return;
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(HomeShell.routeName);
   }
@@ -75,7 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.only(
                     right: AppSpacing.md, top: AppSpacing.sm),
                 child: TextButton(
-                  onPressed: _skip,
+                  onPressed: _finishing ? null : _skip,
                   child: Text(
                     'Skip',
                     style: TextStyle(
@@ -96,43 +117,56 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: Row(
+              child: OverflowBar(
+                alignment: MainAxisAlignment.spaceBetween,
+                overflowAlignment: OverflowBarAlignment.center,
+                spacing: AppSpacing.sm,
+                overflowSpacing: AppSpacing.sm,
                 children: [
-                  for (var i = 0; i < _pages.length; i++)
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutCubic,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: i == _page ? 28 : 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        gradient: i == _page
-                            ? const LinearGradient(
-                                colors: [AppColors.primary, AppColors.skyTop])
-                            : null,
-                        color: i == _page ? null : AppColors.primarySoft,
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: i == _page
-                            ? [
-                                BoxShadow(
-                                  color:
-                                      AppColors.primary.withValues(alpha: 0.35),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                )
-                              ]
-                            : null,
-                      ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < _pages.length; i++)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 260),
+                          curve: Curves.easeOutCubic,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: i == _page ? 28 : 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            gradient: i == _page
+                                ? const LinearGradient(colors: [
+                                    AppColors.primary,
+                                    AppColors.skyTop
+                                  ])
+                                : null,
+                            color: i == _page ? null : AppColors.primarySoft,
+                            borderRadius: BorderRadius.circular(6),
+                            boxShadow: i == _page
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.primary
+                                          .withValues(alpha: 0.35),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    )
+                                  ]
+                                : null,
+                          ),
+                        ),
+                    ],
+                  ),
+                  IntrinsicWidth(
+                    child: AppButton(
+                      label:
+                          _page == _pages.length - 1 ? 'Get Started' : 'Next',
+                      icon: _page == _pages.length - 1
+                          ? Icons.rocket_launch_rounded
+                          : Icons.arrow_forward_rounded,
+                      variant: AppButtonVariant.blue,
+                      expand: false,
+                      onPressed: _finishing ? null : _next,
                     ),
-                  const Spacer(),
-                  AppButton(
-                    label: _page == _pages.length - 1 ? 'Get Started' : 'Next',
-                    icon: _page == _pages.length - 1
-                        ? Icons.rocket_launch_rounded
-                        : Icons.arrow_forward_rounded,
-                    variant: AppButtonVariant.blue,
-                    expand: false,
-                    onPressed: _next,
                   ),
                 ],
               ),
@@ -150,13 +184,13 @@ class _OnboardingPageData {
     required this.image,
     required this.title,
     required this.body,
-    this.languageRow = false,
+    this.showLanguages = false,
   });
 
   final String image;
   final String title;
   final String body;
-  final bool languageRow;
+  final bool showLanguages;
 }
 
 class _OnboardingPage extends StatelessWidget {
@@ -216,16 +250,13 @@ class _OnboardingPage extends StatelessWidget {
                   style: text.headlineMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                if (data.languageRow) ...[
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      LanguageChip(code: 'en', label: 'English', flag: '🇬🇧'),
-                      SizedBox(width: AppSpacing.sm),
-                      LanguageChip(code: 'bn', label: 'বাংলা', flag: '🇧🇩'),
-                      SizedBox(width: AppSpacing.sm),
-                      LanguageChip(code: 'hi', label: 'हिन्दी', flag: '🇮🇳'),
-                    ],
+                if (data.showLanguages) ...[
+                  ExplanationLanguagePicker(
+                    selected:
+                        context.watch<SettingsController>().supportLanguage,
+                    onChanged: (code) => context
+                        .read<SettingsController>()
+                        .setSupportLanguage(code),
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],
