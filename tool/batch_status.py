@@ -39,7 +39,10 @@ def lane_scenes() -> list[str]:
             bg = scene.get("background_id") or ""
             if not bg:
                 continue
-            sets.add(bg[3:] if bg.startswith("bg_") else bg.split("_", 1)[-1])
+            room = bg[3:] if bg.startswith("bg_") else bg.split("_", 1)[-1]
+            if room.startswith("school_"):
+                room = room[len("school_"):]
+            sets.add(room)
         for room in sorted(sets):
             per_chapter = ROOT / f"assets/backgrounds/scene_{cid}_{room}.webp"
             if not per_chapter.exists():

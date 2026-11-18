@@ -80,7 +80,7 @@
     },
     {
       "scene_id": "ch13_s3",
-      "background_id": "bg_classroom",
+      "background_id": "ch13_classroom",
       "character_ids": [
         "rahul",
         "teacher"

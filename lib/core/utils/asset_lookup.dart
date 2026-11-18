@@ -112,6 +112,16 @@ class AssetLookup {
     'ch07_classroom': 'assets/backgrounds/scene_ch07_classroom.webp',
     'ch08_classroom': 'assets/backgrounds/scene_ch08_classroom.webp',
     'ch09_classroom': 'assets/backgrounds/scene_ch09_classroom.webp',
+    'ch10_garden': 'assets/backgrounds/scene_ch10_garden.webp',
+    'ch10_gate': 'assets/backgrounds/scene_ch10_gate.webp',
+    'ch11_classroom': 'assets/backgrounds/scene_ch11_classroom.webp',
+    'ch11_garden': 'assets/backgrounds/scene_ch11_garden.webp',
+    'ch12_classroom': 'assets/backgrounds/scene_ch12_classroom.webp',
+    'ch12_garden': 'assets/backgrounds/scene_ch12_garden.webp',
+    'ch13_classroom': 'assets/backgrounds/scene_ch13_classroom.webp',
+    'ch13_garden': 'assets/backgrounds/scene_ch13_garden.webp',
+    'ch14_classroom': 'assets/backgrounds/scene_ch14_classroom.webp',
+    'ch14_library': 'assets/backgrounds/scene_ch14_library.webp',
   };
 
   static const Map<String, String> illustrations = {
@@ -157,14 +167,16 @@ class AssetLookup {
   /// has no art of its own for that set — callers then keep the shared plate.
   static String? chapterScenePath(String chapterId, String? backgroundId) {
     if (backgroundId == null) return null;
-    // A scene asks by set name (`bg_classroom`) or by its own plate id
-    // (`ch04_classroom`); both resolve to "<chapter>_<set>".
-    final set = backgroundId.startsWith('bg_')
+    // A scene asks by set name (`bg_school_garden`) or by its own plate id
+    // (`ch10_garden`); both resolve to "<chapter>_<room>". The "school_" prefix
+    // is not part of the room: every chapter is at the same school.
+    var room = backgroundId.startsWith('bg_')
         ? backgroundId.substring(3)
         : backgroundId.startsWith('${chapterId}_')
             ? backgroundId.substring(chapterId.length + 1)
             : backgroundId;
-    return chapterScenes['${chapterId}_$set'];
+    if (room.startsWith('school_')) room = room.substring(7);
+    return chapterScenes['${chapterId}_$room'];
   }
 
   static const Map<String, String> topicIcons = {
