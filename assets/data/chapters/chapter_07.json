@@ -28,7 +28,7 @@
   "scenes": [
     {
       "scene_id": "ch07_s1",
-      "background_id": "bg_library",
+      "background_id": "ch07_library",
       "character_ids": [
         "priya",
         "rahul"
@@ -54,7 +54,7 @@
     },
     {
       "scene_id": "ch07_s2",
-      "background_id": "bg_library",
+      "background_id": "ch07_library",
       "character_ids": [
         "teacher",
         "rahul"

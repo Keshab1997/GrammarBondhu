@@ -103,15 +103,24 @@ class AssetLookup {
   /// for fifteen different stories.
   static const Map<String, String> chapterScenes = {
     'ch01_classroom': 'assets/backgrounds/scene_ch01_classroom.webp',
+    'ch01_gate': 'assets/backgrounds/scene_ch01_gate.webp',
     'ch02_classroom': 'assets/backgrounds/scene_ch02_classroom.webp',
+    'ch02_garden': 'assets/backgrounds/scene_ch02_garden.webp',
     'ch03_garden': 'assets/backgrounds/scene_ch03_garden.webp',
+    'ch03_library': 'assets/backgrounds/scene_ch03_library.webp',
     'ch04_classroom': 'assets/backgrounds/scene_ch04_classroom.webp',
     'ch04_garden': 'assets/backgrounds/scene_ch04_garden.webp',
     'ch05_classroom': 'assets/backgrounds/scene_ch05_classroom.webp',
+    'ch05_garden': 'assets/backgrounds/scene_ch05_garden.webp',
     'ch06_classroom': 'assets/backgrounds/scene_ch06_classroom.webp',
+    'ch06_gate': 'assets/backgrounds/scene_ch06_gate.webp',
     'ch07_classroom': 'assets/backgrounds/scene_ch07_classroom.webp',
+    'ch07_library': 'assets/backgrounds/scene_ch07_library.webp',
     'ch08_classroom': 'assets/backgrounds/scene_ch08_classroom.webp',
+    'ch08_garden': 'assets/backgrounds/scene_ch08_garden.webp',
     'ch09_classroom': 'assets/backgrounds/scene_ch09_classroom.webp',
+    'ch09_library': 'assets/backgrounds/scene_ch09_library.webp',
+    'ch10_classroom': 'assets/backgrounds/scene_ch10_classroom.webp',
     'ch10_garden': 'assets/backgrounds/scene_ch10_garden.webp',
     'ch10_gate': 'assets/backgrounds/scene_ch10_gate.webp',
     'ch11_classroom': 'assets/backgrounds/scene_ch11_classroom.webp',
@@ -122,6 +131,7 @@ class AssetLookup {
     'ch13_garden': 'assets/backgrounds/scene_ch13_garden.webp',
     'ch14_classroom': 'assets/backgrounds/scene_ch14_classroom.webp',
     'ch14_library': 'assets/backgrounds/scene_ch14_library.webp',
+    'ch15_classroom': 'assets/backgrounds/scene_ch15_classroom.webp',
   };
 
   static const Map<String, String> illustrations = {

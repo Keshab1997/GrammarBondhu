@@ -28,7 +28,7 @@
   "scenes": [
     {
       "scene_id": "ch06_s1",
-      "background_id": "bg_school_gate",
+      "background_id": "ch06_gate",
       "character_ids": [
         "rahul",
         "priya"
